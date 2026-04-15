@@ -192,7 +192,8 @@ Phase B is the core translation loop. It is orchestrated by a LangGraph state gr
 - **Orchestration**: LangGraph (Python) — chosen for durable execution with checkpointing, conditional edges, persistent state, and composable subgraphs
 - **Agent**: Claude Code CLI invoked as a subprocess — chosen to run under the user's existing Max subscription rather than pay-per-token API billing
 - **AST extraction**: ts-morph (TypeScript) — chosen for full TypeScript compiler type resolution including cross-file inference
-- **Verification**: `cargo check` and `cargo clippy` (Rust toolchain)
+- **TypeScript runner**: `tsx` — runs Phase A TypeScript scripts directly without a compilation step (`npm install -D tsx`; invoked as `tsx extract_ast.ts`)
+- **Verification**: `cargo check` and `cargo clippy` (Rust toolchain) run against the skeleton project
 - **Progress tracking**: `conversion_manifest.json` — the single source of truth, updated atomically after each successful conversion
 
 ### 3.2 Subprocess Invocation of Claude Code
@@ -262,8 +263,8 @@ Runs a layered verification sequence. Each check is cheaper than the next:
 
 1. **Stub detector**: grep for `todo!`, `unimplemented!`, empty function bodies. Instant failure if found.
 2. **Branch parity check**: count if/match arms, loop constructs, and early returns in the TypeScript source vs the Rust output. Flag if Rust has significantly fewer.
-3. **`cargo check`**: syntax and type checking. Compile errors go back to the agent with the error message.
-4. **Discriminator check**: a second cheap Haiku call reviews the snippet looking specifically for: missing branches, logic not present in source, simplified algorithms, hallucinated API calls. Returns `PASS` or `FAIL` with specific issues.
+3. **`cargo check`**: the converted snippet is written into the skeleton project at the correct module path, replacing the `todo!()` stub for that function. `cargo check` then runs on the whole skeleton project. Because every other unconverted function remains a `todo!()` stub, the check meaningfully exercises the new code's type interactions with the rest of the skeleton, catching boundary mismatches immediately. Compile errors go back to the agent with the error message.
+4. **Discriminator check**: a verification step that checks the output for simplification, missing branches, and hallucinated APIs. Returns `PASS` or `FAIL` with specific issues. Implementation (separate model call vs self-review step) is TBD during planning — see Open Question 7.
 
 **`handle_verify_result`**
 Conditional edge:
@@ -345,8 +346,7 @@ All project-specific settings live in `oxidant.config.json` at the root of the O
   
   "architectural_decisions": {
     "graph_ownership_strategy": "arena_slotmap",
-    "error_handling": "thiserror",
-    "async_runtime": "tokio"
+    "error_handling": "thiserror"
   },
   
   "crate_inventory": [
@@ -384,49 +384,59 @@ All project-specific settings live in `oxidant.config.json` at the root of the O
 
 The Oxidant repository contains the harness code itself. It does not contain the source or target codebases — those are referenced by path in `oxidant.config.json`.
 
+The phase names (A/B/C/D) are conceptual groupings, not directories. The code lives in a standard Python `src/` layout so it works correctly with pytest, pip install, and IDE tooling. Phase A TypeScript scripts live alongside the Python package.
+
 ```
 oxidant/
   README.md
-  OXIDANT_PRD.md                  ← this document
-  RESEARCH_SUMMARY.md             ← literature review
-  RESEARCH_ACADEMIC.md            ← detailed academic citations
   oxidant.config.json             ← project configuration
+  pyproject.toml
+  package.json                    ← tsx + ts-morph dev dependencies
   
-  phase_a/                        ← Phase A scripts (TypeScript)
-    extract_ast.ts                ← ts-morph AST extractor
-    detect_idioms.ts              ← idiom pattern scanner
-    classify_tiers.py             ← Haiku classification pass
-    generate_skeleton.py          ← Rust skeleton generator
+  docs/
+    OXIDANT_PRD.md                ← this document
+    RESEARCH_SUMMARY.md           ← literature review
+    RESEARCH_ACADEMIC.md          ← detailed academic citations
   
-  phase_b/                        ← Phase B harness (Python)
-    graph.py                      ← LangGraph state graph definition
-    nodes.py                      ← individual graph node implementations
-    context.py                    ← prompt context assembly
-    invoke.py                     ← Claude Code subprocess invocation
-    verify.py                     ← verification layer
-    manifest.py                   ← manifest read/write operations
-    assemble.py                   ← file assembly from snippets
+  src/oxidant/                    ← Python package (harness)
+    analysis/                     ← Phase A: Python analysis steps
+      classify_tiers.py           ← Haiku tier classification
+      generate_skeleton.py        ← Rust skeleton generator
+    graph/                        ← Phase B: LangGraph state graph
+      graph.py                    ← graph definition and wiring
+      nodes.py                    ← individual node implementations
+    agents/                       ← agent invocation and prompting
+      invoke.py                   ← Claude Code subprocess invocation
+      context.py                  ← prompt context assembly
+    verification/                 ← Phase B verify step
+      verify.py
+    manifest/                     ← manifest read/write
+      manifest.py
+    assembly/                     ← file assembly from skeleton
+      assemble.py
+    refinement/                   ← Phase C: Clippy-driven refinement
+      clippy_runner.py
+      mechanical_fixes.py
+      structural_improvements.py
+    integration/                  ← Phase D: integration and equivalence
+      integration_debug.py
+      equivalence_test.js         ← Node.js WASM comparison harness
+    models/                       ← Pydantic state models
+    corpus/                       ← corpus loaders
+    cli.py                        ← Typer CLI entry point
   
-  phase_c/                        ← Phase C refinement (Python)
-    clippy_runner.py
-    mechanical_fixes.py
-    structural_improvements.py
+  phase_a_scripts/                ← Phase A TypeScript scripts (run via tsx)
+    extract_ast.ts                ← ts-morph AST extractor → conversion_manifest.json
+    detect_idioms.ts              ← idiom pattern scanner → idiom_candidates.json
   
-  phase_d/                        ← Phase D verification (Python + JS)
-    integration_debug.py
-    equivalence_test.js           ← Node.js WASM comparison harness
-    property_tests/               ← proptest suite templates
+  tests/
   
   idiom_dictionary.md             ← generated + human-reviewed idiom map
   idiom_candidates.json           ← raw output of detect_idioms.ts
   conversion_manifest.json        ← central state, updated throughout
   review_queue.json               ← nodes requiring human attention
-  
-  snippets/                       ← one .rs file per converted node
-    geom/
-      point__add.rs
-      point__scale.rs
-      ...
+  corpora/                        ← source repos (gitignored)
+    msagljs/
 ```
 
 ---
