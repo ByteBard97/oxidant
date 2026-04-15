@@ -33,5 +33,8 @@ output/
 results/
 scratch/
 
+# Corpora — checked out locally, never committed
+corpora/*/
+
 # Node (for msagl-js source analysis)
 node_modules/
