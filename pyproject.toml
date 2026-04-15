@@ -27,6 +27,9 @@ dev = [
 [project.scripts]
 oxidant = "oxidant.cli:app"
 
+[tool.hatch.build.targets.wheel]
+packages = ["src/oxidant"]
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
