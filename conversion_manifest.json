@@ -45,7 +45,8 @@
         "null_undefined",
         "mutable_shared_state",
         "static_members",
-        "union_type"
+        "union_type",
+        "getter_setter"
       ],
       "topological_order": 1,
       "bfs_level": 0,
@@ -416,7 +417,9 @@
         "class_inheritance",
         "mutable_shared_state",
         "static_members",
-        "union_type"
+        "union_type",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -742,7 +745,10 @@
         "null_undefined",
         "class_inheritance",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -802,7 +808,9 @@
       "callers": [],
       "parent_class": "modules__drawing__src__drawingNode__DrawingNode",
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": 1952,
       "bfs_level": 2,
       "tier": "haiku",
@@ -846,7 +854,10 @@
         "class_inheritance",
         "mutable_shared_state",
         "static_members",
-        "union_type"
+        "union_type",
+        "abstract_class",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": 1906,
       "bfs_level": 1,
@@ -1107,7 +1118,9 @@
         "map_usage",
         "dynamic_property_access",
         "mutable_shared_state",
-        "union_type"
+        "union_type",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -1175,7 +1188,8 @@
       "cyclomatic_complexity": 20,
       "idioms_needed": [
         "null_undefined",
-        "dynamic_property_access"
+        "dynamic_property_access",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -1249,10 +1263,10 @@
       "bfs_level": null,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "in_progress",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "    Checking msagl-rs v0.1.0 (/Users/ceres/Desktop/SignalCanvas/oxidant/corpora/msagl-rs)\nsrc/adjacent_swaps_with_constraints.rs:12:226: error[E0425]: cannot find type `LayerInfo` in module `crate::layer_info`: not found in `crate::layer_info`\nsrc/all_pairs_distances.rs:12:51: error[E0405]: cannot find trait `IGeomGraph` in module `crate::i_geom_graph`: not found in `crate::i_geom_graph`\nsrc/broken_cone_side.rs:12:152: error[E0425]: cannot find type `ConeSide` in module `crate::cone_side`: not found in `crate::cone_side`\nsrc/bundle_router.rs:36:132: error[E0425]: cannot find type `Port` in module `crate::port`: not found in `crate::port`\nsrc/bundle_router.rs:44:154: error[E0425]: cannot find type `Port` in module `crate::port`: not found in `crate::port`\nsrc/combinatorial_nudger.rs:56:232: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/combinatorial_nudger.rs:60:120: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/combinatorial_nudger.rs:60:207: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/combinatorial_nudger.rs:72:175: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:12:45: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:16:61: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:16:93: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:20:60: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:20:92: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\ns"
     },
     "modules__parser__src__dotparser__DotParser__parseNode": {
       "node_id": "modules__parser__src__dotparser__DotParser__parseNode",
@@ -1381,16 +1395,17 @@
       "cyclomatic_complexity": 10,
       "idioms_needed": [
         "null_undefined",
-        "dynamic_property_access"
+        "dynamic_property_access",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
       "tier": "opus",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "    Checking msagl-rs v0.1.0 (/Users/ceres/Desktop/SignalCanvas/oxidant/corpora/msagl-rs)\nsrc/adjacent_swaps_with_constraints.rs:12:226: error[E0425]: cannot find type `LayerInfo` in module `crate::layer_info`: not found in `crate::layer_info`\nsrc/all_pairs_distances.rs:12:51: error[E0405]: cannot find trait `IGeomGraph` in module `crate::i_geom_graph`: not found in `crate::i_geom_graph`\nsrc/broken_cone_side.rs:12:152: error[E0425]: cannot find type `ConeSide` in module `crate::cone_side`: not found in `crate::cone_side`\nsrc/bundle_router.rs:36:132: error[E0425]: cannot find type `Port` in module `crate::port`: not found in `crate::port`\nsrc/bundle_router.rs:44:154: error[E0425]: cannot find type `Port` in module `crate::port`: not found in `crate::port`\nsrc/combinatorial_nudger.rs:56:232: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/combinatorial_nudger.rs:60:120: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/combinatorial_nudger.rs:60:207: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/combinatorial_nudger.rs:72:175: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:12:45: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:16:61: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:16:93: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:20:60: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:20:92: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\ns"
     },
     "modules__parser__src__dotparser__DotParser__parseUnderGraph": {
       "node_id": "modules__parser__src__dotparser__DotParser__parseUnderGraph",
@@ -1418,7 +1433,8 @@
       "cyclomatic_complexity": 10,
       "idioms_needed": [
         "null_undefined",
-        "dynamic_property_access"
+        "dynamic_property_access",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -1453,7 +1469,8 @@
       "idioms_needed": [
         "null_undefined",
         "dynamic_property_access",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -1507,7 +1524,8 @@
       "cyclomatic_complexity": 115,
       "idioms_needed": [
         "null_undefined",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -1578,16 +1596,17 @@
       "parent_class": null,
       "cyclomatic_complexity": 2,
       "idioms_needed": [
-        "null_undefined"
+        "null_undefined",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "    Checking msagl-rs v0.1.0 (/Users/ceres/Desktop/SignalCanvas/oxidant/corpora/msagl-rs)\nsrc/adjacent_swaps_with_constraints.rs:12:226: error[E0425]: cannot find type `LayerInfo` in module `crate::layer_info`: not found in `crate::layer_info`\nsrc/all_pairs_distances.rs:12:51: error[E0405]: cannot find trait `IGeomGraph` in module `crate::i_geom_graph`: not found in `crate::i_geom_graph`\nsrc/broken_cone_side.rs:12:152: error[E0425]: cannot find type `ConeSide` in module `crate::cone_side`: not found in `crate::cone_side`\nsrc/bundle_router.rs:36:132: error[E0425]: cannot find type `Port` in module `crate::port`: not found in `crate::port`\nsrc/bundle_router.rs:44:154: error[E0425]: cannot find type `Port` in module `crate::port`: not found in `crate::port`\nsrc/combinatorial_nudger.rs:56:232: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/combinatorial_nudger.rs:60:120: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/combinatorial_nudger.rs:60:207: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/combinatorial_nudger.rs:72:175: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:12:45: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:16:61: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:16:93: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:20:60: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:20:92: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\ns"
     },
     "modules__parser__src__dotparser__parseJSONGraph": {
       "node_id": "modules__parser__src__dotparser__parseJSONGraph",
@@ -1610,16 +1629,17 @@
       "parent_class": null,
       "cyclomatic_complexity": 2,
       "idioms_needed": [
-        "null_undefined"
+        "null_undefined",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "    Checking msagl-rs v0.1.0 (/Users/ceres/Desktop/SignalCanvas/oxidant/corpora/msagl-rs)\nsrc/adjacent_swaps_with_constraints.rs:12:226: error[E0425]: cannot find type `LayerInfo` in module `crate::layer_info`: not found in `crate::layer_info`\nsrc/all_pairs_distances.rs:12:51: error[E0405]: cannot find trait `IGeomGraph` in module `crate::i_geom_graph`: not found in `crate::i_geom_graph`\nsrc/broken_cone_side.rs:12:152: error[E0425]: cannot find type `ConeSide` in module `crate::cone_side`: not found in `crate::cone_side`\nsrc/bundle_router.rs:36:132: error[E0425]: cannot find type `Port` in module `crate::port`: not found in `crate::port`\nsrc/bundle_router.rs:44:154: error[E0425]: cannot find type `Port` in module `crate::port`: not found in `crate::port`\nsrc/combinatorial_nudger.rs:56:232: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/combinatorial_nudger.rs:60:120: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/combinatorial_nudger.rs:60:207: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/combinatorial_nudger.rs:72:175: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:12:45: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:16:61: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:16:93: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:20:60: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:20:92: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\ns"
     },
     "modules__parser__src__dotparser__stylesEnumFromString": {
       "node_id": "modules__parser__src__dotparser__stylesEnumFromString",
@@ -1967,10 +1987,10 @@
       "bfs_level": null,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "Branch parity: TypeScript=4 branches, Rust=2 (below 60% floor)"
     },
     "modules__parser__src__dotparser__createGeomForSubgraphs": {
       "node_id": "modules__parser__src__dotparser__createGeomForSubgraphs",
@@ -1999,10 +2019,10 @@
       "bfs_level": null,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "    Checking msagl-rs v0.1.0 (/Users/ceres/Desktop/SignalCanvas/oxidant/corpora/msagl-rs)\nsrc/adjacent_swaps_with_constraints.rs:12:226: error[E0425]: cannot find type `LayerInfo` in module `crate::layer_info`: not found in `crate::layer_info`\nsrc/all_pairs_distances.rs:12:51: error[E0405]: cannot find trait `IGeomGraph` in module `crate::i_geom_graph`: not found in `crate::i_geom_graph`\nsrc/broken_cone_side.rs:12:152: error[E0425]: cannot find type `ConeSide` in module `crate::cone_side`: not found in `crate::cone_side`\nsrc/bundle_router.rs:36:132: error[E0425]: cannot find type `Port` in module `crate::port`: not found in `crate::port`\nsrc/bundle_router.rs:44:154: error[E0425]: cannot find type `Port` in module `crate::port`: not found in `crate::port`\nsrc/combinatorial_nudger.rs:56:232: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/combinatorial_nudger.rs:60:120: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/combinatorial_nudger.rs:60:207: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/combinatorial_nudger.rs:72:175: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:12:45: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:16:61: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:16:93: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:20:60: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:20:92: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\ns"
     },
     "modules__parser__src__dotparser__graphToJSON": {
       "node_id": "modules__parser__src__dotparser__graphToJSON",
@@ -2205,10 +2225,10 @@
       "bfs_level": null,
       "tier": "haiku",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "    Checking msagl-rs v0.1.0 (/Users/ceres/Desktop/SignalCanvas/oxidant/corpora/msagl-rs)\nsrc/adjacent_swaps_with_constraints.rs:12:226: error[E0425]: cannot find type `LayerInfo` in module `crate::layer_info`: not found in `crate::layer_info`\nsrc/all_pairs_distances.rs:12:51: error[E0405]: cannot find trait `IGeomGraph` in module `crate::i_geom_graph`: not found in `crate::i_geom_graph`\nsrc/broken_cone_side.rs:12:152: error[E0425]: cannot find type `ConeSide` in module `crate::cone_side`: not found in `crate::cone_side`\nsrc/bundle_router.rs:36:132: error[E0425]: cannot find type `Port` in module `crate::port`: not found in `crate::port`\nsrc/bundle_router.rs:44:154: error[E0425]: cannot find type `Port` in module `crate::port`: not found in `crate::port`\nsrc/combinatorial_nudger.rs:56:232: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/combinatorial_nudger.rs:60:120: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/combinatorial_nudger.rs:60:207: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/combinatorial_nudger.rs:72:175: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:12:45: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:16:61: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:16:93: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:20:60: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:20:92: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\ns"
     },
     "modules__parser__src__dotparser__getNodeAttrList": {
       "node_id": "modules__parser__src__dotparser__getNodeAttrList",
@@ -2311,10 +2331,10 @@
       "bfs_level": null,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "    Checking msagl-rs v0.1.0 (/Users/ceres/Desktop/SignalCanvas/oxidant/corpora/msagl-rs)\nsrc/adjacent_swaps_with_constraints.rs:12:226: error[E0425]: cannot find type `LayerInfo` in module `crate::layer_info`: not found in `crate::layer_info`\nsrc/all_pairs_distances.rs:12:51: error[E0405]: cannot find trait `IGeomGraph` in module `crate::i_geom_graph`: not found in `crate::i_geom_graph`\nsrc/broken_cone_side.rs:12:152: error[E0425]: cannot find type `ConeSide` in module `crate::cone_side`: not found in `crate::cone_side`\nsrc/bundle_router.rs:36:132: error[E0425]: cannot find type `Port` in module `crate::port`: not found in `crate::port`\nsrc/bundle_router.rs:44:154: error[E0425]: cannot find type `Port` in module `crate::port`: not found in `crate::port`\nsrc/combinatorial_nudger.rs:56:232: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/combinatorial_nudger.rs:60:120: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/combinatorial_nudger.rs:60:207: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/combinatorial_nudger.rs:72:175: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:12:45: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:16:61: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:16:93: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:20:60: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:20:92: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\ns"
     },
     "modules__parser__src__dotparser__edgeParent": {
       "node_id": "modules__parser__src__dotparser__edgeParent",
@@ -2345,7 +2365,7 @@
       "bfs_level": null,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "in_progress",
       "snippet_path": null,
       "attempt_count": 0,
       "last_error": null
@@ -2473,7 +2493,9 @@
       ],
       "parent_class": null,
       "cyclomatic_complexity": 4,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": null,
       "bfs_level": null,
       "tier": "sonnet",
@@ -2578,7 +2600,8 @@
       "cyclomatic_complexity": 6,
       "idioms_needed": [
         "null_undefined",
-        "dynamic_property_access"
+        "dynamic_property_access",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -2752,7 +2775,8 @@
       "idioms_needed": [
         "null_undefined",
         "dynamic_property_access",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -2819,7 +2843,8 @@
         "null_undefined",
         "closure_capture",
         "async_await",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -2958,7 +2983,8 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "arena_allocation"
       ],
       "topological_order": 1907,
       "bfs_level": 1,
@@ -3132,7 +3158,8 @@
         "optional_chaining",
         "dynamic_property_access",
         "mutable_shared_state",
-        "union_type"
+        "union_type",
+        "arena_allocation"
       ],
       "topological_order": 1333,
       "bfs_level": 1,
@@ -3372,7 +3399,9 @@
       "callers": [],
       "parent_class": null,
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "interface_trait"
+      ],
       "topological_order": 19,
       "bfs_level": 0,
       "tier": "haiku",
@@ -3422,7 +3451,11 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "generator_function"
+        "generator_function",
+        "interface_trait",
+        "getter_setter",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -3756,7 +3789,9 @@
       "callers": [],
       "parent_class": "modules__renderer_svg__src__rendererSvg__RendererSvg",
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": null,
       "bfs_level": null,
       "tier": "haiku",
@@ -4295,7 +4330,9 @@
       "callers": [],
       "parent_class": "modules__renderer_svg__src__rendererSvg__RendererSvg",
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": null,
       "bfs_level": null,
       "tier": "haiku",
@@ -4585,7 +4622,10 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "class_inheritance",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "interface_trait",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": 1954,
       "bfs_level": 2,
@@ -4645,7 +4685,9 @@
       "callers": [],
       "parent_class": "modules__renderer_svg__src__svgCreator__SvgViewerObject",
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": 1956,
       "bfs_level": 2,
       "tier": "haiku",
@@ -4702,7 +4744,9 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "class_inheritance"
+        "class_inheritance",
+        "interface_trait",
+        "getter_setter"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -4731,7 +4775,10 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "class_inheritance"
+        "class_inheritance",
+        "interface_trait",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -4757,7 +4804,8 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "class_inheritance"
+        "class_inheritance",
+        "interface_trait"
       ],
       "topological_order": 36,
       "bfs_level": 0,
@@ -4786,7 +4834,9 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "class_inheritance"
+        "class_inheritance",
+        "interface_trait",
+        "getter_setter"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -4842,7 +4892,10 @@
         "dynamic_property_access",
         "mutable_shared_state",
         "static_members",
-        "union_type"
+        "union_type",
+        "getter_setter",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -5154,7 +5207,9 @@
       "callers": [],
       "parent_class": "modules__renderer_svg__src__svgCreator__SvgCreator",
       "cyclomatic_complexity": 6,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": 1966,
       "bfs_level": 2,
       "tier": "sonnet",
@@ -5309,7 +5364,9 @@
       "callers": [],
       "parent_class": "modules__renderer_svg__src__svgCreator__SvgCreator",
       "cyclomatic_complexity": 2,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": 45,
       "bfs_level": 0,
       "tier": "haiku",
@@ -6404,7 +6461,9 @@
       ],
       "parent_class": null,
       "cyclomatic_complexity": 4,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": null,
       "bfs_level": null,
       "tier": "sonnet",
@@ -6530,7 +6589,8 @@
         "optional_chaining",
         "dynamic_property_access",
         "mutable_shared_state",
-        "union_type"
+        "union_type",
+        "arena_allocation"
       ],
       "topological_order": 1338,
       "bfs_level": 1,
@@ -6770,7 +6830,9 @@
       "callers": [],
       "parent_class": null,
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "interface_trait"
+      ],
       "topological_order": 53,
       "bfs_level": 0,
       "tier": "haiku",
@@ -6809,7 +6871,9 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "union_type"
+        "union_type",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -7189,7 +7253,8 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "null_undefined",
-        "union_type"
+        "union_type",
+        "interface_trait"
       ],
       "topological_order": 60,
       "bfs_level": 0,
@@ -7220,7 +7285,8 @@
       "parent_class": null,
       "cyclomatic_complexity": 3,
       "idioms_needed": [
-        "null_undefined"
+        "null_undefined",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -7248,7 +7314,8 @@
       "idioms_needed": [
         "null_undefined",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter"
       ],
       "topological_order": 61,
       "bfs_level": 0,
@@ -7337,7 +7404,9 @@
       ],
       "parent_class": null,
       "cyclomatic_complexity": 5,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": 1949,
       "bfs_level": 2,
       "tier": "sonnet",
@@ -7513,7 +7582,8 @@
       "cyclomatic_complexity": 4,
       "idioms_needed": [
         "closure_capture",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -7966,7 +8036,9 @@
       "callers": [],
       "parent_class": null,
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "arena_allocation"
+      ],
       "topological_order": 1520,
       "bfs_level": 1,
       "tier": "haiku",
@@ -7995,7 +8067,8 @@
       "idioms_needed": [
         "number_as_index",
         "dynamic_property_access",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "arena_allocation"
       ],
       "topological_order": 2026,
       "bfs_level": 2,
@@ -8087,7 +8160,9 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "interface_trait",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -8145,7 +8220,9 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "interface_trait",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -8205,7 +8282,8 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "arena_allocation"
       ],
       "topological_order": 1522,
       "bfs_level": 1,
@@ -8287,7 +8365,10 @@
         "dynamic_property_access",
         "mutable_shared_state",
         "generator_function",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -8703,7 +8784,9 @@
       "callers": [],
       "parent_class": "modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement",
       "cyclomatic_complexity": 6,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": null,
       "bfs_level": null,
       "tier": "sonnet",
@@ -9344,7 +9427,9 @@
       "callers": [],
       "parent_class": null,
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "interface_trait"
+      ],
       "topological_order": null,
       "bfs_level": null,
       "tier": "haiku",
@@ -9442,7 +9527,9 @@
       "callers": [],
       "parent_class": null,
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "interface_trait"
+      ],
       "topological_order": 1343,
       "bfs_level": 1,
       "tier": "haiku",
@@ -9470,7 +9557,8 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -9588,7 +9676,9 @@
       "idioms_needed": [
         "class_inheritance",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -9711,7 +9801,9 @@
       "idioms_needed": [
         "null_undefined",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -9853,7 +9945,10 @@
         "dynamic_property_access",
         "mutable_shared_state",
         "generator_function",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -11955,7 +12050,8 @@
       "parent_class": "modules__core__src__routing__interactiveEdgeRouter__InteractiveEdgeRouter",
       "cyclomatic_complexity": 4,
       "idioms_needed": [
-        "null_undefined"
+        "null_undefined",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -12226,7 +12322,8 @@
         "dynamic_property_access",
         "mutable_shared_state",
         "generator_function",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -13306,7 +13403,8 @@
         "set_usage",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -13652,7 +13750,8 @@
         "array_method_chain",
         "set_usage",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -13898,7 +13997,8 @@
       "idioms_needed": [
         "set_usage",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -14022,7 +14122,10 @@
       "idioms_needed": [
         "null_undefined",
         "class_inheritance",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -14091,7 +14194,9 @@
         "set_usage",
         "mutable_shared_state",
         "generator_function",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -14976,7 +15081,8 @@
         "set_usage",
         "number_as_index",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -15289,7 +15395,8 @@
         "null_undefined",
         "set_usage",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -15535,7 +15642,9 @@
       "idioms_needed": [
         "null_undefined",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -15881,7 +15990,10 @@
         "dynamic_property_access",
         "mutable_shared_state",
         "generator_function",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -16560,7 +16672,8 @@
       "idioms_needed": [
         "null_undefined",
         "set_usage",
-        "dynamic_property_access"
+        "dynamic_property_access",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -16598,7 +16711,8 @@
       "idioms_needed": [
         "null_undefined",
         "set_usage",
-        "dynamic_property_access"
+        "dynamic_property_access",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -16629,7 +16743,9 @@
       "callers": [],
       "parent_class": "modules__core__src__routing__splineRouter__SplineRouter",
       "cyclomatic_complexity": 2,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": null,
       "bfs_level": null,
       "tier": "haiku",
@@ -17391,7 +17507,8 @@
       "cyclomatic_complexity": 6,
       "idioms_needed": [
         "null_undefined",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -17903,7 +18020,8 @@
       "parent_class": "modules__core__src__routing__splineRouter__SplineRouter",
       "cyclomatic_complexity": 7,
       "idioms_needed": [
-        "null_undefined"
+        "null_undefined",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -17937,7 +18055,8 @@
       "cyclomatic_complexity": 6,
       "idioms_needed": [
         "null_undefined",
-        "static_members"
+        "static_members",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -18167,7 +18286,8 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -18584,7 +18704,9 @@
       "idioms_needed": [
         "null_undefined",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -18677,7 +18799,8 @@
         "null_undefined",
         "class_inheritance",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "error_handling"
       ],
       "topological_order": 1957,
       "bfs_level": 2,
@@ -18738,7 +18861,9 @@
       "callers": [],
       "parent_class": "modules__core__src__structs__algorithmData__AlgorithmData",
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": 1959,
       "bfs_level": 2,
       "tier": "haiku",
@@ -18831,7 +18956,9 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "abstract_class",
+        "arena_allocation"
       ],
       "topological_order": 1350,
       "bfs_level": 1,
@@ -18996,7 +19123,8 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "class_inheritance"
+        "class_inheritance",
+        "arena_allocation"
       ],
       "topological_order": 1383,
       "bfs_level": 1,
@@ -19064,7 +19192,8 @@
         "dynamic_property_access",
         "mutable_shared_state",
         "generator_function",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": 1384,
       "bfs_level": 1,
@@ -19567,7 +19696,9 @@
       "idioms_needed": [
         "number_as_index",
         "dynamic_property_access",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "error_handling"
       ],
       "topological_order": 113,
       "bfs_level": 0,
@@ -19713,7 +19844,8 @@
       "cyclomatic_complexity": 9,
       "idioms_needed": [
         "number_as_index",
-        "dynamic_property_access"
+        "dynamic_property_access",
+        "error_handling"
       ],
       "topological_order": 118,
       "bfs_level": 0,
@@ -19797,7 +19929,10 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "generator_function"
+        "generator_function",
+        "getter_setter",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": 121,
       "bfs_level": 0,
@@ -19909,7 +20044,8 @@
       "parent_class": "modules__core__src__structs__BinaryHeapWithComparer__BinaryHeapWithComparer",
       "cyclomatic_complexity": 2,
       "idioms_needed": [
-        "dynamic_property_access"
+        "dynamic_property_access",
+        "error_handling"
       ],
       "topological_order": 125,
       "bfs_level": 0,
@@ -20024,7 +20160,8 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "class_inheritance",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -20240,7 +20377,10 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "generator_function"
+        "generator_function",
+        "abstract_class",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": 134,
       "bfs_level": 0,
@@ -20525,7 +20665,10 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "generator_function"
+        "generator_function",
+        "getter_setter",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": 1379,
       "bfs_level": 1,
@@ -20726,7 +20869,8 @@
       "parent_class": "modules__core__src__structs__genericBinaryHeapPriorityQueue__GenericBinaryHeapPriorityQueue",
       "cyclomatic_complexity": 2,
       "idioms_needed": [
-        "dynamic_property_access"
+        "dynamic_property_access",
+        "error_handling"
       ],
       "topological_order": 146,
       "bfs_level": 0,
@@ -20756,7 +20900,8 @@
       "idioms_needed": [
         "number_as_index",
         "dynamic_property_access",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "error_handling"
       ],
       "topological_order": 147,
       "bfs_level": 0,
@@ -20925,7 +21070,8 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "arena_allocation"
       ],
       "topological_order": 152,
       "bfs_level": 0,
@@ -20990,7 +21136,9 @@
         "set_usage",
         "class_inheritance",
         "mutable_shared_state",
-        "generator_function"
+        "generator_function",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -21885,7 +22033,9 @@
       "callers": [],
       "parent_class": null,
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "interface_trait"
+      ],
       "topological_order": 160,
       "bfs_level": 0,
       "tier": "haiku",
@@ -22002,7 +22152,9 @@
         "set_usage",
         "class_inheritance",
         "mutable_shared_state",
-        "generator_function"
+        "generator_function",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -22169,7 +22321,10 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "map_usage",
-        "generator_function"
+        "generator_function",
+        "getter_setter",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -22462,7 +22617,9 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "abstract_class",
+        "arena_allocation"
       ],
       "topological_order": 1396,
       "bfs_level": 1,
@@ -22567,7 +22724,8 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "null_undefined",
-        "static_members"
+        "static_members",
+        "error_handling"
       ],
       "topological_order": 167,
       "bfs_level": 0,
@@ -22597,7 +22755,8 @@
       "cyclomatic_complexity": 3,
       "idioms_needed": [
         "null_undefined",
-        "static_members"
+        "static_members",
+        "error_handling"
       ],
       "topological_order": 168,
       "bfs_level": 0,
@@ -22623,7 +22782,9 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "error_handling"
       ],
       "topological_order": 169,
       "bfs_level": 0,
@@ -22648,7 +22809,9 @@
       "callers": [],
       "parent_class": "modules__core__src__utils__cancelToken__CancelToken",
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": 170,
       "bfs_level": 0,
       "tier": "haiku",
@@ -23108,7 +23271,8 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter"
       ],
       "topological_order": 182,
       "bfs_level": 0,
@@ -23194,7 +23358,9 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "generator_function"
+        "generator_function",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": 1400,
       "bfs_level": 1,
@@ -23551,7 +23717,8 @@
         "dynamic_property_access",
         "mutable_shared_state",
         "generator_function",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": 1405,
       "bfs_level": 1,
@@ -23848,7 +24015,9 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "generator_function"
+        "generator_function",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": 1532,
       "bfs_level": 1,
@@ -24272,7 +24441,9 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "map_usage",
-        "generator_function"
+        "generator_function",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": 2067,
       "bfs_level": 2,
@@ -24698,7 +24869,10 @@
         "dynamic_property_access",
         "mutable_shared_state",
         "generator_function",
-        "static_members"
+        "static_members",
+        "interface_trait",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": 1541,
       "bfs_level": 1,
@@ -25201,7 +25375,8 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter"
       ],
       "topological_order": 210,
       "bfs_level": 0,
@@ -25793,7 +25968,9 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -26252,7 +26429,10 @@
         "dynamic_property_access",
         "mutable_shared_state",
         "generator_function",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -26570,7 +26750,9 @@
       "callers": [],
       "parent_class": "modules__drawing__src__layoutEditing__geomGraphEditor__GeometryGraphEditor",
       "cyclomatic_complexity": 3,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": 1552,
       "bfs_level": 1,
       "tier": "sonnet",
@@ -26985,7 +27167,9 @@
       "callers": [],
       "parent_class": "modules__drawing__src__layoutEditing__geomGraphEditor__GeometryGraphEditor",
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": null,
       "bfs_level": null,
       "tier": "haiku",
@@ -27854,7 +28038,9 @@
         "set_usage",
         "number_as_index",
         "dynamic_property_access",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -28255,7 +28441,9 @@
       "callers": [],
       "parent_class": null,
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "interface_trait"
+      ],
       "topological_order": null,
       "bfs_level": null,
       "tier": "haiku",
@@ -28307,7 +28495,8 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "class_inheritance"
+        "class_inheritance",
+        "interface_trait"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -28335,7 +28524,8 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "class_inheritance"
+        "class_inheritance",
+        "interface_trait"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -28364,7 +28554,8 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "class_inheritance"
+        "class_inheritance",
+        "interface_trait"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -28420,7 +28611,9 @@
       "callers": [],
       "parent_class": null,
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "interface_trait"
+      ],
       "topological_order": 1366,
       "bfs_level": 1,
       "tier": "haiku",
@@ -28544,7 +28737,9 @@
         "dynamic_property_access",
         "mutable_shared_state",
         "generator_function",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -31439,7 +31634,9 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "class_inheritance",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": 1974,
       "bfs_level": 2,
@@ -31534,7 +31731,10 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "generator_function"
+        "generator_function",
+        "getter_setter",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -31629,7 +31829,8 @@
       "parent_class": "modules__drawing__src__layoutEditing__undoRedoAction__UndoRedoAction",
       "cyclomatic_complexity": 15,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -31661,7 +31862,8 @@
       "cyclomatic_complexity": 16,
       "idioms_needed": [
         "null_undefined",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -31788,7 +31990,9 @@
       "callers": [],
       "parent_class": "modules__drawing__src__layoutEditing__undoRedoAction__UndoRedoAction",
       "cyclomatic_complexity": 6,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": 1371,
       "bfs_level": 1,
       "tier": "sonnet",
@@ -31885,7 +32089,8 @@
       "idioms_needed": [
         "null_undefined",
         "mutable_shared_state",
-        "generator_function"
+        "generator_function",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -32280,7 +32485,9 @@
       "idioms_needed": [
         "null_undefined",
         "closure_capture",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "interface_trait",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -32426,7 +32633,8 @@
         "closure_capture",
         "number_as_index",
         "dynamic_property_access",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "arena_allocation"
       ],
       "topological_order": 278,
       "bfs_level": 0,
@@ -32682,7 +32890,8 @@
       "parent_class": null,
       "cyclomatic_complexity": 3,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "error_handling"
       ],
       "topological_order": 287,
       "bfs_level": 0,
@@ -33937,7 +34146,9 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "union_type"
+        "union_type",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -34707,7 +34918,8 @@
       "cyclomatic_complexity": 3,
       "idioms_needed": [
         "array_method_chain",
-        "set_usage"
+        "set_usage",
+        "error_handling"
       ],
       "topological_order": 323,
       "bfs_level": 0,
@@ -34740,7 +34952,8 @@
       "cyclomatic_complexity": 4,
       "idioms_needed": [
         "null_undefined",
-        "union_type"
+        "union_type",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -34777,7 +34990,8 @@
         "class_inheritance",
         "number_as_index",
         "dynamic_property_access",
-        "union_type"
+        "union_type",
+        "error_handling"
       ],
       "topological_order": 324,
       "bfs_level": 0,
@@ -34846,7 +35060,8 @@
         "array_method_chain",
         "closure_capture",
         "dynamic_property_access",
-        "union_type"
+        "union_type",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -35175,7 +35390,8 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "interface_trait"
       ],
       "topological_order": 326,
       "bfs_level": 0,
@@ -35230,7 +35446,8 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "interface_trait"
       ],
       "topological_order": 328,
       "bfs_level": 0,
@@ -35432,7 +35649,8 @@
         "dynamic_property_access",
         "mutable_shared_state",
         "generator_function",
-        "static_members"
+        "static_members",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -35641,7 +35859,8 @@
       "parent_class": "modules__core__test__utils__svgDebugWriter__SvgDebugWriter",
       "cyclomatic_complexity": 4,
       "idioms_needed": [
-        "static_members"
+        "static_members",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -37032,7 +37251,9 @@
       ],
       "parent_class": null,
       "cyclomatic_complexity": 3,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": null,
       "bfs_level": null,
       "tier": "sonnet",
@@ -37062,7 +37283,8 @@
       "parent_class": null,
       "cyclomatic_complexity": 3,
       "idioms_needed": [
-        "null_undefined"
+        "null_undefined",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -37525,7 +37747,8 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -37910,7 +38133,10 @@
       "idioms_needed": [
         "class_inheritance",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -37975,7 +38201,9 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "class_inheritance",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -38084,7 +38312,9 @@
         "class_inheritance",
         "mutable_shared_state",
         "generator_function",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -38648,7 +38878,10 @@
         "class_inheritance",
         "mutable_shared_state",
         "generator_function",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -39134,7 +39367,9 @@
       "callers": [],
       "parent_class": "modules__core__src__layout__core__geomGraph__GeomGraph",
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": 348,
       "bfs_level": 0,
       "tier": "haiku",
@@ -39700,7 +39935,9 @@
       "idioms_needed": [
         "null_undefined",
         "class_inheritance",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -39924,7 +40161,9 @@
         "class_inheritance",
         "mutable_shared_state",
         "generator_function",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -40471,7 +40710,10 @@
         "class_inheritance",
         "mutable_shared_state",
         "generator_function",
-        "static_members"
+        "static_members",
+        "abstract_class",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -40651,7 +40893,9 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "class_inheritance",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -40778,7 +41022,10 @@
       ],
       "parent_class": null,
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "abstract_class",
+        "getter_setter"
+      ],
       "topological_order": null,
       "bfs_level": null,
       "tier": "haiku",
@@ -40811,7 +41058,9 @@
         "null_undefined",
         "class_inheritance",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -40912,7 +41161,8 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "class_inheritance",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -41055,7 +41305,9 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "mutable_shared_state",
-        "union_type"
+        "union_type",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -41263,7 +41515,8 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "generator_function"
+        "generator_function",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -42221,7 +42474,8 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -42761,7 +43015,8 @@
         "null_undefined",
         "number_as_index",
         "dynamic_property_access",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "arena_allocation"
       ],
       "topological_order": 2280,
       "bfs_level": 3,
@@ -43164,7 +43419,8 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter"
       ],
       "topological_order": 377,
       "bfs_level": 0,
@@ -43222,7 +43478,10 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "interface_trait",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -43307,7 +43566,9 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -43463,7 +43724,8 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -44166,7 +44428,11 @@
       "idioms_needed": [
         "null_undefined",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "interface_trait",
+        "getter_setter",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -44618,7 +44884,10 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "mutable_shared_state",
-        "generator_function"
+        "generator_function",
+        "interface_trait",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -44874,7 +45143,9 @@
       "callers": [],
       "parent_class": null,
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "interface_trait"
+      ],
       "topological_order": null,
       "bfs_level": null,
       "tier": "haiku",
@@ -44909,7 +45180,8 @@
         "closure_capture",
         "set_usage",
         "class_inheritance",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -45161,7 +45433,10 @@
         "number_as_index",
         "mutable_shared_state",
         "generator_function",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -45615,7 +45890,9 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -46054,7 +46331,9 @@
       "callers": [],
       "parent_class": "modules__core__src__layout__layered__Balancing__Balancing",
       "cyclomatic_complexity": 2,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": 412,
       "bfs_level": 0,
       "tier": "haiku",
@@ -46146,7 +46425,8 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "error_handling"
       ],
       "topological_order": 1994,
       "bfs_level": 2,
@@ -46180,7 +46460,8 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "dynamic_property_access",
-        "static_members"
+        "static_members",
+        "error_handling"
       ],
       "topological_order": 1995,
       "bfs_level": 2,
@@ -46315,7 +46596,8 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "generator_function"
+        "generator_function",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -46581,7 +46863,9 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -46879,7 +47163,8 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": 2047,
       "bfs_level": 2,
@@ -47000,7 +47285,9 @@
         "map_usage",
         "number_as_index",
         "dynamic_property_access",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -47319,7 +47606,8 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "class_inheritance"
+        "class_inheritance",
+        "interface_trait"
       ],
       "topological_order": 429,
       "bfs_level": 0,
@@ -47348,7 +47636,8 @@
         "null_undefined",
         "number_as_index",
         "dynamic_property_access",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter"
       ],
       "topological_order": 430,
       "bfs_level": 0,
@@ -47772,7 +48061,10 @@
         "dynamic_property_access",
         "mutable_shared_state",
         "generator_function",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -47894,7 +48186,9 @@
       "callers": [],
       "parent_class": "modules__core__src__layout__layered__layeredLayout__LayeredLayout",
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": 441,
       "bfs_level": 0,
       "tier": "haiku",
@@ -48164,7 +48458,8 @@
       "parent_class": "modules__core__src__layout__layered__layeredLayout__LayeredLayout",
       "cyclomatic_complexity": 3,
       "idioms_needed": [
-        "null_undefined"
+        "null_undefined",
+        "error_handling"
       ],
       "topological_order": 1939,
       "bfs_level": 1,
@@ -50033,7 +50328,9 @@
         "dynamic_property_access",
         "mutable_shared_state",
         "static_members",
-        "union_type"
+        "union_type",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -50587,7 +50884,11 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "generator_function"
+        "generator_function",
+        "interface_trait",
+        "getter_setter",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -50754,7 +51055,8 @@
       "cyclomatic_complexity": 4,
       "idioms_needed": [
         "number_as_index",
-        "dynamic_property_access"
+        "dynamic_property_access",
+        "error_handling"
       ],
       "topological_order": 469,
       "bfs_level": 0,
@@ -50874,7 +51176,9 @@
         "dynamic_property_access",
         "mutable_shared_state",
         "generator_function",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -51531,7 +51835,9 @@
         "dynamic_property_access",
         "mutable_shared_state",
         "generator_function",
-        "static_members"
+        "static_members",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -52140,7 +52446,9 @@
       "callers": [],
       "parent_class": "modules__core__src__layout__layered__RefinerBetweenTwoLayers__RefinerBetweenTwoLayers",
       "cyclomatic_complexity": 2,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": 1458,
       "bfs_level": 1,
       "tier": "haiku",
@@ -52168,7 +52476,9 @@
       "callers": [],
       "parent_class": "modules__core__src__layout__layered__RefinerBetweenTwoLayers__RefinerBetweenTwoLayers",
       "cyclomatic_complexity": 2,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": 1459,
       "bfs_level": 1,
       "tier": "haiku",
@@ -52372,7 +52682,8 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -52948,7 +53259,9 @@
         "dynamic_property_access",
         "mutable_shared_state",
         "generator_function",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -54626,7 +54939,11 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "interface_trait",
+        "getter_setter",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -54830,7 +55147,10 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "generator_function"
+        "generator_function",
+        "getter_setter",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -54865,7 +55185,8 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "map_usage",
-        "dynamic_property_access"
+        "dynamic_property_access",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -55813,7 +56134,9 @@
         "dynamic_property_access",
         "mutable_shared_state",
         "generator_function",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -57310,7 +57633,8 @@
         "class_inheritance",
         "number_as_index",
         "dynamic_property_access",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -57443,7 +57767,9 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -57585,7 +57911,8 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -57853,7 +58180,9 @@
       "idioms_needed": [
         "null_undefined",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "interface_trait",
+        "getter_setter"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -58534,7 +58863,9 @@
         "class_inheritance",
         "number_as_index",
         "dynamic_property_access",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -58631,7 +58962,9 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "class_inheritance",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -58794,7 +59127,9 @@
         "map_usage",
         "class_inheritance",
         "dynamic_property_access",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -58961,7 +59296,11 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "interface_trait",
+        "getter_setter",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -59282,7 +59621,8 @@
       "parent_class": "modules__core__src__math__geometry__bezierSeg__BezierSeg",
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "null_undefined"
+        "null_undefined",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -60313,7 +60653,10 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": 1613,
       "bfs_level": 1,
@@ -60373,7 +60716,8 @@
       "parent_class": "modules__core__src__math__geometry__compassVector__CompassVector",
       "cyclomatic_complexity": 5,
       "idioms_needed": [
-        "static_members"
+        "static_members",
+        "error_handling"
       ],
       "topological_order": 1487,
       "bfs_level": 1,
@@ -60403,7 +60747,8 @@
       "parent_class": "modules__core__src__math__geometry__compassVector__CompassVector",
       "cyclomatic_complexity": 5,
       "idioms_needed": [
-        "static_members"
+        "static_members",
+        "error_handling"
       ],
       "topological_order": 1488,
       "bfs_level": 1,
@@ -60433,7 +60778,8 @@
       "parent_class": "modules__core__src__math__geometry__compassVector__CompassVector",
       "cyclomatic_complexity": 5,
       "idioms_needed": [
-        "static_members"
+        "static_members",
+        "error_handling"
       ],
       "topological_order": 1489,
       "bfs_level": 1,
@@ -60771,7 +61117,9 @@
         "dynamic_property_access",
         "mutable_shared_state",
         "generator_function",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -61200,7 +61548,8 @@
       "idioms_needed": [
         "null_undefined",
         "closure_capture",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "error_handling"
       ],
       "topological_order": 1626,
       "bfs_level": 1,
@@ -61231,7 +61580,9 @@
       "idioms_needed": [
         "null_undefined",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": 1905,
       "bfs_level": 1,
@@ -61405,7 +61756,11 @@
         "mutable_shared_state",
         "generator_function",
         "static_members",
-        "union_type"
+        "union_type",
+        "interface_trait",
+        "getter_setter",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -61461,7 +61816,8 @@
       "parent_class": "modules__core__src__math__geometry__curve__Curve",
       "cyclomatic_complexity": 5,
       "idioms_needed": [
-        "static_members"
+        "static_members",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -61553,7 +61909,8 @@
       "parent_class": "modules__core__src__math__geometry__curve__Curve",
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "static_members"
+        "static_members",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -61583,7 +61940,8 @@
       "parent_class": "modules__core__src__math__geometry__curve__Curve",
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "static_members"
+        "static_members",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -61613,7 +61971,8 @@
       "cyclomatic_complexity": 3,
       "idioms_needed": [
         "number_as_index",
-        "dynamic_property_access"
+        "dynamic_property_access",
+        "error_handling"
       ],
       "topological_order": 632,
       "bfs_level": 0,
@@ -62690,7 +63049,8 @@
       "parent_class": "modules__core__src__math__geometry__curve__Curve",
       "cyclomatic_complexity": 5,
       "idioms_needed": [
-        "static_members"
+        "static_members",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -63211,7 +63571,8 @@
         "null_undefined",
         "number_as_index",
         "dynamic_property_access",
-        "static_members"
+        "static_members",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -63281,7 +63642,8 @@
       "parent_class": "modules__core__src__math__geometry__curve__Curve",
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "null_undefined"
+        "null_undefined",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -63950,7 +64312,9 @@
       "callers": [],
       "parent_class": "modules__core__src__math__geometry__curve__Curve",
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": 645,
       "bfs_level": 0,
       "tier": "haiku",
@@ -63976,7 +64340,9 @@
       "callers": [],
       "parent_class": "modules__core__src__math__geometry__curve__Curve",
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": 646,
       "bfs_level": 0,
       "tier": "haiku",
@@ -64447,7 +64813,9 @@
       ],
       "parent_class": null,
       "cyclomatic_complexity": 4,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": null,
       "bfs_level": null,
       "tier": "sonnet",
@@ -65190,7 +65558,8 @@
       "idioms_needed": [
         "null_undefined",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -65469,7 +65838,11 @@
         "null_undefined",
         "number_as_index",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "interface_trait",
+        "getter_setter",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -66324,7 +66697,9 @@
       "callers": [],
       "parent_class": "modules__core__src__math__geometry__ellipse__Ellipse",
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": 667,
       "bfs_level": 0,
       "tier": "haiku",
@@ -66350,7 +66725,9 @@
       "callers": [],
       "parent_class": "modules__core__src__math__geometry__ellipse__Ellipse",
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": 668,
       "bfs_level": 0,
       "tier": "haiku",
@@ -66376,7 +66753,9 @@
       "callers": [],
       "parent_class": "modules__core__src__math__geometry__ellipse__Ellipse",
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": 669,
       "bfs_level": 0,
       "tier": "haiku",
@@ -66562,7 +66941,9 @@
       ],
       "parent_class": null,
       "cyclomatic_complexity": 6,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": null,
       "bfs_level": null,
       "tier": "sonnet",
@@ -66621,7 +67002,8 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "number_as_index"
+        "number_as_index",
+        "interface_trait"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -66651,7 +67033,8 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "number_as_index",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -66716,7 +67099,9 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "interface_trait",
+        "getter_setter"
       ],
       "topological_order": 1505,
       "bfs_level": 1,
@@ -67130,7 +67515,9 @@
       "callers": [],
       "parent_class": null,
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "interface_trait"
+      ],
       "topological_order": 680,
       "bfs_level": 0,
       "tier": "haiku",
@@ -67225,7 +67612,11 @@
         "number_as_index",
         "mutable_shared_state",
         "static_members",
-        "union_type"
+        "union_type",
+        "interface_trait",
+        "getter_setter",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -67373,7 +67764,8 @@
       "parent_class": "modules__core__src__math__geometry__lineSegment__LineSegment",
       "cyclomatic_complexity": 3,
       "idioms_needed": [
-        "null_undefined"
+        "null_undefined",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -68197,7 +68589,8 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -68524,7 +68917,9 @@
       "idioms_needed": [
         "null_undefined",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": 1654,
       "bfs_level": 1,
@@ -69201,7 +69596,8 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter"
       ],
       "topological_order": 1659,
       "bfs_level": 1,
@@ -69579,7 +69975,8 @@
         "null_undefined",
         "mutable_shared_state",
         "static_members",
-        "union_type"
+        "union_type",
+        "getter_setter"
       ],
       "topological_order": 714,
       "bfs_level": 0,
@@ -71199,7 +71596,9 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": 1703,
       "bfs_level": 1,
@@ -71352,7 +71751,11 @@
         "closure_capture",
         "mutable_shared_state",
         "generator_function",
-        "static_members"
+        "static_members",
+        "interface_trait",
+        "getter_setter",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -71925,7 +72328,8 @@
       "parent_class": "modules__core__src__math__geometry__polyline__Polyline",
       "cyclomatic_complexity": 5,
       "idioms_needed": [
-        "null_undefined"
+        "null_undefined",
+        "error_handling"
       ],
       "topological_order": 736,
       "bfs_level": 0,
@@ -72124,7 +72528,9 @@
       "callers": [],
       "parent_class": "modules__core__src__math__geometry__polyline__Polyline",
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": null,
       "bfs_level": null,
       "tier": "haiku",
@@ -72183,7 +72589,9 @@
       "callers": [],
       "parent_class": "modules__core__src__math__geometry__polyline__Polyline",
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": null,
       "bfs_level": null,
       "tier": "haiku",
@@ -72241,7 +72649,9 @@
       "callers": [],
       "parent_class": "modules__core__src__math__geometry__polyline__Polyline",
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": null,
       "bfs_level": null,
       "tier": "haiku",
@@ -72268,7 +72678,9 @@
       "callers": [],
       "parent_class": "modules__core__src__math__geometry__polyline__Polyline",
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": 738,
       "bfs_level": 0,
       "tier": "haiku",
@@ -72294,7 +72706,9 @@
       "callers": [],
       "parent_class": "modules__core__src__math__geometry__polyline__Polyline",
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": 739,
       "bfs_level": 0,
       "tier": "haiku",
@@ -72355,7 +72769,9 @@
       "callers": [],
       "parent_class": "modules__core__src__math__geometry__polyline__Polyline",
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": 1714,
       "bfs_level": 1,
       "tier": "haiku",
@@ -72442,7 +72858,9 @@
       "callers": [],
       "parent_class": "modules__core__src__math__geometry__polyline__Polyline",
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": 1715,
       "bfs_level": 1,
       "tier": "haiku",
@@ -72470,7 +72888,9 @@
       "callers": [],
       "parent_class": "modules__core__src__math__geometry__polyline__Polyline",
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": 1716,
       "bfs_level": 1,
       "tier": "haiku",
@@ -72496,7 +72916,9 @@
       "callers": [],
       "parent_class": "modules__core__src__math__geometry__polyline__Polyline",
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": 740,
       "bfs_level": 0,
       "tier": "haiku",
@@ -72522,7 +72944,9 @@
       "callers": [],
       "parent_class": "modules__core__src__math__geometry__polyline__Polyline",
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": 741,
       "bfs_level": 0,
       "tier": "haiku",
@@ -72548,7 +72972,9 @@
       "callers": [],
       "parent_class": "modules__core__src__math__geometry__polyline__Polyline",
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": 742,
       "bfs_level": 0,
       "tier": "haiku",
@@ -72696,7 +73122,9 @@
       "idioms_needed": [
         "null_undefined",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -72955,7 +73383,9 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "interface_trait",
+        "getter_setter"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -74285,7 +74715,9 @@
         "null_undefined",
         "mutable_shared_state",
         "generator_function",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -74609,7 +75041,8 @@
         "set_usage",
         "number_as_index",
         "dynamic_property_access",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "arena_allocation"
       ],
       "topological_order": 1988,
       "bfs_level": 2,
@@ -75007,7 +75440,8 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -75073,7 +75507,9 @@
         "null_undefined",
         "number_as_index",
         "dynamic_property_access",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -75610,7 +76046,8 @@
       "parent_class": "modules__core__src__math__projectionSolver__Block__Block",
       "cyclomatic_complexity": 4,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "error_handling"
       ],
       "topological_order": 764,
       "bfs_level": 0,
@@ -75766,7 +76203,9 @@
       "idioms_needed": [
         "number_as_index",
         "dynamic_property_access",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -75939,7 +76378,9 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -76225,7 +76666,9 @@
       "idioms_needed": [
         "null_undefined",
         "dynamic_property_access",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -76480,7 +76923,9 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -76632,7 +77077,8 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "arena_allocation"
       ],
       "topological_order": 1919,
       "bfs_level": 1,
@@ -76823,7 +77269,8 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -76943,7 +77390,8 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -77384,7 +77832,9 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": 1921,
       "bfs_level": 1,
@@ -77440,7 +77890,8 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -77513,7 +77964,10 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "generator_function"
+        "generator_function",
+        "getter_setter",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -77606,7 +78060,8 @@
       "parent_class": "modules__core__src__math__projectionSolver__Solver__Solver",
       "cyclomatic_complexity": 2,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -77727,7 +78182,9 @@
       "callers": [],
       "parent_class": "modules__core__src__math__projectionSolver__Solver__Solver",
       "cyclomatic_complexity": 4,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": null,
       "bfs_level": null,
       "tier": "sonnet",
@@ -77818,7 +78275,8 @@
       "parent_class": "modules__core__src__math__projectionSolver__Solver__Solver",
       "cyclomatic_complexity": 5,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -78423,7 +78881,10 @@
         "map_usage",
         "set_usage",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -78730,7 +79191,8 @@
       "cyclomatic_complexity": 4,
       "idioms_needed": [
         "null_undefined",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "error_handling"
       ],
       "topological_order": 2172,
       "bfs_level": 2,
@@ -79071,7 +79533,8 @@
         "set_usage",
         "number_as_index",
         "dynamic_property_access",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -79513,7 +79976,8 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter"
       ],
       "topological_order": 835,
       "bfs_level": 0,
@@ -79565,7 +80029,8 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -79628,7 +80093,10 @@
       "idioms_needed": [
         "null_undefined",
         "number_as_index",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -79660,7 +80128,8 @@
       "parent_class": "modules__core__src__math__projectionSolver__Variable__Variable",
       "cyclomatic_complexity": 7,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "error_handling"
       ],
       "topological_order": 837,
       "bfs_level": 0,
@@ -79836,7 +80305,9 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -80012,7 +80483,8 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "null_undefined",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "arena_allocation"
       ],
       "topological_order": 1923,
       "bfs_level": 1,
@@ -80103,7 +80575,8 @@
         "null_undefined",
         "array_method_chain",
         "mutable_shared_state",
-        "generator_function"
+        "generator_function",
+        "arena_allocation"
       ],
       "topological_order": 2180,
       "bfs_level": 2,
@@ -80857,7 +81330,8 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -81600,7 +82074,9 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -81797,7 +82273,9 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -81887,7 +82365,8 @@
         "dynamic_property_access",
         "mutable_shared_state",
         "generator_function",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -82163,7 +82642,8 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -84169,7 +84649,9 @@
       "idioms_needed": [
         "number_as_index",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -84326,7 +84808,8 @@
       "cyclomatic_complexity": 3,
       "idioms_needed": [
         "closure_capture",
-        "static_members"
+        "static_members",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -84361,7 +84844,8 @@
       "idioms_needed": [
         "closure_capture",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -84698,7 +85182,8 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -84755,7 +85240,9 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "mutable_shared_state",
-        "generator_function"
+        "generator_function",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": 878,
       "bfs_level": 0,
@@ -84834,7 +85321,9 @@
       "callers": [],
       "parent_class": "modules__core__src__routing__ConstrainedDelaunayTriangulation__ThreeArray__ThreeArray",
       "cyclomatic_complexity": 10,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": 881,
       "bfs_level": 0,
       "tier": "opus",
@@ -84862,7 +85351,8 @@
       "parent_class": "modules__core__src__routing__ConstrainedDelaunayTriangulation__ThreeArray__ThreeArray",
       "cyclomatic_complexity": 10,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "error_handling"
       ],
       "topological_order": 882,
       "bfs_level": 0,
@@ -84969,7 +85459,9 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "class_inheritance",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": 1732,
       "bfs_level": 1,
@@ -85035,7 +85527,10 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "class_inheritance",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "abstract_class",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -85234,7 +85729,9 @@
       "idioms_needed": [
         "class_inheritance",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -85367,7 +85864,8 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "class_inheritance",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -85433,7 +85931,9 @@
       "idioms_needed": [
         "null_undefined",
         "closure_capture",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": 2258,
       "bfs_level": 3,
@@ -85614,7 +86114,9 @@
         "null_undefined",
         "number_as_index",
         "dynamic_property_access",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -85971,7 +86473,8 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -86092,7 +86595,8 @@
         "closure_capture",
         "map_usage",
         "dynamic_property_access",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -86241,7 +86745,8 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "class_inheritance",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -86314,7 +86819,8 @@
         "closure_capture",
         "number_as_index",
         "dynamic_property_access",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -86708,7 +87214,8 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "class_inheritance",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -86963,7 +87470,8 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -87161,7 +87669,9 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "null_undefined",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -87263,7 +87773,9 @@
         "null_undefined",
         "set_usage",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -87672,7 +88184,9 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "null_undefined",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -87891,7 +88405,9 @@
         "closure_capture",
         "number_as_index",
         "dynamic_property_access",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -88228,7 +88744,9 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -89743,7 +90261,8 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "dynamic_property_access",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -89805,7 +90324,8 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -89874,7 +90394,9 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -90197,7 +90719,8 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "static_members"
+        "static_members",
+        "getter_setter"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -90590,7 +91113,9 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -92178,7 +92703,10 @@
         "dynamic_property_access",
         "mutable_shared_state",
         "generator_function",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -92493,7 +93021,8 @@
       "parent_class": "modules__core__src__routing__rectilinear__RectilinearEdgeRouter__RectilinearEdgeRouter",
       "cyclomatic_complexity": 2,
       "idioms_needed": [
-        "null_undefined"
+        "null_undefined",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -92523,7 +93052,8 @@
       "parent_class": "modules__core__src__routing__rectilinear__RectilinearEdgeRouter__RectilinearEdgeRouter",
       "cyclomatic_complexity": 2,
       "idioms_needed": [
-        "null_undefined"
+        "null_undefined",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -93287,7 +93817,8 @@
       "parent_class": "modules__core__src__routing__rectilinear__RectilinearEdgeRouter__RectilinearEdgeRouter",
       "cyclomatic_complexity": 4,
       "idioms_needed": [
-        "null_undefined"
+        "null_undefined",
+        "error_handling"
       ],
       "topological_order": 935,
       "bfs_level": 0,
@@ -93394,7 +93925,8 @@
       "parent_class": "modules__core__src__routing__rectilinear__RectilinearEdgeRouter__RectilinearEdgeRouter",
       "cyclomatic_complexity": 4,
       "idioms_needed": [
-        "null_undefined"
+        "null_undefined",
+        "error_handling"
       ],
       "topological_order": 939,
       "bfs_level": 0,
@@ -94016,7 +94548,9 @@
         "array_method_chain",
         "closure_capture",
         "number_as_index",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -94382,7 +94916,9 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": 2076,
       "bfs_level": 2,
@@ -94798,7 +95334,9 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -95742,7 +96280,9 @@
         "null_undefined",
         "array_method_chain",
         "closure_capture",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -96245,7 +96785,9 @@
         "set_usage",
         "number_as_index",
         "dynamic_property_access",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -96635,7 +97177,9 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "null_undefined",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -96943,7 +97487,9 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -97035,7 +97581,8 @@
       "idioms_needed": [
         "null_undefined",
         "closure_capture",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -97439,7 +97986,8 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -98577,7 +99125,8 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "null_undefined",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -98698,7 +99247,9 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -99054,7 +99605,8 @@
       "parent_class": "modules__core__src__routing__rectilinear__SsstRectilinearPath__SsstRectilinearPath",
       "cyclomatic_complexity": 6,
       "idioms_needed": [
-        "static_members"
+        "static_members",
+        "error_handling"
       ],
       "topological_order": 1499,
       "bfs_level": 1,
@@ -99084,7 +99636,8 @@
       "parent_class": "modules__core__src__routing__rectilinear__SsstRectilinearPath__SsstRectilinearPath",
       "cyclomatic_complexity": 6,
       "idioms_needed": [
-        "static_members"
+        "static_members",
+        "error_handling"
       ],
       "topological_order": 1500,
       "bfs_level": 1,
@@ -99712,7 +100265,8 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "null_undefined",
-        "static_members"
+        "static_members",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -100546,7 +101100,8 @@
       "parent_class": "modules__core__src__routing__rectilinear__StaticGraphUtility__StaticGraphUtility",
       "cyclomatic_complexity": 5,
       "idioms_needed": [
-        "static_members"
+        "static_members",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -100578,7 +101133,8 @@
       "parent_class": "modules__core__src__routing__rectilinear__StaticGraphUtility__StaticGraphUtility",
       "cyclomatic_complexity": 5,
       "idioms_needed": [
-        "static_members"
+        "static_members",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -100688,7 +101244,9 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -101756,7 +102314,9 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "null_undefined",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -101911,7 +102471,10 @@
         "closure_capture",
         "number_as_index",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "abstract_class",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -103386,7 +103949,8 @@
         "null_undefined",
         "class_inheritance",
         "dynamic_property_access",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -103516,7 +104080,8 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "union_type"
+        "union_type",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -103984,7 +104549,9 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -104108,7 +104675,10 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -104196,7 +104766,9 @@
       "callers": [],
       "parent_class": "modules__core__src__routing__visibility__ActiveEdgeComparerWithRay__ActiveEdgeComparerWithRay",
       "cyclomatic_complexity": 4,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": 1788,
       "bfs_level": 1,
       "tier": "sonnet",
@@ -104468,7 +105040,9 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -104565,7 +105139,8 @@
         "dynamic_property_access",
         "mutable_shared_state",
         "generator_function",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -105120,7 +105695,9 @@
       "idioms_needed": [
         "null_undefined",
         "closure_capture",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -105649,7 +106226,8 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -105811,7 +106389,10 @@
         "map_usage",
         "mutable_shared_state",
         "generator_function",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -106077,7 +106658,8 @@
       "cyclomatic_complexity": 9,
       "idioms_needed": [
         "null_undefined",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -106348,7 +106930,9 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -106878,7 +107462,9 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "class_inheritance",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": 1798,
       "bfs_level": 1,
@@ -106941,7 +107527,10 @@
       ],
       "parent_class": null,
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "abstract_class",
+        "getter_setter"
+      ],
       "topological_order": 1799,
       "bfs_level": 1,
       "tier": "haiku",
@@ -106993,7 +107582,9 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "mutable_shared_state",
-        "generator_function"
+        "generator_function",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -107133,7 +107724,8 @@
       "idioms_needed": [
         "null_undefined",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -107285,7 +107877,9 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -107372,7 +107966,8 @@
         "null_undefined",
         "number_as_index",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -108315,7 +108910,8 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter"
       ],
       "topological_order": 1924,
       "bfs_level": 1,
@@ -108478,7 +109074,9 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -108656,7 +109254,10 @@
         "set_usage",
         "mutable_shared_state",
         "generator_function",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -108980,7 +109581,8 @@
       "parent_class": "modules__core__src__routing__visibility__VisibilityGraph__VisibilityGraph",
       "cyclomatic_complexity": 3,
       "idioms_needed": [
-        "static_members"
+        "static_members",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -109337,7 +109939,9 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -109714,7 +110318,10 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "closure_capture"
+        "closure_capture",
+        "interface_trait",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": 1047,
       "bfs_level": 0,
@@ -109740,7 +110347,8 @@
       "parent_class": "modules__core__test__drawing__layoutEditing__layoutEditor_spec__FakeMouseEvent",
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "dynamic_property_access"
+        "dynamic_property_access",
+        "error_handling"
       ],
       "topological_order": 1048,
       "bfs_level": 0,
@@ -109766,7 +110374,8 @@
       "parent_class": "modules__core__test__drawing__layoutEditing__layoutEditor_spec__FakeMouseEvent",
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "dynamic_property_access"
+        "dynamic_property_access",
+        "error_handling"
       ],
       "topological_order": 1049,
       "bfs_level": 0,
@@ -109871,7 +110480,9 @@
       "callers": [],
       "parent_class": "modules__core__test__drawing__layoutEditing__layoutEditor_spec__FakeMouseEvent",
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": 1053,
       "bfs_level": 0,
       "tier": "haiku",
@@ -109966,7 +110577,8 @@
       "parent_class": "modules__core__test__drawing__layoutEditing__layoutEditor_spec__FakeMouseEvent",
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "dynamic_property_access"
+        "dynamic_property_access",
+        "error_handling"
       ],
       "topological_order": 1056,
       "bfs_level": 0,
@@ -110034,7 +110646,11 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "null_undefined",
-        "generator_function"
+        "generator_function",
+        "interface_trait",
+        "getter_setter",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -110142,7 +110758,8 @@
       "parent_class": "modules__core__test__drawing__layoutEditing__layoutEditor_spec__FakeViewer",
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "dynamic_property_access"
+        "dynamic_property_access",
+        "error_handling"
       ],
       "topological_order": 1976,
       "bfs_level": 2,
@@ -110203,7 +110820,9 @@
       "callers": [],
       "parent_class": "modules__core__test__drawing__layoutEditing__layoutEditor_spec__FakeViewer",
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": null,
       "bfs_level": null,
       "tier": "haiku",
@@ -110234,7 +110853,9 @@
       "callers": [],
       "parent_class": "modules__core__test__drawing__layoutEditing__layoutEditor_spec__FakeViewer",
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": null,
       "bfs_level": null,
       "tier": "haiku",
@@ -110568,7 +111189,9 @@
       "callers": [],
       "parent_class": "modules__core__test__drawing__layoutEditing__layoutEditor_spec__FakeViewer",
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": null,
       "bfs_level": null,
       "tier": "haiku",
@@ -110935,7 +111558,8 @@
       "cyclomatic_complexity": 5,
       "idioms_needed": [
         "array_method_chain",
-        "closure_capture"
+        "closure_capture",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -112296,7 +112920,9 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "class_inheritance",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": 1824,
       "bfs_level": 1,
@@ -112644,7 +113270,9 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": 1827,
       "bfs_level": 1,
@@ -112987,7 +113615,10 @@
       ],
       "parent_class": null,
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "abstract_class",
+        "arena_allocation"
+      ],
       "topological_order": null,
       "bfs_level": null,
       "tier": "haiku",
@@ -113072,7 +113703,8 @@
       "idioms_needed": [
         "null_undefined",
         "class_inheritance",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -113171,7 +113803,8 @@
         "class_inheritance",
         "number_as_index",
         "dynamic_property_access",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -113469,7 +114102,8 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "arena_allocation"
       ],
       "topological_order": 1930,
       "bfs_level": 1,
@@ -113564,7 +114198,8 @@
         "closure_capture",
         "number_as_index",
         "dynamic_property_access",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -114108,7 +114743,8 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": 1932,
       "bfs_level": 1,
@@ -114773,7 +115409,9 @@
       "callers": [],
       "parent_class": null,
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "interface_trait"
+      ],
       "topological_order": 1086,
       "bfs_level": 0,
       "tier": "haiku",
@@ -114803,7 +115441,9 @@
       "idioms_needed": [
         "number_as_index",
         "dynamic_property_access",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "interface_trait",
+        "arena_allocation"
       ],
       "topological_order": 1996,
       "bfs_level": 2,
@@ -114954,7 +115594,9 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": 1433,
       "bfs_level": 1,
@@ -115012,7 +115654,8 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "arena_allocation"
       ],
       "topological_order": 1999,
       "bfs_level": 2,
@@ -115084,7 +115727,11 @@
         "closure_capture",
         "number_as_index",
         "dynamic_property_access",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "interface_trait",
+        "getter_setter",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -115814,7 +116461,8 @@
       "parent_class": "modules__core__src__layout__layered__layering__NetworkSimplex__NetworkSimplex",
       "cyclomatic_complexity": 14,
       "idioms_needed": [
-        "null_undefined"
+        "null_undefined",
+        "error_handling"
       ],
       "topological_order": 2010,
       "bfs_level": 2,
@@ -116113,7 +116761,9 @@
         "map_usage",
         "number_as_index",
         "dynamic_property_access",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "interface_trait",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -116243,7 +116893,9 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -117079,7 +117731,10 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -117121,7 +117776,8 @@
       "idioms_needed": [
         "map_usage",
         "number_as_index",
-        "dynamic_property_access"
+        "dynamic_property_access",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -117344,7 +118000,9 @@
       "callers": [],
       "parent_class": "modules__core__src__layout__layered__ordering__constrainedOrdering__ConstrainedOrdering",
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": 1135,
       "bfs_level": 0,
       "tier": "haiku",
@@ -117368,7 +118026,9 @@
       "callers": [],
       "parent_class": "modules__core__src__layout__layered__ordering__constrainedOrdering__ConstrainedOrdering",
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": 1136,
       "bfs_level": 0,
       "tier": "haiku",
@@ -117640,7 +118300,8 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -118051,7 +118712,9 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -119714,7 +120377,8 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": 2173,
       "bfs_level": 2,
@@ -119865,7 +120529,8 @@
         "class_inheritance",
         "number_as_index",
         "dynamic_property_access",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -120081,7 +120746,10 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "abstract_class",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -120363,7 +121031,10 @@
       "idioms_needed": [
         "map_usage",
         "class_inheritance",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "abstract_class",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -120454,7 +121125,8 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -120633,7 +121305,9 @@
       "idioms_needed": [
         "null_undefined",
         "mutable_shared_state",
-        "generator_function"
+        "generator_function",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": 1946,
       "bfs_level": 1,
@@ -121580,7 +122254,9 @@
         "null_undefined",
         "number_as_index",
         "mutable_shared_state",
-        "generator_function"
+        "generator_function",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": 2225,
       "bfs_level": 2,
@@ -122332,7 +123008,9 @@
       "idioms_needed": [
         "set_usage",
         "class_inheritance",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -122507,7 +123185,9 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "class_inheritance",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -122571,7 +123251,9 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "class_inheritance",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -122635,7 +123317,9 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "set_usage",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -122788,7 +123472,10 @@
         "map_usage",
         "mutable_shared_state",
         "generator_function",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -122969,7 +123656,8 @@
       "parent_class": "modules__core__src__routing__rectilinear__nudging__CombinatorialNudger__CombinatorialNudger",
       "cyclomatic_complexity": 5,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -123460,7 +124148,8 @@
         "class_inheritance",
         "number_as_index",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -124564,7 +125253,9 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "generator_function"
+        "generator_function",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": 1848,
       "bfs_level": 1,
@@ -124754,7 +125445,8 @@
         "null_undefined",
         "closure_capture",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": 2276,
       "bfs_level": 3,
@@ -125135,7 +125827,9 @@
         "class_inheritance",
         "number_as_index",
         "dynamic_property_access",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -125388,7 +126082,9 @@
         "dynamic_property_access",
         "mutable_shared_state",
         "generator_function",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -127305,7 +128001,9 @@
         "null_undefined",
         "mutable_shared_state",
         "generator_function",
-        "union_type"
+        "union_type",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -127550,7 +128248,9 @@
       "idioms_needed": [
         "null_undefined",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -127701,7 +128401,8 @@
         "map_usage",
         "mutable_shared_state",
         "generator_function",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -128544,7 +129245,9 @@
       "idioms_needed": [
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": 1863,
       "bfs_level": 1,
@@ -128649,7 +129352,8 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -129439,7 +130143,9 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "null_undefined",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -129744,7 +130450,9 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -130099,7 +130807,9 @@
       "callers": [],
       "parent_class": "modules__core__src__routing__spline__bundling__BundleBasesCalculator__BundleBasesCalculator",
       "cyclomatic_complexity": 5,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": null,
       "bfs_level": null,
       "tier": "sonnet",
@@ -130867,7 +131577,8 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -131409,7 +132120,8 @@
         "class_inheritance",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -132021,7 +132733,9 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -132272,7 +132986,8 @@
       "parent_class": "modules__core__src__routing__spline__bundling__CdtIntersections__CdtIntersections",
       "cyclomatic_complexity": 3,
       "idioms_needed": [
-        "static_members"
+        "static_members",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -132375,7 +133090,9 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "null_undefined",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -132577,7 +133294,8 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -133038,7 +133756,8 @@
         "dynamic_property_access",
         "mutable_shared_state",
         "generator_function",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -134309,7 +135028,9 @@
         "set_usage",
         "number_as_index",
         "dynamic_property_access",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -135206,7 +135927,9 @@
         "dynamic_property_access",
         "mutable_shared_state",
         "generator_function",
-        "static_members"
+        "static_members",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -135473,7 +136196,8 @@
       "idioms_needed": [
         "null_undefined",
         "closure_capture",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -135539,7 +136263,8 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -135967,7 +136692,8 @@
       "idioms_needed": [
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -136133,7 +136859,8 @@
         "null_undefined",
         "set_usage",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -136467,7 +137194,9 @@
         "dynamic_property_access",
         "mutable_shared_state",
         "generator_function",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -137655,7 +138384,8 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "null_undefined",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -137746,7 +138476,9 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -137810,7 +138542,9 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -137916,7 +138650,9 @@
         "dynamic_property_access",
         "mutable_shared_state",
         "generator_function",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -138499,7 +139235,8 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "map_usage"
+        "map_usage",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -138560,7 +139297,9 @@
       "idioms_needed": [
         "null_undefined",
         "set_usage",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -138694,7 +139433,9 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -139046,7 +139787,8 @@
       "idioms_needed": [
         "null_undefined",
         "dynamic_property_access",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -139929,7 +140671,9 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "null_undefined",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -140028,7 +140772,9 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -140594,7 +141340,8 @@
       "idioms_needed": [
         "null_undefined",
         "number_as_index",
-        "dynamic_property_access"
+        "dynamic_property_access",
+        "error_handling"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -140690,7 +141437,9 @@
         "null_undefined",
         "map_usage",
         "set_usage",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -140924,7 +141673,10 @@
       "callers": [],
       "parent_class": null,
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "getter_setter",
+        "arena_allocation"
+      ],
       "topological_order": null,
       "bfs_level": null,
       "tier": "haiku",
@@ -140969,7 +141721,8 @@
         "number_as_index",
         "dynamic_property_access",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -142132,7 +142885,8 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "map_usage",
-        "generator_function"
+        "generator_function",
+        "getter_setter"
       ],
       "topological_order": 1297,
       "bfs_level": 0,
@@ -142323,7 +143077,9 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "class_inheritance",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -142413,7 +143169,9 @@
       "parent_class": null,
       "cyclomatic_complexity": 1,
       "idioms_needed": [
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -142475,7 +143233,9 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "class_inheritance",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -142563,7 +143323,8 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "class_inheritance",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -142649,7 +143410,8 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "class_inheritance",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -142737,7 +143499,11 @@
       ],
       "parent_class": null,
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "abstract_class",
+        "getter_setter",
+        "arena_allocation"
+      ],
       "topological_order": null,
       "bfs_level": null,
       "tier": "haiku",
@@ -142768,7 +143534,8 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -143039,7 +143806,9 @@
         "null_undefined",
         "class_inheritance",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -143278,7 +144047,9 @@
       "callers": [],
       "parent_class": null,
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "interface_trait"
+      ],
       "topological_order": 1896,
       "bfs_level": 1,
       "tier": "haiku",
@@ -143308,7 +144079,9 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "class_inheritance",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -143398,7 +144171,9 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "class_inheritance",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -143548,7 +144323,9 @@
         "class_inheritance",
         "number_as_index",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "error_handling",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -143865,7 +144642,9 @@
       "callers": [],
       "parent_class": "modules__core__src__routing__spline__coneSpanner__LineSweeper__LineSweeper",
       "cyclomatic_complexity": 4,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "error_handling"
+      ],
       "topological_order": null,
       "bfs_level": null,
       "tier": "sonnet",
@@ -145401,7 +146180,8 @@
         "class_inheritance",
         "number_as_index",
         "mutable_shared_state",
-        "static_members"
+        "static_members",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -146998,7 +147778,10 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "class_inheritance",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "abstract_class",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -147087,7 +147870,9 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "class_inheritance",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": 1901,
       "bfs_level": 1,
@@ -147150,7 +147935,9 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "class_inheritance",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -147240,7 +148027,9 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "class_inheritance",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,
@@ -147369,7 +148158,10 @@
       ],
       "parent_class": null,
       "cyclomatic_complexity": 1,
-      "idioms_needed": [],
+      "idioms_needed": [
+        "abstract_class",
+        "getter_setter"
+      ],
       "topological_order": 1902,
       "bfs_level": 1,
       "tier": "haiku",
@@ -147404,7 +148196,9 @@
       "cyclomatic_complexity": 1,
       "idioms_needed": [
         "class_inheritance",
-        "mutable_shared_state"
+        "mutable_shared_state",
+        "getter_setter",
+        "arena_allocation"
       ],
       "topological_order": null,
       "bfs_level": null,

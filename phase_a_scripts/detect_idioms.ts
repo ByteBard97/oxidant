@@ -1,4 +1,4 @@
-import { Project, Node, SyntaxKind } from "ts-morph";
+import { Project, Node, SyntaxKind, TypeFlags } from "ts-morph";
 import * as fs from "fs";
 
 const args = process.argv.slice(2);
@@ -11,6 +11,12 @@ const manifestPath = getArg("--manifest");
 const manifest     = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
 
 const ARRAY_METHODS = new Set(["map","filter","reduce","find","some","every","forEach","flatMap","findIndex"]);
+
+// Primitive TS type names that do NOT warrant arena treatment
+const PRIMITIVE_TYPE_NAMES = new Set([
+  "string","number","boolean","bigint","symbol","undefined","null","void","never","any","unknown","object",
+  "String","Number","Boolean","Array","Object","Function","Promise","Date","RegExp","Error",
+]);
 
 type Detector = (n: Node) => boolean;
 
@@ -69,6 +75,46 @@ const IDIOMS: Record<string, Detector> = {
 
   union_type: (n) =>
     n.getDescendantsOfKind(SyntaxKind.UnionType).length > 0,
+
+  // ── New idioms ────────────────────────────────────────────────────────────
+
+  // TypeScript interfaces → Rust traits. Fire on interface declarations and
+  // on classes that implement an interface (the impl block needs a trait impl).
+  interface_trait: (n) =>
+    n.getDescendantsOfKind(SyntaxKind.InterfaceDeclaration).length > 0 ||
+    n.getDescendantsOfKind(SyntaxKind.ImplementsKeyword).length > 0,
+
+  // abstract class / abstract method → enum dispatch or Box<dyn Trait>
+  abstract_class: (n) =>
+    n.getDescendantsOfKind(SyntaxKind.AbstractKeyword).length > 0,
+
+  // TypeScript getter/setter accessors → plain Rust methods with different
+  // signatures: `fn field(&self) -> T` and `fn set_field(&mut self, v: T)`.
+  getter_setter: (n) =>
+    n.getDescendantsOfKind(SyntaxKind.GetAccessor).length > 0 ||
+    n.getDescendantsOfKind(SyntaxKind.SetAccessor).length > 0,
+
+  // throw / try-catch → Result<T, E> + the ? operator
+  error_handling: (n) =>
+    n.getDescendantsOfKind(SyntaxKind.ThrowStatement).length > 0 ||
+    n.getDescendantsOfKind(SyntaxKind.TryStatement).length > 0,
+
+  // Classes that hold fields typed as other user-defined class/interface types
+  // (i.e., non-primitive object references). These are candidates for arena
+  // allocation (Vec<T> + usize indices) rather than Rc<RefCell<T>> in Rust.
+  arena_allocation: (n) => {
+    const props = n.getDescendantsOfKind(SyntaxKind.PropertyDeclaration);
+    return props.some((prop) => {
+      const typeNode = prop.getTypeNode();
+      if (!typeNode) return false;
+      const text = typeNode.getText().trim();
+      // Strip Array<...> / T[] wrappers to get the element type name
+      const inner = text.replace(/Array<|>|\[\]/g, "").trim();
+      // Strip nullability: T | null | undefined
+      const base = inner.split("|")[0].trim();
+      return base.length > 0 && !PRIMITIVE_TYPE_NAMES.has(base) && /^[A-Z]/.test(base);
+    });
+  },
 };
 
 // Build in-memory project, one source file per node
