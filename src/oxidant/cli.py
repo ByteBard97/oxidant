@@ -199,6 +199,44 @@ def phase_c(
     typer.echo(f"\nReport written to {target_path / 'clippy_report.json'}")
 
 
+@app.command("phase-d")
+def phase_d(
+    config: Path = typer.Option("oxidant.config.json", "--config", "-c"),
+    target: Path = typer.Option(
+        None, "--target",
+        help="Rust project root. Defaults to target_repo from config.",
+    ),
+    manifest: Path = typer.Option(
+        None, "--manifest",
+        help="Path to conversion_manifest.json for retranslation hints.",
+    ),
+) -> None:
+    """Run Phase D: full build verification and integration error isolation.
+
+    Runs ``cargo build --release`` on the target Rust project, parses
+    integration errors, and writes ``integration_report.json``.
+    Pass ``--manifest`` to also identify which translated files need re-translation.
+    """
+    import json as _json
+    from oxidant.integration.integration_debug import run_phase_d
+
+    cfg = _json.loads(config.read_text())
+    target_path = target or Path(cfg["target_repo"])
+
+    typer.echo(f"Phase D: running full build on {target_path}...")
+    report = run_phase_d(target_path.resolve(), manifest_path=manifest)
+
+    status = "PASS" if report.build_success else "FAIL"
+    typer.echo(f"  Build:       {status}")
+    typer.echo(f"  Errors:      {report.total_errors}")
+    typer.echo(f"  Files:       {len(report.files_with_errors)}")
+    if report.files_needing_retranslation:
+        typer.echo(f"  Retranslate: {len(report.files_needing_retranslation)} file(s)")
+        for f in report.files_needing_retranslation:
+            typer.echo(f"    {f}")
+    typer.echo(f"\nReport written to {target_path.resolve() / 'integration_report.json'}")
+
+
 @app.command()
 def translate(
     source: str = typer.Argument(..., help="Path to a .ts file"),
