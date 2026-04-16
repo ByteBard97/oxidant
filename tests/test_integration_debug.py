@@ -136,7 +136,7 @@ def test_intersect_with_manifest_finds_converted_file(tmp_path):
         "nodes": {
             "Foo::bar": {
                 "node_id": "Foo::bar",
-                "source_file": "src/foo.rs",
+                "source_file": "foo.ts",
                 "line_start": 1, "line_end": 10,
                 "source_text": "function bar() {}",
                 "node_kind": "method",
@@ -159,7 +159,7 @@ def test_intersect_with_manifest_ignores_non_converted(tmp_path):
         "nodes": {
             "Foo::bar": {
                 "node_id": "Foo::bar",
-                "source_file": "src/foo.rs",
+                "source_file": "foo.ts",
                 "line_start": 1, "line_end": 10,
                 "source_text": "function bar() {}",
                 "node_kind": "method",
