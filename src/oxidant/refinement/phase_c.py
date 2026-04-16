@@ -50,15 +50,15 @@ class ClippyReport:
 
 
 def _run_auto_fix(target_path: Path) -> int:
-    """Run ``cargo fix`` with Clippy lints to apply MachineApplicable suggestions.
+    """Run ``cargo clippy --fix --allow-dirty`` to apply MachineApplicable clippy suggestions.
 
     Returns the exit code (0 = success, non-zero = fix failed or no changes).
     The fix may fail on a skeleton with many todo!() stubs — that is expected.
     """
     result = subprocess.run(
         [
-            "cargo", "fix",
-            "--allow-dirty", "--allow-staged",
+            "cargo", "clippy",
+            "--fix", "--allow-dirty", "--allow-staged",
             "--all-targets",
         ] + _CLIPPY_PEDANTIC_FLAGS,
         cwd=target_path,
@@ -66,7 +66,7 @@ def _run_auto_fix(target_path: Path) -> int:
         text=True,
         timeout=_FIX_TIMEOUT_SECONDS,
     )
-    logger.info("cargo fix exited %d", result.returncode)
+    logger.info("cargo clippy --fix exited %d", result.returncode)
     return result.returncode
 
 
