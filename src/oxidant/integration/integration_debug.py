@@ -7,10 +7,13 @@ from __future__ import annotations
 
 import json
 import logging
+import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
+
+_BUILD_TIMEOUT_SECONDS = 600
 
 
 @dataclass
@@ -82,3 +85,108 @@ def _parse_build_output(output: str) -> list[BuildError]:
             column_start=primary_span.get("column_start", 0),
         ))
     return errors
+
+
+def _intersect_with_manifest(
+    files_with_errors: list[str],
+    manifest_path: Path,
+) -> list[str]:
+    """Return files from files_with_errors that have a CONVERTED node in the manifest.
+
+    If manifest_path does not exist, returns an empty list (safe fallback for
+    projects that haven't run Phase A/B yet).
+    """
+    if not manifest_path.exists():
+        return []
+
+    from oxidant.models.manifest import Manifest, NodeStatus
+
+    manifest = Manifest.load(manifest_path)
+    converted_source_files = {
+        node.source_file
+        for node in manifest.nodes.values()
+        if node.status == NodeStatus.CONVERTED
+    }
+    return [f for f in files_with_errors if f in converted_source_files]
+
+
+def run_full_build(target_path: Path) -> tuple[bool, str]:
+    """Run ``cargo build --release --message-format=json``.
+
+    Args:
+        target_path: Root of the Rust project (contains Cargo.toml).
+
+    Returns:
+        (success, combined_output) where success is True iff exit code == 0.
+
+    Raises:
+        subprocess.TimeoutExpired: If the build takes longer than 10 minutes.
+    """
+    result = subprocess.run(
+        ["cargo", "build", "--release", "--message-format=json"],
+        cwd=target_path,
+        capture_output=True,
+        text=True,
+        timeout=_BUILD_TIMEOUT_SECONDS,
+    )
+    logger.info("cargo build --release exited %d", result.returncode)
+    combined = result.stdout + "\n" + result.stderr
+    return result.returncode == 0, combined
+
+
+def _error_to_dict(e: BuildError) -> dict:
+    return {
+        "error_code": e.error_code,
+        "message": e.message,
+        "file": e.file_name,
+        "line": e.line_start,
+        "column": e.column_start,
+    }
+
+
+def run_phase_d(
+    target_path: Path,
+    manifest_path: Path | None = None,
+) -> IntegrationReport:
+    """Run the full Phase D integration verification pipeline.
+
+    1. Run ``cargo build --release --message-format=json``.
+    2. Parse build errors from JSON stream.
+    3. Identify translated files needing re-translation (manifest intersection).
+    4. Write ``integration_report.json`` to target_path.
+
+    Args:
+        target_path: Root of the Rust project (contains Cargo.toml).
+        manifest_path: Path to conversion_manifest.json. When None, the
+            files_needing_retranslation list will be empty.
+
+    Returns:
+        IntegrationReport with build status and per-error details.
+    """
+    logger.info("Phase D: running full build on %s...", target_path)
+    success, output = run_full_build(target_path)
+
+    errors = _parse_build_output(output)
+    files_with_errors = sorted({e.file_name for e in errors if e.file_name})
+
+    files_needing_retranslation: list[str] = []
+    if manifest_path is not None:
+        files_needing_retranslation = _intersect_with_manifest(
+            files_with_errors, manifest_path
+        )
+
+    report = IntegrationReport(
+        build_success=success,
+        total_errors=len(errors),
+        files_with_errors=files_with_errors,
+        files_needing_retranslation=files_needing_retranslation,
+        errors=[_error_to_dict(e) for e in errors],
+    )
+
+    report_path = target_path / "integration_report.json"
+    report_path.write_text(json.dumps(report.to_dict(), indent=2))
+    logger.info(
+        "Phase D complete: build_success=%s, %d errors in %d files (%d needing retranslation)",
+        success, len(errors), len(files_with_errors), len(files_needing_retranslation),
+    )
+    return report
