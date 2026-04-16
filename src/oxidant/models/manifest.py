@@ -94,3 +94,58 @@ class Manifest(BaseModel):
         """Update a node's fields and persist the manifest to disk."""
         self.nodes[node_id] = self.nodes[node_id].model_copy(update=fields)
         self.save(path)
+
+    def compute_topology(self) -> None:
+        """Kahn's algorithm over the unified dependency graph.
+
+        Sets topological_order and bfs_level on every node.
+        Raises ValueError if a cycle is detected.
+        Nodes whose dependencies point outside the manifest are treated as leaves.
+        """
+        from collections import deque
+
+        def deps(node: ConversionNode) -> list[str]:
+            seen: set[str] = set()
+            result: list[str] = []
+            for d in node.type_dependencies + node.call_dependencies:
+                if d in self.nodes and d not in seen:
+                    seen.add(d)
+                    result.append(d)
+            return result
+
+        in_degree: dict[str, int] = {nid: 0 for nid in self.nodes}
+        dependents: dict[str, list[str]] = {nid: [] for nid in self.nodes}
+
+        for nid, node in self.nodes.items():
+            for dep in deps(node):
+                in_degree[nid] += 1
+                dependents[dep].append(nid)
+
+        bfs_levels: dict[str, int] = {}
+        queue: deque[str] = deque()
+        for nid, deg in in_degree.items():
+            if deg == 0:
+                queue.append(nid)
+                bfs_levels[nid] = 0
+
+        order = 0
+        while queue:
+            nid = queue.popleft()
+            node = self.nodes[nid]
+            self.nodes[nid] = node.model_copy(update={
+                "topological_order": order,
+                "bfs_level": bfs_levels[nid],
+            })
+            order += 1
+            for dependent in dependents[nid]:
+                in_degree[dependent] -= 1
+                bfs_levels[dependent] = max(
+                    bfs_levels.get(dependent, 0),
+                    bfs_levels[nid] + 1,
+                )
+                if in_degree[dependent] == 0:
+                    queue.append(dependent)
+
+        if order != len(self.nodes):
+            remaining = [nid for nid, deg in in_degree.items() if deg > 0]
+            raise ValueError(f"Dependency cycle detected involving: {remaining}")
