@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Oxidant — Agentic TypeScript-to-Rust Translation Harness</title>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, theme: 'dark', themeVariables: { fontSize: '15px' } });
+  </script>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --surface2: #21262d;
+      --border: #30363d;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --accent: #f78166;
+      --accent2: #79c0ff;
+      --accent3: #56d364;
+      --accent4: #d2a8ff;
+      --rust: #f0883e;
+      --ts: #3178c6;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    a { color: var(--accent2); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── Layout ── */
+    .site-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+    }
+    .site-header-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+    .logo { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.5px; color: var(--text); }
+    .logo span { color: var(--rust); }
+    .nav { display: flex; gap: 1.5rem; font-size: 0.9rem; color: var(--muted); }
+    .nav a { color: var(--muted); }
+    .nav a:hover { color: var(--text); text-decoration: none; }
+
+    .hero {
+      background: linear-gradient(160deg, #0d1117 0%, #161b22 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 5rem 2rem 4rem;
+      text-align: center;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1.1;
+      margin-bottom: 1.25rem;
+    }
+    .hero h1 .ts { color: var(--ts); }
+    .hero h1 .arrow { color: var(--muted); }
+    .hero h1 .rs { color: var(--rust); }
+    .hero p {
+      font-size: 1.15rem;
+      color: var(--muted);
+      max-width: 640px;
+      margin: 0 auto 2rem;
+    }
+    .badge-row {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .badge {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 0.25rem 0.8rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    /* ── Content ── */
+    .content {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 3rem 2rem 6rem;
+    }
+
+    section { margin-bottom: 4rem; }
+
+    h2 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+    }
+    h3 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin: 1.5rem 0 0.5rem;
+      color: var(--accent2);
+    }
+    p { color: var(--muted); margin-bottom: 0.75rem; }
+    p strong { color: var(--text); }
+
+    /* ── Phase cards ── */
+    .phases {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .phase-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.25rem;
+    }
+    .phase-card .phase-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+    }
+    .phase-card h3 { margin: 0 0 0.5rem; font-size: 1rem; }
+    .phase-card p { font-size: 0.875rem; margin: 0; }
+    .phase-a h3 { color: var(--accent3); }
+    .phase-b h3 { color: var(--accent2); }
+    .phase-c h3 { color: var(--accent4); }
+    .phase-d h3 { color: var(--rust); }
+
+    /* ── Diagram container ── */
+    .diagram-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 2rem;
+      margin: 1.5rem 0;
+      overflow-x: auto;
+    }
+    .diagram-wrap .mermaid { display: flex; justify-content: center; }
+
+    /* ── Code ── */
+    pre, code {
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+      font-size: 0.875rem;
+    }
+    pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      margin: 1rem 0;
+    }
+    code { background: var(--surface2); border-radius: 3px; padding: 0.1em 0.4em; color: var(--accent3); }
+    pre code { background: none; padding: 0; color: inherit; }
+
+    /* ── Two-col layout ── */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+    @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+
+    /* ── Manifest schema table ── */
+    .schema-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      font-size: 0.875rem;
+    }
+    .schema-table th {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      background: var(--surface2);
+      color: var(--text);
+      border-bottom: 1px solid var(--border);
+    }
+    .schema-table td {
+      padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--muted);
+      vertical-align: top;
+    }
+    .schema-table td:first-child { color: var(--accent3); font-family: monospace; }
+    .schema-table tr:last-child td { border-bottom: none; }
+
+    /* ── Idiom pills ── */
+    .idiom-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    .idiom-pill {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.3rem 0.7rem;
+      font-size: 0.8rem;
+      font-family: monospace;
+      color: var(--accent2);
+    }
+    .idiom-pill .count { color: var(--muted); margin-left: 0.4rem; }
+
+    /* ── Stats bar ── */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    .stat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+    }
+    .stat .number { font-size: 2rem; font-weight: 700; color: var(--accent2); line-height: 1; }
+    .stat .label { font-size: 0.75rem; color: var(--muted); margin-top: 0.3rem; }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="site-header-inner">
+    <div class="logo"><span>⬡</span> Oxidant</div>
+    <nav class="nav">
+      <a href="#pipeline">Pipeline</a>
+      <a href="#manifest">Manifest</a>
+      <a href="#phase-b">Translation Loop</a>
+      <a href="#idioms">Idiom Detection</a>
+      <a href="#verification">Verification</a>
+      <a href="https://github.com/ByteBard97/oxidant">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<div class="hero">
+  <h1>
+    <span class="ts">TypeScript</span>
+    <span class="arrow"> → </span>
+    <span class="rs">Rust</span>
+    <br />at repository scale
+  </h1>
+  <p>
+    Oxidant is a general-purpose agentic harness that automates TypeScript-to-Rust
+    translation using static analysis, a LangGraph orchestration loop, and
+    Claude Code — without writing a transpiler.
+  </p>
+  <div class="badge-row">
+    <span class="badge">Python 3.11</span>
+    <span class="badge">LangGraph</span>
+    <span class="badge">ts-morph AST</span>
+    <span class="badge">cargo check verification</span>
+    <span class="badge">Tiered Claude models</span>
+    <span class="badge">Topological ordering</span>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- ── Why ── -->
+  <section id="why">
+    <h2>Why Oxidant exists</h2>
+    <p>
+      There is no mature tool for translating a TypeScript codebase to Rust.
+      Naive file-by-file LLM prompting produces code that compiles in isolation
+      but fails at integration — type boundaries collide, ownership is invented
+      rather than derived, and algorithms get silently simplified.
+    </p>
+    <p>
+      Oxidant's approach is borrowed from the academic TS→Rust literature
+      (<strong>ORBIT, ENCRUST, SACTOR</strong>): extract a complete dependency graph first,
+      translate in topological order so every dependency is already converted when
+      a node is processed, verify each snippet with the real Rust compiler before
+      accepting it, and separate correctness from idiomaticity into distinct phases.
+    </p>
+    <p>
+      The first test corpus is <strong>msagl-js</strong> — Microsoft's Automatic Graph Layout
+      library in TypeScript. Before Oxidant existed, this translation was done manually:
+      236 commits of painstaking hand-translation, acting as the agentic harness by hand.
+      Oxidant automates that process.
+    </p>
+  </section>
+
+  <!-- ── Pipeline overview ── -->
+  <section id="pipeline">
+    <h2>The four-phase pipeline</h2>
+    <p>
+      The pipeline is sequential at the top level. Each phase produces artifacts consumed
+      by the next. Phase B's internal loop is highly iterative — a single node may be
+      attempted multiple times at escalating model tiers before being accepted or queued
+      for human review.
+    </p>
+
+    <div class="phases">
+      <div class="phase-card phase-a">
+        <div class="phase-label">Phase A</div>
+        <h3>Analysis &amp; Preparation</h3>
+        <p>ts-morph AST extraction → idiom detection → topological sort → Haiku tier classification → compilable Rust skeleton with <code>todo!()</code> stubs.</p>
+      </div>
+      <div class="phase-card phase-b">
+        <div class="phase-label">Phase B</div>
+        <h3>Translation Loop</h3>
+        <p>LangGraph state graph processes nodes in topological order. Each node is translated by Claude Code, verified with <code>cargo check</code>, and retried at higher model tiers on failure.</p>
+      </div>
+      <div class="phase-card phase-c">
+        <div class="phase-label">Phase C</div>
+        <h3>Idiomatic Refinement</h3>
+        <p>Runs <code>cargo clippy --all-targets -W clippy::pedantic</code>. Mechanical warnings are auto-fixed. Structural and human-judgment warnings are reported for review.</p>
+      </div>
+      <div class="phase-card phase-d">
+        <div class="phase-label">Phase D</div>
+        <h3>Integration &amp; Verification</h3>
+        <p>Full <code>cargo build --release</code>. Integration errors (type boundary mismatches between assembled modules) are isolated and flagged for re-translation.</p>
+      </div>
+    </div>
+
+    <div class="diagram-wrap">
+      <pre class="mermaid">
+flowchart LR
+    subgraph A ["Phase A — Analysis"]
+        A1["A1: ts-morph\nAST extraction"] --> A2["A2: Idiom\ndetection"]
+        A2 --> A3["A3: Topological\nsort"]
+        A3 --> A4["A4: Tier\nclassification"]
+        A4 --> A5["A5: Rust skeleton\ngeneration"]
+    end
+
+    subgraph B ["Phase B — Translation"]
+        B1["pick_next_node"] --> B2["build_context"]
+        B2 --> B3["invoke_agent\n(claude CLI)"]
+        B3 --> B4["verify\n(cargo check)"]
+        B4 -->|"PASS"| B5["update_manifest"]
+        B4 -->|"retry"| B2
+        B4 -->|"escalate tier"| B2
+        B4 -->|"exhausted"| B6["review_queue"]
+        B5 --> B1
+        B6 --> B1
+    end
+
+    subgraph C ["Phase C — Refinement"]
+        C1["cargo clippy"] --> C2["auto-fix\nmechanical"]
+        C2 --> C3["report\nstructural"]
+    end
+
+    subgraph D ["Phase D — Integration"]
+        D1["cargo build\n--release"] --> D2["parse errors"]
+        D2 --> D3["intersect\nwith manifest"]
+        D3 --> D4["integration_report\n.json"]
+    end
+
+    A --> B --> C --> D
+
+    classDef phase fill:#161b22,stroke:#30363d,color:#e6edf3
+    classDef node fill:#21262d,stroke:#30363d,color:#8b949e
+      </pre>
+    </div>
+  </section>
+
+  <!-- ── Manifest ── -->
+  <section id="manifest">
+    <h2>The conversion manifest</h2>
+    <p>
+      <code>conversion_manifest.json</code> is the central artifact shared by all phases.
+      Every translatable unit in the source codebase — class, method, function, interface,
+      enum, type alias — becomes a node in the manifest with full metadata.
+    </p>
+
+    <div class="stats">
+      <div class="stat"><div class="number">4,820</div><div class="label">total nodes (msagl-js)</div></div>
+      <div class="stat"><div class="number">420</div><div class="label">auto-converted structural</div></div>
+      <div class="stat"><div class="number">1,196</div><div class="label">haiku-tier nodes</div></div>
+      <div class="stat"><div class="number">3,476</div><div class="label">sonnet-tier nodes</div></div>
+      <div class="stat"><div class="number">148</div><div class="label">opus-tier nodes</div></div>
+    </div>
+
+    <table class="schema-table">
+      <thead>
+        <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>node_id</td><td>string</td><td>Unique key: <code>module__file__ClassName__methodName</code></td></tr>
+        <tr><td>source_file</td><td>string</td><td>Relative TypeScript path, e.g. <code>modules/drawing/src/color.ts</code></td></tr>
+        <tr><td>source_text</td><td>string</td><td>Full TypeScript source of this node (up to 2000 chars sent to Claude)</td></tr>
+        <tr><td>node_kind</td><td>enum</td><td><code>class | method | free_function | constructor | enum | interface | type_alias</code></td></tr>
+        <tr><td>type_dependencies</td><td>string[]</td><td>Node IDs this node references by type — forms the dependency graph</td></tr>
+        <tr><td>call_dependencies</td><td>string[]</td><td>Node IDs this node calls at runtime</td></tr>
+        <tr><td>topological_order</td><td>int</td><td>Processing priority — lower is processed first</td></tr>
+        <tr><td>cyclomatic_complexity</td><td>int</td><td>Number of independent paths through the code</td></tr>
+        <tr><td>idioms_needed</td><td>string[]</td><td>TS patterns requiring special Rust handling (see Idiom Detection)</td></tr>
+        <tr><td>tier</td><td>haiku | sonnet | opus</td><td>Which Claude model to use for translation</td></tr>
+        <tr><td>status</td><td>enum</td><td><code>not_started | in_progress | converted | human_review</code></td></tr>
+        <tr><td>snippet_path</td><td>string?</td><td>Path to the saved <code>.rs</code> snippet once converted</td></tr>
+        <tr><td>attempt_count</td><td>int</td><td>Number of translation attempts made</td></tr>
+        <tr><td>last_error</td><td>string?</td><td>Last cargo check error for debugging and retry context</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ── Phase A deep dive ── -->
+  <section id="ast">
+    <h2>Phase A: Analysis pipeline</h2>
+
+    <h3>A1 — AST Extraction (ts-morph)</h3>
+    <p>
+      <strong>ts-morph</strong> was chosen over raw TypeScript compiler API or Babel specifically
+      for its <strong>cross-file type resolution</strong>. When a method in <code>GeomGraph</code>
+      accepts a parameter of type <code>GeomNode</code> from another module, ts-morph resolves
+      that type fully and records it as a dependency edge in the manifest. This is what makes
+      topological ordering accurate.
+    </p>
+    <p>
+      Every translatable unit is extracted with its full source text, parameter types, return
+      type, and both type-level and runtime call dependencies. The output is a single
+      <code>conversion_manifest.json</code>.
+    </p>
+
+    <h3>A2 — Idiom Detection (ts-morph)</h3>
+    <p>
+      A second ts-morph pass scans each node's AST for 14 patterns known to require
+      non-trivial Rust translation. Each detected idiom is stored in <code>idioms_needed[]</code>
+      on the node and used in Phase B to inject relevant translation guidance into the prompt.
+    </p>
+
+    <h3>A3 — Topological Sort</h3>
+    <p>
+      Nodes are sorted so that when a node is translated, every node it depends on has
+      already been translated. The resulting Rust signatures of dependencies are available
+      to the agent, eliminating guesswork about what the Rust API looks like.
+      This is the single biggest driver of translation quality.
+    </p>
+
+    <h3>A4 — Tier Classification</h3>
+    <p>
+      Each node is assigned a translation tier — <strong>haiku</strong>, <strong>sonnet</strong>,
+      or <strong>opus</strong> — based on cyclomatic complexity, idiom count, and node kind.
+      Simpler nodes use cheaper, faster models. The tier is also the escalation path:
+      if Haiku fails after 3 attempts, the node is re-tried at Sonnet, then Opus.
+    </p>
+
+    <h3>A5 — Rust Skeleton Generation</h3>
+    <p>
+      A Python script generates a complete, compilable Rust project. Every module exists.
+      Every struct has its fields. Every function has a <code>todo!("OXIDANT: not yet translated — {node_id}")</code>
+      body. The skeleton must pass <code>cargo build</code> before Phase B begins.
+      The count of remaining <code>todo!()</code> macros is the primary progress metric.
+    </p>
+  </section>
+
+  <!-- ── Idiom detection ── -->
+  <section id="idioms">
+    <h2>Idiom detection &amp; translation guidance</h2>
+    <p>
+      TypeScript has patterns with no direct Rust equivalent. Oxidant detects these
+      statically in Phase A and injects targeted translation guidance into Phase B prompts.
+      Each node only receives guidance for the idioms present in <em>its own</em> source —
+      no noise, no irrelevant context.
+    </p>
+
+    <div class="idiom-grid">
+      <div class="idiom-pill">mutable_shared_state <span class="count">1,608</span></div>
+      <div class="idiom-pill">null_undefined <span class="count">1,171</span></div>
+      <div class="idiom-pill">dynamic_property_access <span class="count">945</span></div>
+      <div class="idiom-pill">static_members <span class="count">920</span></div>
+      <div class="idiom-pill">number_as_index <span class="count">519</span></div>
+      <div class="idiom-pill">closure_capture <span class="count">441</span></div>
+      <div class="idiom-pill">array_method_chain <span class="count">248</span></div>
+      <div class="idiom-pill">map_usage <span class="count">242</span></div>
+      <div class="idiom-pill">set_usage <span class="count">220</span></div>
+      <div class="idiom-pill">generator_function <span class="count">186</span></div>
+      <div class="idiom-pill">class_inheritance <span class="count">118</span></div>
+      <div class="idiom-pill">union_type <span class="count">34</span></div>
+      <div class="idiom-pill">optional_chaining <span class="count">13</span></div>
+      <div class="idiom-pill">async_await <span class="count">7</span></div>
+    </div>
+
+    <p style="margin-top: 1rem;">
+      Idiom guidance lives in <code>idiom_dictionary.md</code> — a versioned markdown file with
+      one section per idiom. Sections are keyed to idiom names so <code>context.py</code> can
+      look them up at translation time. Adding a new idiom pattern means adding one entry to
+      <code>detect_idioms.ts</code> and one section to the dictionary.
+    </p>
+
+    <div class="two-col">
+      <div>
+        <h3>Example: null_undefined → Option&lt;T&gt;</h3>
+        <pre><code>// TypeScript
+const node = graph.findNode(id);
+if (node == null) return null;
+return node.label ?? "untitled";</code></pre>
+        <pre><code>// Rust (translated output)
+let node = graph.borrow().find_node(id);
+if node.is_none() { return None; }
+let node = node.unwrap();
+return Some(node.borrow().label
+    .clone()
+    .unwrap_or_else(|| "untitled".to_string()));</code></pre>
+      </div>
+      <div>
+        <h3>Example: mutable_shared_state → Rc&lt;RefCell&lt;T&gt;&gt;</h3>
+        <pre><code>// TypeScript
+class GeomGraph {
+  boundingBox: Rectangle;
+  constructor(graph: Graph) {
+    this.boundingBox = new Rectangle();
+  }
+}</code></pre>
+        <pre><code>// Rust (skeleton pattern)
+pub struct GeomGraph {
+    pub bounding_box: Rectangle,
+    base: GeomNode,
+}
+// Shared ref: Rc&lt;RefCell&lt;GeomGraph&gt;&gt;
+// Mutation: node.borrow_mut().bounding_box = r;</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Phase B translation loop ── -->
+  <section id="phase-b">
+    <h2>Phase B: The translation loop</h2>
+    <p>
+      Phase B is a <strong>LangGraph <code>StateGraph</code></strong> that iterates over the manifest
+      in topological order. Each iteration picks one node, builds a context-rich prompt, calls
+      Claude Code as a subprocess, verifies the output, and either accepts it or retries.
+    </p>
+
+    <div class="diagram-wrap">
+      <pre class="mermaid">
+stateDiagram-v2
+    [*] --> pick_next_node
+    pick_next_node --> build_context : node available
+    pick_next_node --> [*] : all done / max_nodes reached
+
+    build_context --> invoke_agent : prompt ready
+    invoke_agent --> verify : snippet received
+
+    verify --> update_manifest : PASS
+    verify --> retry_node : attempts remaining
+    verify --> escalate_node : tier exhausted, higher tier available
+    verify --> queue_for_review : all tiers exhausted
+
+    retry_node --> build_context : increment attempt
+    escalate_node --> build_context : promote to sonnet/opus
+
+    update_manifest --> pick_next_node : node CONVERTED
+    queue_for_review --> pick_next_node : node HUMAN_REVIEW
+      </pre>
+    </div>
+
+    <h3>Prompt construction</h3>
+    <p>
+      Every prompt is assembled fresh for each attempt by <code>context.py</code>:
+    </p>
+    <ul style="color: var(--muted); padding-left: 1.5rem; line-height: 2;">
+      <li>The full TypeScript source text of the node</li>
+      <li>The Rust function signature from the skeleton (not invented — read from disk)</li>
+      <li>Rust snippets of already-converted dependencies (the actual translated code they call into)</li>
+      <li>Relevant idiom translation guidance from <code>idiom_dictionary.md</code></li>
+      <li>On retries: the exact <code>cargo check</code> error with line numbers</li>
+    </ul>
+
+    <h3>Subscription auth — no API key</h3>
+    <p>
+      Phase B calls <code>claude --print --output-format json &lt;prompt&gt;</code> as a subprocess,
+      intentionally stripping <code>ANTHROPIC_API_KEY</code> from the environment before invoking.
+      This forces Claude Code to use the user's Max subscription rather than billing to the API account.
+      The model used is determined by the node's tier, not overridden at the subprocess call.
+    </p>
+
+    <h3>Tier escalation</h3>
+    <p>
+      Each node starts at its assigned tier (haiku / sonnet / opus). If the snippet fails
+      verification and retries are exhausted, the node is re-tried at the next tier.
+      A sonnet-tier node that fails 4 attempts is escalated to opus for 5 more attempts.
+      If opus is exhausted, the node goes to <code>review_queue.json</code>.
+    </p>
+  </section>
+
+  <!-- ── Verification ── -->
+  <section id="verification">
+    <h2>Verification: three layers</h2>
+    <p>
+      Every translated snippet passes three checks before being accepted, ordered cheapest-first.
+      The first failure short-circuits — no point running <code>cargo check</code> if the
+      snippet still contains <code>todo!()</code>.
+    </p>
+
+    <div class="diagram-wrap">
+      <pre class="mermaid">
+flowchart LR
+    S["Rust snippet\nfrom Claude"] --> V1
+
+    V1{"1. Stub check\n~0ms"}
+    V1 -->|"todo!() found"| FAIL1["STUB\nretry"]
+    V1 -->|"clean"| V2
+
+    V2{"2. Branch parity\n~0ms"}
+    V2 -->|"Rust &lt; 60% of TS\nbranches"| FAIL2["BRANCH\nretry"]
+    V2 -->|"OK"| V3
+
+    V3{"3. cargo check\n5–30s"}
+    V3 -->|"compiler error"| FAIL3["CARGO\nretry with\nerror context"]
+    V3 -->|"compiles"| PASS["✓ PASS\nwrite snippet\nupdate manifest"]
+      </pre>
+    </div>
+
+    <h3>Why cargo check instead of a Rust AST?</h3>
+    <p>
+      The TypeScript side uses ts-morph (full compiler-backed AST). The Rust side uses
+      <strong>the compiler directly</strong> — no Rust AST library like <code>syn</code>.
+      This is intentional: <code>cargo check</code> performs full type checking including
+      borrow checker analysis, and the skeleton means every other unconverted function is
+      still present as a <code>todo!()</code> stub. The new snippet is type-checked against
+      the real skeleton API, not a mock. Errors include exact line numbers and types —
+      far more useful than anything a static AST check could produce.
+    </p>
+
+    <h3>The inject-and-restore pattern</h3>
+    <p>
+      For each <code>cargo check</code> verification, the snippet is injected into the
+      skeleton at the exact <code>todo!()</code> marker for that node, <code>cargo check</code>
+      runs on the whole project, then the original <code>todo!()</code> is restored — even if
+      the check fails. The skeleton is always left in a compilable state after verification.
+    </p>
+  </section>
+
+  <!-- ── CLI ── -->
+  <section id="cli">
+    <h2>CLI reference</h2>
+    <pre><code># Full Phase A (extract AST, detect idioms, sort, classify, generate skeleton)
+oxidant phase-a
+
+# Phase A without API tier classification (uses heuristic rules instead)
+oxidant phase-a --heuristic-tiers
+
+# Reclassify tiers on an existing manifest (no re-running Phase A)
+oxidant classify-tiers --heuristic
+
+# Phase B — translate all nodes
+oxidant phase-b
+
+# Phase B smoke test — stop after N nodes
+oxidant phase-b --max-nodes 5
+
+# Phase B dry run — print the first node's prompt, no API calls
+oxidant phase-b --dry-run
+
+# Phase C — Clippy refinement pass
+oxidant phase-c
+
+# Phase D — full build + integration error isolation
+oxidant phase-d
+oxidant phase-d --manifest conversion_manifest.json</code></pre>
+  </section>
+
+</div>
+
+<footer>
+  <p>
+    Oxidant is open source — <a href="https://github.com/ByteBard97/oxidant">github.com/ByteBard97/oxidant</a>
+  </p>
+</footer>
+
+</body>
+</html>
