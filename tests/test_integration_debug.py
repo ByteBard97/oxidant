@@ -74,6 +74,22 @@ def test_parse_build_output_skips_non_compiler_message():
     assert _parse_build_output(line) == []
 
 
+def test_parse_build_output_skips_aborting_summary():
+    """Cargo's 'aborting due to N previous errors' has null code and no spans — must be skipped."""
+    line = json.dumps({
+        "reason": "compiler-message",
+        "message": {
+            "level": "error",
+            "message": "aborting due to 2 previous errors",
+            "code": None,
+            "spans": [],
+            "children": [],
+            "rendered": "error: aborting due to 2 previous errors\n",
+        }
+    })
+    assert _parse_build_output(line) == []
+
+
 def test_parse_build_output_multiple_errors():
     lines = "\n".join([
         _make_compiler_message(code="E0412", file_name="src/a.rs"),
