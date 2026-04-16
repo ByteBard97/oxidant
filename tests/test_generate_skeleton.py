@@ -18,8 +18,13 @@ def test_map_generic_array(): assert map_ts_type("Array<string>") == "Vec<String
 def test_map_nullable():
     assert map_ts_type("string | null") == "Option<String>"
     assert map_ts_type("number | undefined") == "Option<f64>"
-def test_map_unknown_class():
-    assert map_ts_type("Point") == "Rc<RefCell<Point>>"
+def test_map_known_class():
+    # When Point is in the known_classes set, it wraps in Rc<RefCell<>>
+    assert map_ts_type("Point", known_classes={"Point"}) == "Rc<RefCell<Point>>"
+
+def test_map_unknown_type_falls_back():
+    # Unknown PascalCase types not in any manifest map → serde_json::Value
+    assert map_ts_type("UnknownType") == "serde_json::Value"
 def test_map_map_type():
     assert map_ts_type("Map<string, number>") == "std::collections::HashMap<String, f64>"
 
