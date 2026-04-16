@@ -34,7 +34,7 @@ Idioms: {idioms}
 
 
 def classify_manifest(manifest_path: Path, model: str) -> None:
-    """Classify all untiered nodes in the manifest. Saves after each node."""
+    """Classify all untiered nodes in the manifest. Saves once after all nodes are processed."""
     manifest = Manifest.load(manifest_path)
     client = anthropic.Anthropic()
 
