@@ -4,10 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Oxidant — Agentic TypeScript-to-Rust Translation Harness</title>
-  <script type="module">
-    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
-    mermaid.initialize({ startOnLoad: true, theme: 'dark', themeVariables: { fontSize: '15px' } });
-  </script>
   <style>
     :root {
       --bg: #0d1117;
@@ -157,7 +153,7 @@
       margin: 1.5rem 0;
       overflow-x: auto;
     }
-    .diagram-wrap .mermaid { display: flex; justify-content: center; }
+    .diagram-wrap img { max-width: 100%; height: auto; display: block; border-radius: 6px; }
 
     /* ── Code ── */
     pre, code {
@@ -349,43 +345,7 @@
     </div>
 
     <div class="diagram-wrap">
-      <pre class="mermaid">
-flowchart LR
-    subgraph A ["Phase A — Analysis"]
-        A1["A1: ts-morph\nAST extraction"] --> A2["A2: Idiom\ndetection"]
-        A2 --> A3["A3: Topological\nsort"]
-        A3 --> A4["A4: Tier\nclassification"]
-        A4 --> A5["A5: Rust skeleton\ngeneration"]
-    end
-
-    subgraph B ["Phase B — Translation"]
-        B1["pick_next_node"] --> B2["build_context"]
-        B2 --> B3["invoke_agent\n(claude CLI)"]
-        B3 --> B4["verify\n(cargo check)"]
-        B4 -->|"PASS"| B5["update_manifest"]
-        B4 -->|"retry"| B2
-        B4 -->|"escalate tier"| B2
-        B4 -->|"exhausted"| B6["review_queue"]
-        B5 --> B1
-        B6 --> B1
-    end
-
-    subgraph C ["Phase C — Refinement"]
-        C1["cargo clippy"] --> C2["auto-fix\nmechanical"]
-        C2 --> C3["report\nstructural"]
-    end
-
-    subgraph D ["Phase D — Integration"]
-        D1["cargo build\n--release"] --> D2["parse errors"]
-        D2 --> D3["intersect\nwith manifest"]
-        D3 --> D4["integration_report\n.json"]
-    end
-
-    A --> B --> C --> D
-
-    classDef phase fill:#161b22,stroke:#30363d,color:#e6edf3
-    classDef node fill:#21262d,stroke:#30363d,color:#8b949e
-      </pre>
+      <img src="diagrams/pipeline.svg" alt="Oxidant Phase A→B→C→D pipeline overview" style="max-width:100%;height:auto;display:block;margin:0 auto;border-radius:8px;" />
     </div>
   </section>
 
@@ -558,26 +518,7 @@ pub struct GeomGraph {
     </p>
 
     <div class="diagram-wrap">
-      <pre class="mermaid">
-stateDiagram-v2
-    [*] --> pick_next_node
-    pick_next_node --> build_context : node available
-    pick_next_node --> [*] : all done / max_nodes reached
-
-    build_context --> invoke_agent : prompt ready
-    invoke_agent --> verify : snippet received
-
-    verify --> update_manifest : PASS
-    verify --> retry_node : attempts remaining
-    verify --> escalate_node : tier exhausted, higher tier available
-    verify --> queue_for_review : all tiers exhausted
-
-    retry_node --> build_context : increment attempt
-    escalate_node --> build_context : promote to sonnet/opus
-
-    update_manifest --> pick_next_node : node CONVERTED
-    queue_for_review --> pick_next_node : node HUMAN_REVIEW
-      </pre>
+      <img src="diagrams/phase_b_state.svg" alt="Phase B LangGraph state machine" style="max-width:100%;height:auto;display:block;margin:0 auto;border-radius:8px;" />
     </div>
 
     <h3>Prompt construction</h3>
@@ -619,22 +560,7 @@ stateDiagram-v2
     </p>
 
     <div class="diagram-wrap">
-      <pre class="mermaid">
-flowchart LR
-    S["Rust snippet\nfrom Claude"] --> V1
-
-    V1{"1. Stub check\n~0ms"}
-    V1 -->|"todo!() found"| FAIL1["STUB\nretry"]
-    V1 -->|"clean"| V2
-
-    V2{"2. Branch parity\n~0ms"}
-    V2 -->|"Rust &lt; 60% of TS\nbranches"| FAIL2["BRANCH\nretry"]
-    V2 -->|"OK"| V3
-
-    V3{"3. cargo check\n5–30s"}
-    V3 -->|"compiler error"| FAIL3["CARGO\nretry with\nerror context"]
-    V3 -->|"compiles"| PASS["✓ PASS\nwrite snippet\nupdate manifest"]
-      </pre>
+      <img src="diagrams/verification.svg" alt="Three-layer verification flowchart" style="max-width:100%;height:auto;display:block;margin:0 auto;border-radius:8px;" />
     </div>
 
     <h3>Why cargo check instead of a Rust AST?</h3>

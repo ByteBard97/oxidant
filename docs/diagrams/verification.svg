@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f0f1a"/>
+      <stop offset="100%" stop-color="#1a1a2e"/>
+    </linearGradient>
+    <marker id="ag" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#10b981"/>
+    </marker>
+    <marker id="ar" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#ef4444"/>
+    </marker>
+    <marker id="ao" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#f97316"/>
+    </marker>
+    <marker id="agray" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#64748b"/>
+    </marker>
+    <marker id="ab" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#3b82f6"/>
+    </marker>
+  </defs>
+  <rect width="960" height="540" fill="url(#bg)"/>
+  <style>text {{ font-family: "SF Mono","Fira Code","Cascadia Code",monospace; }}</style>
+  <text x="480" y="32" text-anchor="middle" font-size="14" font-weight="700" fill="#e2e8f0" letter-spacing="0.08em">VERIFICATION — Three-Layer Snippet Checking</text>
+  <rect x="270" y="52" width="160" height="44" rx="6" fill="#0f172a" stroke="#334155" stroke-width="1.5"/>
+  <text x="350" y="71" text-anchor="middle" font-size="12" font-weight="700" fill="#e2e8f0">Rust snippet</text>
+  <text x="350" y="86" text-anchor="middle" font-size="10" fill="#94a3b8">from Claude subprocess</text>
+  <line x1="350" y1="96" x2="350" y2="126" stroke="#64748b" stroke-width="1.5" marker-end="url(#agray)"/>
+  <rect x="240" y="126" width="220" height="60" rx="6" fill="#0f1f3d" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="350" y="146" text-anchor="middle" font-size="12" font-weight="700" fill="#93c5fd">1 · Stub Check</text>
+  <text x="350" y="162" text-anchor="middle" font-size="10" fill="#bfdbfe">scan for todo!() / unimplemented!()</text>
+  <text x="350" y="176" text-anchor="middle" font-size="10" fill="#7dd3fc">~0ms — instant string scan</text>
+  <rect x="660" y="132" width="200" height="48" rx="6" fill="#2d1010" stroke="#ef4444" stroke-width="1.5"/>
+  <text x="760" y="150" text-anchor="middle" font-size="11" font-weight="700" fill="#fca5a5">STUB — retry</text>
+  <text x="760" y="166" text-anchor="middle" font-size="10" fill="#f87171">re-prompt, no error context</text>
+  <line x1="460" y1="156" x2="660" y2="156" stroke="#ef4444" stroke-width="1.5" marker-end="url(#ar)"/>
+  <rect x="468" y="146" width="70" height="16" rx="3" fill="#0f0f1a" opacity="0.9"/>
+  <text x="503" y="158" text-anchor="middle" font-size="10" fill="#ef4444">todo!() found</text>
+  <line x1="350" y1="186" x2="350" y2="206" stroke="#10b981" stroke-width="1.5" marker-end="url(#ag)"/>
+  <rect x="330" y="188" width="40" height="16" rx="3" fill="#0f0f1a" opacity="0.9"/>
+  <text x="350" y="200" text-anchor="middle" font-size="10" fill="#10b981">clean</text>
+  <rect x="240" y="206" width="220" height="60" rx="6" fill="#0f1f3d" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="350" y="226" text-anchor="middle" font-size="12" font-weight="700" fill="#93c5fd">2 · Branch Parity</text>
+  <text x="350" y="242" text-anchor="middle" font-size="10" fill="#bfdbfe">Rust branches ≥ 60% of TypeScript</text>
+  <text x="350" y="256" text-anchor="middle" font-size="10" fill="#7dd3fc">~0ms — AST branch count</text>
+  <rect x="660" y="212" width="200" height="48" rx="6" fill="#2d1010" stroke="#ef4444" stroke-width="1.5"/>
+  <text x="760" y="230" text-anchor="middle" font-size="11" font-weight="700" fill="#fca5a5">BRANCH — retry</text>
+  <text x="760" y="248" text-anchor="middle" font-size="10" fill="#f87171">re-prompt: "match all branches"</text>
+  <line x1="460" y1="236" x2="660" y2="242" stroke="#ef4444" stroke-width="1.5" marker-end="url(#ar)"/>
+  <rect x="468" y="226" width="80" height="16" rx="3" fill="#0f0f1a" opacity="0.9"/>
+  <text x="508" y="238" text-anchor="middle" font-size="10" fill="#ef4444">&lt;60% coverage</text>
+  <line x1="350" y1="266" x2="350" y2="286" stroke="#10b981" stroke-width="1.5" marker-end="url(#ag)"/>
+  <rect x="336" y="268" width="28" height="16" rx="3" fill="#0f0f1a" opacity="0.9"/>
+  <text x="350" y="280" text-anchor="middle" font-size="10" fill="#10b981">OK</text>
+  <rect x="240" y="286" width="220" height="60" rx="6" fill="#0f1f3d" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="350" y="306" text-anchor="middle" font-size="12" font-weight="700" fill="#93c5fd">3 · cargo check</text>
+  <text x="350" y="322" text-anchor="middle" font-size="10" fill="#bfdbfe">inject snippet → check → restore</text>
+  <text x="350" y="336" text-anchor="middle" font-size="10" fill="#7dd3fc">5–30s — full borrow check + types</text>
+  <rect x="660" y="292" width="200" height="48" rx="6" fill="#2d1010" stroke="#f97316" stroke-width="1.5"/>
+  <text x="760" y="310" text-anchor="middle" font-size="11" font-weight="700" fill="#fdba74">CARGO — retry</text>
+  <text x="760" y="328" text-anchor="middle" font-size="10" fill="#fed7aa">error + line numbers in next prompt</text>
+  <line x1="460" y1="316" x2="660" y2="322" stroke="#f97316" stroke-width="1.5" marker-end="url(#ao)"/>
+  <rect x="468" y="306" width="80" height="16" rx="3" fill="#0f0f1a" opacity="0.9"/>
+  <text x="508" y="318" text-anchor="middle" font-size="10" fill="#f97316">compiler error</text>
+  <line x1="350" y1="346" x2="350" y2="370" stroke="#10b981" stroke-width="2" marker-end="url(#ag)"/>
+  <rect x="250" y="370" width="200" height="52" rx="8" fill="#052e16" stroke="#10b981" stroke-width="2"/>
+  <text x="350" y="392" text-anchor="middle" font-size="14" font-weight="700" fill="#6ee7b7">✓  PASS</text>
+  <text x="350" y="408" text-anchor="middle" font-size="10" fill="#a7f3d0">write snippet · update_manifest · CONVERTED</text>
+</svg>
