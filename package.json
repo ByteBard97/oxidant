@@ -1,0 +1,13 @@
+{
+  "name": "oxidant-scripts",
+  "private": true,
+  "scripts": {
+    "extract": "tsx phase_a_scripts/extract_ast.ts",
+    "idioms": "tsx phase_a_scripts/detect_idioms.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "ts-morph": "^24.0.0",
+    "typescript": "^5.7.0"
+  }
+}
