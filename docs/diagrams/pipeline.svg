@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 480">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f0f1a"/>
+      <stop offset="100%" stop-color="#1a1a2e"/>
+    </linearGradient>
+    <marker id="arr-blue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#3b82f6"/>
+    </marker>
+    <marker id="arr-purple" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#a855f7"/>
+    </marker>
+    <marker id="arr-green" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#10b981"/>
+    </marker>
+    <marker id="arr-orange" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#f97316"/>
+    </marker>
+    <marker id="arr-gray" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#64748b"/>
+    </marker>
+  </defs>
+  <rect width="960" height="480" fill="url(#bg)"/>
+  <style>text { font-family: "SF Mono","Fira Code","Cascadia Code","Courier New",monospace; }</style>
+  <text x="480" y="32" text-anchor="middle" font-size="14" font-weight="700" fill="#e2e8f0" letter-spacing="0.08em">OXIDANT — TypeScript → Rust Translation Pipeline</text>
+  <rect x="20" y="52" width="200" height="400" rx="8" fill="#0a1628" stroke="#1d4ed8" stroke-width="1.5"/>
+  <rect x="20" y="52" width="200" height="44" rx="8" fill="#1d4ed8"/>
+  <rect x="20" y="84" width="200" height="12" fill="#1d4ed8"/>
+  <text x="120" y="70" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff" letter-spacing="0.06em">PHASE A</text>
+  <text x="120" y="86" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.7)" letter-spacing="0.04em">ANALYSIS</text>
+  <rect x="248" y="52" width="220" height="400" rx="8" fill="#120d24" stroke="#7c3aed" stroke-width="1.5"/>
+  <rect x="248" y="52" width="220" height="44" rx="8" fill="#7c3aed"/>
+  <rect x="248" y="84" width="220" height="12" fill="#7c3aed"/>
+  <text x="358" y="70" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff" letter-spacing="0.06em">PHASE B</text>
+  <text x="358" y="86" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.7)" letter-spacing="0.04em">TRANSLATION</text>
+  <rect x="496" y="52" width="200" height="400" rx="8" fill="#031a0e" stroke="#059669" stroke-width="1.5"/>
+  <rect x="496" y="52" width="200" height="44" rx="8" fill="#059669"/>
+  <rect x="496" y="84" width="200" height="12" fill="#059669"/>
+  <text x="596" y="70" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff" letter-spacing="0.06em">PHASE C</text>
+  <text x="596" y="86" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.7)" letter-spacing="0.04em">REFINEMENT</text>
+  <rect x="724" y="52" width="216" height="400" rx="8" fill="#1a0d04" stroke="#ea580c" stroke-width="1.5"/>
+  <rect x="724" y="52" width="216" height="44" rx="8" fill="#ea580c"/>
+  <rect x="724" y="84" width="216" height="12" fill="#ea580c"/>
+  <text x="832" y="70" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff" letter-spacing="0.06em">PHASE D</text>
+  <text x="832" y="86" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.7)" letter-spacing="0.04em">INTEGRATION</text>
+  <rect x="32" y="108" width="176" height="48" rx="5" fill="#0f1f3d" stroke="#1d4ed8" stroke-width="1"/>
+  <text x="42" y="124" font-size="10" font-weight="700" fill="#93c5fd">A1</text>
+  <text x="42" y="138" font-size="10" fill="#bfdbfe">ts-morph AST extraction</text>
+  <line x1="120" y1="156" x2="120" y2="174" stroke="#1d4ed8" stroke-width="1.5" marker-end="url(#arr-blue)"/>
+  <rect x="32" y="174" width="176" height="48" rx="5" fill="#0f1f3d" stroke="#1d4ed8" stroke-width="1"/>
+  <text x="42" y="190" font-size="10" font-weight="700" fill="#93c5fd">A2</text>
+  <text x="42" y="204" font-size="10" fill="#bfdbfe">idiom detection (14 patterns)</text>
+  <line x1="120" y1="222" x2="120" y2="240" stroke="#1d4ed8" stroke-width="1.5" marker-end="url(#arr-blue)"/>
+  <rect x="32" y="240" width="176" height="48" rx="5" fill="#0f1f3d" stroke="#1d4ed8" stroke-width="1"/>
+  <text x="42" y="256" font-size="10" font-weight="700" fill="#93c5fd">A3</text>
+  <text x="42" y="270" font-size="10" fill="#bfdbfe">topological sort</text>
+  <line x1="120" y1="288" x2="120" y2="306" stroke="#1d4ed8" stroke-width="1.5" marker-end="url(#arr-blue)"/>
+  <rect x="32" y="306" width="176" height="48" rx="5" fill="#0f1f3d" stroke="#1d4ed8" stroke-width="1"/>
+  <text x="42" y="322" font-size="10" font-weight="700" fill="#93c5fd">A4</text>
+  <text x="42" y="336" font-size="10" fill="#bfdbfe">tier classification</text>
+  <line x1="120" y1="354" x2="120" y2="372" stroke="#1d4ed8" stroke-width="1.5" marker-end="url(#arr-blue)"/>
+  <rect x="32" y="372" width="176" height="48" rx="5" fill="#0f1f3d" stroke="#1d4ed8" stroke-width="1"/>
+  <text x="42" y="388" font-size="10" font-weight="700" fill="#93c5fd">A5</text>
+  <text x="42" y="402" font-size="10" fill="#bfdbfe">Rust skeleton generation</text>
+  <rect x="260" y="108" width="196" height="44" rx="5" fill="#1a0f32" stroke="#7c3aed" stroke-width="1"/>
+  <text x="270" y="123" font-size="10" font-weight="700" fill="#c4b5fd">pick_next_node</text>
+  <text x="270" y="137" font-size="10" fill="#a5b4fc">select lowest-order eligible</text>
+  <line x1="358" y1="152" x2="358" y2="164" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#arr-purple)"/>
+  <rect x="260" y="164" width="196" height="44" rx="5" fill="#1a0f32" stroke="#7c3aed" stroke-width="1"/>
+  <text x="270" y="179" font-size="10" font-weight="700" fill="#c4b5fd">build_context</text>
+  <text x="270" y="193" font-size="10" fill="#a5b4fc">assemble Claude prompt</text>
+  <line x1="358" y1="208" x2="358" y2="220" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#arr-purple)"/>
+  <rect x="260" y="220" width="196" height="44" rx="5" fill="#1a0f32" stroke="#7c3aed" stroke-width="1"/>
+  <text x="270" y="235" font-size="10" font-weight="700" fill="#c4b5fd">invoke_agent</text>
+  <text x="270" y="249" font-size="10" fill="#a5b4fc">claude --print subprocess</text>
+  <line x1="358" y1="264" x2="358" y2="276" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#arr-purple)"/>
+  <rect x="260" y="276" width="196" height="44" rx="5" fill="#1a0f32" stroke="#7c3aed" stroke-width="1"/>
+  <text x="270" y="291" font-size="10" font-weight="700" fill="#c4b5fd">verify</text>
+  <text x="270" y="305" font-size="10" fill="#a5b4fc">stub / branch / cargo check</text>
+  <line x1="358" y1="320" x2="358" y2="332" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#arr-purple)"/>
+  <rect x="260" y="332" width="196" height="44" rx="5" fill="#1a0f32" stroke="#7c3aed" stroke-width="1"/>
+  <text x="270" y="347" font-size="10" font-weight="700" fill="#c4b5fd">retry / escalate</text>
+  <text x="270" y="361" font-size="10" fill="#a5b4fc">increment tier if needed</text>
+  <line x1="358" y1="376" x2="358" y2="388" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#arr-purple)"/>
+  <rect x="260" y="388" width="196" height="44" rx="5" fill="#1a0f32" stroke="#7c3aed" stroke-width="1"/>
+  <text x="270" y="403" font-size="10" font-weight="700" fill="#c4b5fd">update_manifest</text>
+  <text x="270" y="417" font-size="10" fill="#a5b4fc">write .rs, mark CONVERTED</text>
+  <rect x="508" y="108" width="176" height="56" rx="5" fill="#051a10" stroke="#059669" stroke-width="1"/>
+  <text x="518" y="126" font-size="10" font-weight="700" fill="#6ee7b7">cargo clippy</text>
+  <text x="518" y="142" font-size="10" fill="#a7f3d0">full linting pass</text>
+  <line x1="596" y1="164" x2="596" y2="188" stroke="#059669" stroke-width="1.5" marker-end="url(#arr-green)"/>
+  <rect x="508" y="188" width="176" height="56" rx="5" fill="#051a10" stroke="#059669" stroke-width="1"/>
+  <text x="518" y="206" font-size="10" font-weight="700" fill="#6ee7b7">auto-fix mechanical</text>
+  <text x="518" y="222" font-size="10" fill="#a7f3d0">unused vars, imports...</text>
+  <line x1="596" y1="244" x2="596" y2="268" stroke="#059669" stroke-width="1.5" marker-end="url(#arr-green)"/>
+  <rect x="508" y="268" width="176" height="56" rx="5" fill="#051a10" stroke="#059669" stroke-width="1"/>
+  <text x="518" y="286" font-size="10" font-weight="700" fill="#6ee7b7">report structural</text>
+  <text x="518" y="302" font-size="10" fill="#a7f3d0">human-review warnings</text>
+  <rect x="734" y="108" width="196" height="56" rx="5" fill="#1a0d04" stroke="#ea580c" stroke-width="1.5"/>
+  <text x="744" y="126" font-size="10" font-weight="700" fill="#fdba74">cargo build --release</text>
+  <text x="744" y="142" font-size="10" fill="#fed7aa">full compiler run</text>
+  <line x1="832" y1="164" x2="832" y2="190" stroke="#ea580c" stroke-width="1.5" marker-end="url(#arr-orange)"/>
+  <rect x="734" y="190" width="196" height="56" rx="5" fill="#1a0d04" stroke="#ea580c" stroke-width="1.5"/>
+  <text x="744" y="208" font-size="10" font-weight="700" fill="#fdba74">parse errors</text>
+  <text x="744" y="224" font-size="10" fill="#fed7aa">E-code extraction</text>
+  <line x1="832" y1="246" x2="832" y2="272" stroke="#ea580c" stroke-width="1.5" marker-end="url(#arr-orange)"/>
+  <rect x="734" y="272" width="196" height="56" rx="5" fill="#1a0d04" stroke="#ea580c" stroke-width="1.5"/>
+  <text x="744" y="290" font-size="10" font-weight="700" fill="#fdba74">intersect manifest</text>
+  <text x="744" y="306" font-size="10" fill="#fed7aa">map errors → node IDs</text>
+  <line x1="832" y1="328" x2="832" y2="354" stroke="#ea580c" stroke-width="1.5" marker-end="url(#arr-orange)"/>
+  <rect x="734" y="354" width="196" height="56" rx="5" fill="#1a0d04" stroke="#ea580c" stroke-width="1.5"/>
+  <text x="744" y="372" font-size="10" font-weight="700" fill="#fdba74">integration_report.json</text>
+  <text x="744" y="388" font-size="10" fill="#fed7aa">files needing retranslation</text>
+  <line x1="220" y1="252" x2="248" y2="252" stroke="#64748b" stroke-width="2" marker-end="url(#arr-gray)"/>
+  <line x1="468" y1="252" x2="496" y2="252" stroke="#64748b" stroke-width="2" marker-end="url(#arr-gray)"/>
+  <line x1="696" y1="252" x2="724" y2="252" stroke="#64748b" stroke-width="2" marker-end="url(#arr-gray)"/>
+</svg>
