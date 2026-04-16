@@ -47,7 +47,7 @@ def test_run_phase_c_returns_report(tmp_path):
 
 
 def test_run_phase_c_auto_fix_called_first(tmp_path):
-    """cargo fix is invoked before the JSON report pass."""
+    """cargo clippy --fix is invoked before the JSON report pass."""
     fix_calls: list = []
 
     def capture_run(cmd, **kwargs):
@@ -58,7 +58,7 @@ def test_run_phase_c_auto_fix_called_first(tmp_path):
         with patch("oxidant.refinement.phase_c.run_clippy", return_value=[]):
             run_phase_c(tmp_path)
 
-    assert any("fix" in cmd for cmd in fix_calls)
+    assert any("--fix" in cmd for cmd in fix_calls)
 
 
 def test_run_phase_c_writes_report_to_disk(tmp_path):
