@@ -71,6 +71,9 @@ def _parse_build_output(output: str) -> list[BuildError]:
         if not primary_span and msg.get("spans"):
             primary_span = msg["spans"][0]
 
+        if not primary_span:
+            continue
+
         errors.append(BuildError(
             error_code=error_code,
             message=msg.get("message", ""),
