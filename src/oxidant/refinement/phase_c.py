@@ -1,10 +1,11 @@
 """Phase C orchestration: auto-fix mechanical warnings, report remaining ones.
 
 Sequence:
-1. ``cargo clippy --fix --allow-dirty`` — cargo applies all MachineApplicable
+1. ``run_clippy()`` — baseline pass, count warnings before auto-fix.
+2. ``cargo clippy --fix --allow-dirty`` — cargo applies all MachineApplicable
    suggestions in-place. No agent needed.
-2. ``run_clippy()`` — parse remaining warnings after auto-fix.
-3. Categorize + write ``clippy_report.json`` to target_path.
+3. ``run_clippy()`` — second pass, collect remaining warnings after auto-fix.
+4. Categorize + write ``clippy_report.json`` to target_path.
 """
 from __future__ import annotations
 
@@ -15,18 +16,12 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from oxidant.refinement.categorize import WarningTier, categorize_warning
-from oxidant.refinement.clippy_runner import ClippyWarning, run_clippy
+from oxidant.refinement.clippy_runner import PEDANTIC_DENY_FLAGS, ClippyWarning, run_clippy
 
 logger = logging.getLogger(__name__)
 
 _FIX_TIMEOUT_SECONDS = 300
-_CLIPPY_PEDANTIC_FLAGS = [
-    "--",
-    "-W", "clippy::pedantic",
-    "-A", "clippy::module_name_repetitions",
-    "-A", "clippy::missing_errors_doc",
-    "-A", "clippy::missing_panics_doc",
-]
+_CLIPPY_FIX_FLAGS: list[str] = ["--"] + PEDANTIC_DENY_FLAGS
 
 
 @dataclass
@@ -60,7 +55,7 @@ def _run_auto_fix(target_path: Path) -> int:
             "cargo", "clippy",
             "--fix", "--allow-dirty", "--allow-staged",
             "--all-targets",
-        ] + _CLIPPY_PEDANTIC_FLAGS,
+        ] + _CLIPPY_FIX_FLAGS,
         cwd=target_path,
         capture_output=True,
         text=True,

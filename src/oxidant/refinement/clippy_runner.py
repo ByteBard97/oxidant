@@ -14,15 +14,20 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-_CLIPPY_FLAGS = [
-    "--message-format=json",
-    "--all-targets",
-    "--",
+# Shared lint flags used by both the diagnostic pass and the --fix pass.
+# Kept here so both callers stay in sync automatically.
+PEDANTIC_DENY_FLAGS: list[str] = [
     "-W", "clippy::pedantic",
     "-A", "clippy::module_name_repetitions",   # too noisy for generated code
     "-A", "clippy::missing_errors_doc",        # no docs in skeleton
     "-A", "clippy::missing_panics_doc",
 ]
+
+_CLIPPY_FLAGS: list[str] = [
+    "--message-format=json",
+    "--all-targets",
+    "--",
+] + PEDANTIC_DENY_FLAGS
 
 _CARGO_TIMEOUT_SECONDS = 300
 

@@ -46,19 +46,28 @@ def test_run_phase_c_returns_report(tmp_path):
     assert report.human_count == 1
 
 
-def test_run_phase_c_auto_fix_called_first(tmp_path):
-    """cargo clippy --fix is invoked before the JSON report pass."""
-    fix_calls: list = []
+def test_run_phase_c_auto_fix_called_between_clippy_passes(tmp_path):
+    """cargo clippy --fix is invoked between the baseline and report run_clippy passes."""
+    call_log: list[str] = []
 
     def capture_run(cmd, **kwargs):
-        fix_calls.append(cmd)
+        if "--fix" in cmd:
+            call_log.append("fix")
         return _fake_run()
 
+    clippy_call_count = 0
+
+    def fake_run_clippy(path: object) -> list:
+        nonlocal clippy_call_count
+        clippy_call_count += 1
+        call_log.append(f"clippy_{clippy_call_count}")
+        return []
+
     with patch("oxidant.refinement.phase_c.subprocess.run", side_effect=capture_run):
-        with patch("oxidant.refinement.phase_c.run_clippy", return_value=[]):
+        with patch("oxidant.refinement.phase_c.run_clippy", side_effect=fake_run_clippy):
             run_phase_c(tmp_path)
 
-    assert any("--fix" in cmd for cmd in fix_calls)
+    assert call_log == ["clippy_1", "fix", "clippy_2"]
 
 
 def test_run_phase_c_writes_report_to_disk(tmp_path):
