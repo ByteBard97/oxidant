@@ -63,3 +63,84 @@ def test_manifest_json_persistence(tmp_path):
     manifest.save(path)
     loaded = Manifest.load(path)
     assert loaded.nodes["mod__foo"].source_text == "function foo() {}"
+
+
+def test_topological_sort_chain():
+    # A → B → C (A has no deps; C depends on B; B depends on A)
+    nodes = {
+        "m__A": ConversionNode(
+            node_id="m__A", source_file="x.ts", line_start=1, line_end=2,
+            source_text="", node_kind=NodeKind.FREE_FUNCTION,
+            parameter_types={}, return_type=None,
+            type_dependencies=[], call_dependencies=[], callers=["m__B"],
+        ),
+        "m__B": ConversionNode(
+            node_id="m__B", source_file="x.ts", line_start=3, line_end=4,
+            source_text="", node_kind=NodeKind.FREE_FUNCTION,
+            parameter_types={}, return_type=None,
+            type_dependencies=[], call_dependencies=["m__A"], callers=["m__C"],
+        ),
+        "m__C": ConversionNode(
+            node_id="m__C", source_file="x.ts", line_start=5, line_end=6,
+            source_text="", node_kind=NodeKind.FREE_FUNCTION,
+            parameter_types={}, return_type=None,
+            type_dependencies=["m__B"], call_dependencies=[], callers=[],
+        ),
+    }
+    manifest = Manifest(source_repo=".", generated_at="2026-04-15", nodes=nodes)
+    manifest.compute_topology()
+    assert manifest.nodes["m__A"].topological_order == 0
+    assert manifest.nodes["m__B"].topological_order == 1
+    assert manifest.nodes["m__C"].topological_order == 2
+    assert manifest.nodes["m__A"].bfs_level == 0
+    assert manifest.nodes["m__B"].bfs_level == 1
+    assert manifest.nodes["m__C"].bfs_level == 2
+
+
+def test_topological_sort_parallel_nodes():
+    # A and B are both leaves; C depends on both → A and B are level 0, C is level 1
+    nodes = {
+        "m__A": ConversionNode(
+            node_id="m__A", source_file="x.ts", line_start=1, line_end=2,
+            source_text="", node_kind=NodeKind.FREE_FUNCTION,
+            parameter_types={}, return_type=None,
+            type_dependencies=[], call_dependencies=[], callers=["m__C"],
+        ),
+        "m__B": ConversionNode(
+            node_id="m__B", source_file="x.ts", line_start=3, line_end=4,
+            source_text="", node_kind=NodeKind.FREE_FUNCTION,
+            parameter_types={}, return_type=None,
+            type_dependencies=[], call_dependencies=[], callers=["m__C"],
+        ),
+        "m__C": ConversionNode(
+            node_id="m__C", source_file="x.ts", line_start=5, line_end=6,
+            source_text="", node_kind=NodeKind.FREE_FUNCTION,
+            parameter_types={}, return_type=None,
+            type_dependencies=["m__A", "m__B"], call_dependencies=[], callers=[],
+        ),
+    }
+    manifest = Manifest(source_repo=".", generated_at="2026-04-15", nodes=nodes)
+    manifest.compute_topology()
+    assert manifest.nodes["m__A"].bfs_level == 0
+    assert manifest.nodes["m__B"].bfs_level == 0
+    assert manifest.nodes["m__C"].bfs_level == 1
+
+
+def test_topological_sort_raises_on_cycle():
+    nodes = {
+        "m__A": ConversionNode(
+            node_id="m__A", source_file="x.ts", line_start=1, line_end=2,
+            source_text="", node_kind=NodeKind.FREE_FUNCTION,
+            parameter_types={}, return_type=None,
+            type_dependencies=["m__B"], call_dependencies=[], callers=[],
+        ),
+        "m__B": ConversionNode(
+            node_id="m__B", source_file="x.ts", line_start=3, line_end=4,
+            source_text="", node_kind=NodeKind.FREE_FUNCTION,
+            parameter_types={}, return_type=None,
+            type_dependencies=["m__A"], call_dependencies=[], callers=[],
+        ),
+    }
+    manifest = Manifest(source_repo=".", generated_at="2026-04-15", nodes=nodes)
+    with pytest.raises(ValueError, match="cycle"):
+        manifest.compute_topology()
