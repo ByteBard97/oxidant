@@ -38,3 +38,6 @@ corpora/*/
 
 # Node (for msagl-js source analysis)
 node_modules/
+
+# Git worktrees
+.worktrees/
