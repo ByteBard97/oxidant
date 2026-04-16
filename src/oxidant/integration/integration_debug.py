@@ -1,22 +1,16 @@
 """Phase D: full-build integration verification and error isolation.
 
-Sequence:
-1. ``run_full_build()`` — ``cargo build --release --message-format=json``.
-2. ``_parse_build_output()`` — extract BuildError objects from JSON stream.
-3. ``_intersect_with_manifest()`` — find translated files among those with errors.
-4. Write ``integration_report.json`` to target_path.
+Parses ``cargo build --release --message-format=json`` output into typed
+``BuildError`` objects and aggregates them into an ``IntegrationReport``.
 """
 from __future__ import annotations
 
 import json
 import logging
-import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
-
-_BUILD_TIMEOUT_SECONDS = 600  # release builds take longer than debug
 
 
 @dataclass
