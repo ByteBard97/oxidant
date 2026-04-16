@@ -1,0 +1,23 @@
+{
+  "source_repo": "corpora/msagljs",
+  "target_repo": "corpora/msagl-rs",
+  "source_language": "typescript",
+  "target_language": "rust",
+  "tsconfig": "corpora/msagljs/tsconfig.json",
+  "architectural_decisions": {
+    "graph_ownership_strategy": "arena_slotmap",
+    "error_handling": "thiserror"
+  },
+  "crate_inventory": [
+    "slotmap", "petgraph", "nalgebra", "thiserror",
+    "itertools", "ordered-float", "serde", "serde_json"
+  ],
+  "model_tiers": {
+    "haiku": "claude-haiku-4-5-20251001",
+    "sonnet": "claude-sonnet-4-6",
+    "opus": "claude-opus-4-6"
+  },
+  "max_attempts": { "haiku": 3, "sonnet": 4, "opus": 5 },
+  "parallelism": 4,
+  "subscription_auth": true
+}
