@@ -186,3 +186,83 @@ def test_run_full_build_returns_false_on_failure(tmp_path):
     with patch("oxidant.integration.integration_debug.subprocess.run", return_value=_fake_run(1)):
         success, output = run_full_build(tmp_path)
     assert success is False
+
+
+# --- run_phase_d end-to-end ---
+
+def test_run_phase_d_success_writes_report(tmp_path):
+    """Successful build produces a report with build_success=True and no errors."""
+    with patch("oxidant.integration.integration_debug.subprocess.run", return_value=_fake_run(0)):
+        report = run_phase_d(tmp_path)
+
+    assert report.build_success is True
+    assert report.total_errors == 0
+    report_path = tmp_path / "integration_report.json"
+    assert report_path.exists()
+    data = json.loads(report_path.read_text())
+    assert data["build_success"] is True
+    assert "errors" in data
+
+
+def test_run_phase_d_failure_identifies_files(tmp_path):
+    """Failing build populates files_with_errors from parsed error messages."""
+    error_line = json.dumps({
+        "reason": "compiler-message",
+        "message": {
+            "level": "error",
+            "message": "cannot find type `Foo`",
+            "code": {"code": "E0412"},
+            "spans": [{"file_name": "src/graph.rs", "line_start": 5,
+                        "column_start": 1, "is_primary": True}],
+            "children": [],
+            "rendered": "error[E0412]: cannot find type `Foo`\n",
+        }
+    })
+    mock = _fake_run(returncode=1, stdout=error_line)
+
+    with patch("oxidant.integration.integration_debug.subprocess.run", return_value=mock):
+        report = run_phase_d(tmp_path)
+
+    assert report.build_success is False
+    assert report.total_errors == 1
+    assert "src/graph.rs" in report.files_with_errors
+
+
+def test_run_phase_d_intersects_manifest_when_provided(tmp_path):
+    """When a manifest is provided, files_needing_retranslation is populated."""
+    manifest = {
+        "version": "1.0",
+        "source_repo": "../msagljs",
+        "generated_at": "2026-04-16T00:00:00",
+        "nodes": {
+            "Graph::layout": {
+                "node_id": "Graph::layout",
+                "source_file": "graph.ts",
+                "line_start": 1, "line_end": 50,
+                "source_text": "function layout() {}",
+                "node_kind": "method",
+                "status": "converted",
+            }
+        }
+    }
+    manifest_path = tmp_path / "conversion_manifest.json"
+    manifest_path.write_text(json.dumps(manifest))
+
+    error_line = json.dumps({
+        "reason": "compiler-message",
+        "message": {
+            "level": "error",
+            "message": "type mismatch",
+            "code": {"code": "E0308"},
+            "spans": [{"file_name": "src/graph.rs", "line_start": 10,
+                        "column_start": 5, "is_primary": True}],
+            "children": [],
+            "rendered": "error[E0308]: type mismatch\n",
+        }
+    })
+    mock = _fake_run(returncode=1, stdout=error_line)
+
+    with patch("oxidant.integration.integration_debug.subprocess.run", return_value=mock):
+        report = run_phase_d(tmp_path, manifest_path=manifest_path)
+
+    assert "src/graph.rs" in report.files_needing_retranslation
