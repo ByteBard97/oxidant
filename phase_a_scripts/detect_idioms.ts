@@ -47,9 +47,6 @@ const IDIOMS: Record<string, Detector> = {
   class_inheritance: (n) =>
     n.getDescendantsOfKind(SyntaxKind.ExtendsKeyword).length > 0,
 
-  discriminated_union: (n) =>
-    n.getDescendantsOfKind(SyntaxKind.UnionType).length > 0,
-
   number_as_index: (n) => {
     const text = n.getFullText();
     return /\[\s*\w+\s*\]/.test(text) && text.includes("number");
