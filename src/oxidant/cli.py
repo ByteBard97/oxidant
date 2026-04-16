@@ -169,6 +169,36 @@ def phase_b(
     typer.echo("\nPhase B complete.")
 
 
+@app.command("phase-c")
+def phase_c(
+    config: Path = typer.Option("oxidant.config.json", "--config", "-c"),
+    target: Path = typer.Option(
+        None, "--target",
+        help="Rust project root. Defaults to target_repo from config.",
+    ),
+) -> None:
+    """Run Phase C: auto-fix mechanical Clippy warnings, report structural/human ones.
+
+    Requires a partially or fully translated skeleton from phase-b.
+    Writes ``clippy_report.json`` to the target project root.
+    """
+    import json as _json
+    from oxidant.refinement.phase_c import run_phase_c
+
+    cfg = _json.loads(config.read_text())
+    target_path = target or Path(cfg["target_repo"])
+
+    typer.echo(f"Phase C: running Clippy refinement on {target_path}...")
+    report = run_phase_c(target_path.resolve())
+
+    typer.echo(f"  Auto-fixed:  {report.auto_fixed_count} warnings")
+    typer.echo(f"  Remaining:   {report.total_remaining}")
+    typer.echo(f"    Mechanical: {report.mechanical_count}")
+    typer.echo(f"    Structural: {report.structural_count}")
+    typer.echo(f"    Human:      {report.human_count}")
+    typer.echo(f"\nReport written to {target_path / 'clippy_report.json'}")
+
+
 @app.command()
 def translate(
     source: str = typer.Argument(..., help="Path to a .ts file"),
