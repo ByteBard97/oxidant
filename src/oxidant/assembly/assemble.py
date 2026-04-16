@@ -10,13 +10,9 @@ import logging
 from collections import defaultdict
 from pathlib import Path
 
-from oxidant.models.manifest import ConversionNode, Manifest, NodeKind, NodeStatus
+from oxidant.models.manifest import ConversionNode, Manifest, NodeKind, NodeStatus, _STRUCTURAL_KINDS
 
 logger = logging.getLogger(__name__)
-
-_STRUCTURAL_KINDS: frozenset[NodeKind] = frozenset({
-    NodeKind.CLASS, NodeKind.INTERFACE, NodeKind.ENUM, NodeKind.TYPE_ALIAS,
-})
 
 _SNIPPET_KIND_ORDER: list[NodeKind] = [
     NodeKind.CONSTRUCTOR,

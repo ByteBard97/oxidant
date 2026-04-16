@@ -99,7 +99,13 @@ def verify(state: OxidantState) -> dict:
     """Run the three verification checks (stub / branch parity / cargo check)."""
     manifest = Manifest.load(Path(state["manifest_path"]))
     node = manifest.nodes[state["current_node_id"]]
-    snippet = state.get("current_snippet") or ""
+    snippet = state.get("current_snippet")
+    if snippet is None:
+        # invoke_agent failed — short-circuit without running cargo check
+        return {
+            "verify_status": VerifyStatus.CARGO.value,
+            "last_error": state.get("last_error") or "Agent invocation failed (no snippet returned)",
+        }
 
     result = verify_snippet(
         node_id=node.node_id,
