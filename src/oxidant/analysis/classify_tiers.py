@@ -1,4 +1,11 @@
-"""Classify each manifest node into a translation tier using Claude Haiku."""
+"""Classify each manifest node into a translation tier.
+
+Two modes:
+- API mode (default): sends each node to Claude Haiku for LLM-based classification.
+  Requires ANTHROPIC_API_KEY in the environment.
+- Heuristic mode (--heuristic-tiers / classify_manifest_heuristic): uses deterministic
+  rules on complexity + idioms. No API calls. Useful for subscription-auth environments.
+"""
 
 from __future__ import annotations
 
@@ -6,11 +13,70 @@ import json
 import logging
 from pathlib import Path
 
-import anthropic
-
 from oxidant.models.manifest import Manifest, TranslationTier
 
 logger = logging.getLogger(__name__)
+
+# Idioms that indicate non-trivial Rust translation effort
+_SONNET_IDIOMS = frozenset({
+    "async_await",
+    "generator_function",
+    "class_inheritance",
+    "closure_capture",
+})
+
+_OPUS_IDIOMS = frozenset({
+    # none currently detected in the msagl-js corpus; reserved for future use
+})
+
+_STRUCTURAL_KINDS = frozenset({"enum", "interface", "type_alias"})
+
+def _heuristic_tier(node_kind: str, complexity: int, idioms: list[str]) -> TranslationTier:
+    """Return a tier without an API call.
+
+    Rules (conservative — err toward sonnet over haiku):
+    - Structural nodes with no logic (enum/interface/type_alias) → haiku
+    - Complexity ≤ 2 with no idioms → haiku
+    - Any OPUS idiom present → opus
+    - Complexity ≥ 10 → opus
+    - Otherwise → sonnet
+    """
+    idiom_set = set(idioms)
+
+    if idiom_set & _OPUS_IDIOMS:
+        return TranslationTier.OPUS
+    if complexity >= 10:
+        return TranslationTier.OPUS
+
+    if node_kind in _STRUCTURAL_KINDS and not idioms:
+        return TranslationTier.HAIKU
+    if complexity <= 2 and not idioms:
+        return TranslationTier.HAIKU
+
+    return TranslationTier.SONNET
+
+
+def classify_manifest_heuristic(manifest_path: Path) -> None:
+    """Classify all untiered nodes using deterministic heuristic rules. No API calls."""
+    manifest = Manifest.load(manifest_path)
+    changed = 0
+    for node_id, node in manifest.nodes.items():
+        if node.tier is not None:
+            continue
+        tier = _heuristic_tier(
+            node.node_kind.value,
+            node.cyclomatic_complexity,
+            node.idioms_needed,
+        )
+        manifest.nodes[node_id] = node.model_copy(
+            update={"tier": tier, "tier_reason": "heuristic"}
+        )
+        changed += 1
+        logger.debug("%-60s → %s (heuristic)", node_id, tier.value)
+
+    manifest.save(manifest_path)
+    logger.info("classify_manifest_heuristic: assigned tiers to %d nodes.", changed)
+
 
 _SYSTEM = """You are a TypeScript-to-Rust translation difficulty classifier.
 
@@ -34,7 +100,12 @@ Idioms: {idioms}
 
 
 def classify_manifest(manifest_path: Path, model: str) -> None:
-    """Classify all untiered nodes in the manifest. Saves once after all nodes are processed."""
+    """Classify all untiered nodes in the manifest. Saves once after all nodes are processed.
+
+    Requires ANTHROPIC_API_KEY in the environment. For subscription-auth environments,
+    use classify_manifest_heuristic instead.
+    """
+    import anthropic  # imported here so heuristic path doesn't require it
     manifest = Manifest.load(manifest_path)
     client = anthropic.Anthropic()
 

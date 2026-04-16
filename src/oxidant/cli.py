@@ -21,7 +21,9 @@ def phase_a(
     config: Path = typer.Option("oxidant.config.json", "--config", "-c"),
     manifest_out: Path = typer.Option("conversion_manifest.json", "--manifest-out"),
     skip_tiers: bool = typer.Option(False, "--skip-tiers",
-                                     help="Skip Haiku tier classification (no API call)"),
+                                     help="Skip tier classification entirely."),
+    heuristic_tiers: bool = typer.Option(False, "--heuristic-tiers",
+                                          help="Use deterministic heuristic tiers (no API call)."),
 ) -> None:
     """Run the full Phase A analysis pipeline.
 
@@ -64,6 +66,10 @@ def phase_a(
     # A4: Tier classification
     if skip_tiers:
         typer.echo("A4: skipped (--skip-tiers)")
+    elif heuristic_tiers:
+        typer.echo("A4: classifying tiers (heuristic, no API call)...")
+        from oxidant.analysis.classify_tiers import classify_manifest_heuristic
+        classify_manifest_heuristic(manifest_out)
     else:
         typer.echo("A4: classifying tiers...")
         from oxidant.analysis.classify_tiers import classify_manifest
@@ -84,6 +90,41 @@ def phase_a(
 
     typer.echo("\nNext step (manual): review idiom_candidates.json and generate idiom_dictionary.md")
     typer.echo("  Run a single Opus call with the detected patterns as input.")
+
+
+@app.command("classify-tiers")
+def classify_tiers(
+    manifest: Path = typer.Option("conversion_manifest.json", "--manifest"),
+    heuristic: bool = typer.Option(False, "--heuristic",
+                                    help="Use deterministic rules (no API call)."),
+    config: Path = typer.Option("oxidant.config.json", "--config", "-c"),
+) -> None:
+    """Run tier classification (A4) on an existing manifest without re-running Phase A.
+
+    By default uses Claude Haiku (requires ANTHROPIC_API_KEY). Pass --heuristic to
+    use deterministic rules instead.
+    """
+    from oxidant.analysis.classify_tiers import classify_manifest, classify_manifest_heuristic
+
+    if heuristic:
+        typer.echo("Classifying tiers (heuristic, no API call)...")
+        classify_manifest_heuristic(manifest)
+    else:
+        cfg = json.loads(config.read_text())
+        model = cfg["model_tiers"]["haiku"]
+        typer.echo(f"Classifying tiers with {model}...")
+        classify_manifest(manifest, model=model)
+
+    import json as _json
+    with open(manifest) as f:
+        m = _json.load(f)
+    nodes = m["nodes"]
+    from collections import Counter
+    tier_counts = Counter(n.get("tier") for n in nodes.values())
+    total = len(nodes)
+    typer.echo(f"Done. {total} nodes:")
+    for tier, count in sorted(tier_counts.items(), key=lambda x: x[0] or ""):
+        typer.echo(f"  {tier or 'None':8s}  {count}")
 
 
 @app.command("phase-b")
