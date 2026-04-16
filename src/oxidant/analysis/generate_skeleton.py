@@ -22,50 +22,108 @@ _PRIMITIVES: dict[str, str] = {
 }
 
 
-def map_ts_type(ts_type: str, known_classes: set[str] | None = None) -> str:
-    """Map a TypeScript type string to a Rust type string."""
+# Web/DOM API types that have no Rust equivalent — map to serde_json::Value
+_WEB_TYPES: frozenset[str] = frozenset({
+    "PointerEvent", "MouseEvent", "KeyboardEvent", "TouchEvent", "Event",
+    "EventTarget", "Element", "HTMLElement", "SVGElement", "SVGGElement",
+    "SVGPathElement", "SVGCircleElement", "SVGTextElement", "Document",
+    "Window", "Worker", "MessageEvent", "ErrorEvent", "ProgressEvent",
+    "AbortSignal", "URL", "URLSearchParams", "Blob", "File", "FileList",
+    "FormData", "Headers", "Request", "Response", "ReadableStream",
+    "WritableStream", "TransformStream", "WebSocket", "XMLHttpRequest",
+    "MutationObserver", "IntersectionObserver", "ResizeObserver",
+    "CanvasRenderingContext2D", "WebGLRenderingContext",
+    "AudioContext", "MediaStream", "RTCPeerConnection",
+})
+
+
+def map_ts_type(
+    ts_type: str,
+    known_classes: set[str] | None = None,
+    class_module: dict[str, str] | None = None,
+    known_interfaces: set[str] | None = None,
+    interface_module: dict[str, str] | None = None,
+    known_enums: set[str] | None = None,
+    enum_module: dict[str, str] | None = None,
+) -> str:
+    """Map a TypeScript type string to a Rust type string.
+
+    Uses fully-qualified `crate::module::Type` paths when module maps are
+    provided, so cross-module references compile without `use` imports.
+    """
     t = ts_type.strip()
     known = known_classes or set()
+    cmod = class_module or {}
+    ifaces = known_interfaces or set()
+    imod = interface_module or {}
+    enums = known_enums or set()
+    emod = enum_module or {}
+
+    def recurse(inner: str) -> str:
+        return map_ts_type(inner, known, cmod, ifaces, imod, enums, emod)
 
     if t in _PRIMITIVES:
         return _PRIMITIVES[t]
 
+    # Web/DOM types have no Rust equivalent
+    if t in _WEB_TYPES:
+        return "serde_json::Value"
+
     # T[]
     if t.endswith("[]"):
-        return f"Vec<{map_ts_type(t[:-2], known)}>"
+        return f"Vec<{recurse(t[:-2])}>"
 
     # Array<T>
     if m := re.fullmatch(r"Array<(.+)>", t):
-        return f"Vec<{map_ts_type(m.group(1), known)}>"
+        return f"Vec<{recurse(m.group(1))}>"
 
     # T | null / T | undefined
     parts = [p.strip() for p in t.split("|")]
     non_null = [p for p in parts if p not in ("null", "undefined")]
     if len(non_null) < len(parts):
         if len(non_null) == 1:
-            return f"Option<{map_ts_type(non_null[0], known)}>"
+            return f"Option<{recurse(non_null[0])}>"
         return "Option<serde_json::Value>"
 
     # Map<K, V>
     if m := re.fullmatch(r"Map<(.+?),\s*(.+)>", t):
-        return f"std::collections::HashMap<{map_ts_type(m.group(1), known)}, {map_ts_type(m.group(2), known)}>"
+        return f"std::collections::HashMap<{recurse(m.group(1))}, {recurse(m.group(2))}>"
 
     # Set<T>
     if m := re.fullmatch(r"Set<(.+)>", t):
-        return f"std::collections::HashSet<{map_ts_type(m.group(1), known)}>"
+        return f"std::collections::HashSet<{recurse(m.group(1))}>"
 
-    # Promise<T>
+    # Promise<T> — skeleton placeholder (no actual async runtime)
     if m := re.fullmatch(r"Promise<(.+)>", t):
-        return f"impl std::future::Future<Output = {map_ts_type(m.group(1), known)}>"
+        inner = recurse(m.group(1))
+        return f"std::pin::Pin<Box<dyn std::future::Future<Output = {inner}>>>"
 
-    # Generic type parameter (single capital or all caps)
-    if re.fullmatch(r"[A-Z][A-Z0-9]*", t):
-        return t
+    # Short names (≤3 chars) that are generic-param-like (Tr, Tp, PN, etc.)
+    # or all-caps short names — skeleton can't declare these as generics
+    if len(t) <= 3 and re.fullmatch(r"[A-Z][A-Za-z0-9]*", t):
+        return "serde_json::Value"
 
-    # Known or guessed class → Rc<RefCell<Foo>>
-    if t in known or re.fullmatch(r"[A-Z][a-zA-Z0-9]*", t):
+    # Known interface → trait object Rc<dyn Trait>
+    if t in ifaces:
+        if t in imod:
+            return f"Rc<dyn crate::{imod[t]}::{t}>"
+        return f"Rc<dyn {t}>"
+
+    # Known enum or type alias → plain path (no wrapping)
+    if t in enums:
+        if t in emod:
+            return f"crate::{emod[t]}::{t}"
+        # Type alias not in any module map — no Rust equivalent in skeleton
+        return "serde_json::Value"
+
+    # Known class (confirmed in manifest) → Rc<RefCell<Class>>
+    if t in known:
+        if t in cmod:
+            return f"Rc<RefCell<crate::{cmod[t]}::{t}>>"
         return f"Rc<RefCell<{t}>>"
 
+    # Unknown PascalCase type not in any manifest map → serde_json::Value
+    # (could be from unexported files, node_modules, or missing extraction)
     return "serde_json::Value"
 
 
@@ -103,8 +161,25 @@ def _struct_name(node_id: str) -> str:
 
 
 def _sanitize_param_name(name: str) -> str:
-    """Escape Rust keywords used as parameter names."""
-    return _escape_keyword(name)
+    """Sanitize a TypeScript parameter name for use as a Rust identifier.
+
+    Handles destructuring patterns ({uniforms}, [a, b]) and Rust keywords.
+    """
+    stripped = name.strip()
+    # Object or array destructuring — replace with a safe name
+    if stripped.startswith("{") or stripped.startswith("["):
+        # Extract first identifier from the pattern if possible
+        inner = re.sub(r"[{}\[\]]", " ", stripped).strip()
+        first = re.split(r"[\s,]+", inner)[0] if inner else ""
+        safe = re.sub(r"[^a-zA-Z0-9_]", "_", first) if first else "_destructured"
+        if not safe or not safe[0].isalpha() and safe[0] != "_":
+            safe = f"_{safe}"
+        return _escape_keyword(safe) if safe else "_destructured"
+    # Strip any remaining non-identifier characters
+    safe = re.sub(r"[^a-zA-Z0-9_]", "_", stripped)
+    if not safe or (not safe[0].isalpha() and safe[0] != "_"):
+        safe = f"_{safe}"
+    return _escape_keyword(safe)
 
 
 def generate_skeleton(manifest_path: Path, target_path: Path) -> None:
@@ -118,8 +193,50 @@ def generate_skeleton(manifest_path: Path, target_path: Path) -> None:
         if n.node_kind == NodeKind.CLASS
     }
 
+    # Build lookup tables: name → module for qualified cross-module paths
+    class_module: dict[str, str] = {
+        _struct_name(nid): _module_name(n.source_file)
+        for nid, n in manifest.nodes.items()
+        if n.node_kind == NodeKind.CLASS
+    }
+    known_interfaces = {
+        _struct_name(nid)
+        for nid, n in manifest.nodes.items()
+        if n.node_kind == NodeKind.INTERFACE
+    }
+    interface_module: dict[str, str] = {
+        _struct_name(nid): _module_name(n.source_file)
+        for nid, n in manifest.nodes.items()
+        if n.node_kind == NodeKind.INTERFACE
+    }
+    known_enums = {
+        _struct_name(nid)
+        for nid, n in manifest.nodes.items()
+        if n.node_kind == NodeKind.ENUM
+    }
+    enum_module: dict[str, str] = {
+        _struct_name(nid): _module_name(n.source_file)
+        for nid, n in manifest.nodes.items()
+        if n.node_kind == NodeKind.ENUM
+    }
+
+    # Type aliases have no direct Rust equivalent in the skeleton —
+    # add them to the web_types blocklist effectively by treating them as enums
+    # pointing to serde_json::Value (they won't appear in enum_module so the
+    # fallback is handled in map_ts_type's unknown-type path below)
+    known_type_aliases = {
+        _struct_name(nid)
+        for nid, n in manifest.nodes.items()
+        if n.node_kind == NodeKind.TYPE_ALIAS
+    }
+    # Merge type aliases into the enums set so they get a defined mapping
+    known_enums = known_enums | known_type_aliases
+
     def t(ts: str | None) -> str:
-        return map_ts_type(ts or "void", known_classes)
+        return map_ts_type(
+            ts or "void", known_classes, class_module,
+            known_interfaces, interface_module, known_enums, enum_module,
+        )
 
     by_module: dict[str, list[ConversionNode]] = defaultdict(list)
     for node in manifest.nodes.values():
@@ -169,10 +286,14 @@ def generate_skeleton(manifest_path: Path, target_path: Path) -> None:
         ]
 
         # Enums
+        seen_enums: set[str] = set()
         for node in nodes:
             if node.node_kind != NodeKind.ENUM:
                 continue
             name = _struct_name(node.node_id)
+            if name in seen_enums:
+                continue
+            seen_enums.add(name)
             lines += [
                 "#[derive(Debug, Clone, PartialEq)]",
                 f"pub enum {name} {{",
@@ -182,10 +303,14 @@ def generate_skeleton(manifest_path: Path, target_path: Path) -> None:
             ]
 
         # Interfaces → traits
+        seen_traits: set[str] = set()
         for node in nodes:
             if node.node_kind != NodeKind.INTERFACE:
                 continue
             name = _struct_name(node.node_id)
+            if name in seen_traits:
+                continue
+            seen_traits.add(name)
             lines += [
                 f"pub trait {name} {{",
                 "    // OXIDANT: trait methods not yet translated",
@@ -199,10 +324,15 @@ def generate_skeleton(manifest_path: Path, target_path: Path) -> None:
             if node.node_kind == NodeKind.METHOD and node.parent_class:
                 methods_by_class[node.parent_class].append(node)
 
+        seen_structs: set[str] = set()
         for node in nodes:
             if node.node_kind != NodeKind.CLASS:
                 continue
             sname = _struct_name(node.node_id)
+            # Deduplicate struct names within the module
+            if sname in seen_structs:
+                continue
+            seen_structs.add(sname)
             lines += [
                 "#[derive(Debug, Clone)]",
                 f"pub struct {sname} {{",
@@ -212,7 +342,7 @@ def generate_skeleton(manifest_path: Path, target_path: Path) -> None:
                 f"impl {sname} {{",
             ]
 
-            # Constructor
+            # Constructor (only emit one)
             ctor_id = f"{node.node_id}__constructor"
             if ctor_id in manifest.nodes:
                 ctor = manifest.nodes[ctor_id]
@@ -227,9 +357,16 @@ def generate_skeleton(manifest_path: Path, target_path: Path) -> None:
                     "",
                 ]
 
-            # Methods
+            # Methods — deduplicate overloads with numeric suffix
+            seen_methods: dict[str, int] = {}
             for m in methods_by_class.get(node.node_id, []):
-                mname = _escape_keyword(_to_snake(m.node_id.split("__")[-1]))
+                raw_name = m.node_id.split("__")[-1]
+                if not raw_name:  # trailing __ in node_id → skip
+                    continue
+                base = _escape_keyword(_to_snake(raw_name))
+                count = seen_methods.get(base, 0)
+                seen_methods[base] = count + 1
+                mname = base if count == 0 else f"{base}_{count}"
                 params = ", ".join(
                     f"{_sanitize_param_name(k)}: {t(v)}"
                     for k, v in m.parameter_types.items()
@@ -245,11 +382,15 @@ def generate_skeleton(manifest_path: Path, target_path: Path) -> None:
 
             lines += ["}", ""]
 
-        # Free functions
+        # Free functions — deduplicate overloads with numeric suffix
+        seen_fns: dict[str, int] = {}
         for node in nodes:
             if node.node_kind != NodeKind.FREE_FUNCTION:
                 continue
-            fname = _escape_keyword(_to_snake(node.node_id.split("__")[-1]))
+            base = _escape_keyword(_to_snake(node.node_id.split("__")[-1]))
+            count = seen_fns.get(base, 0)
+            seen_fns[base] = count + 1
+            fname = base if count == 0 else f"{base}_{count}"
             params = ", ".join(
                 f"{_sanitize_param_name(k)}: {t(v)}"
                 for k, v in node.parameter_types.items()
