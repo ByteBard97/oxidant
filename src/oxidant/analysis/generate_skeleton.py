@@ -75,9 +75,27 @@ def _to_snake(name: str) -> str:
     return s.lower()
 
 
+_RUST_KEYWORDS: frozenset[str] = frozenset({
+    "as", "break", "const", "continue", "crate", "else", "enum", "extern",
+    "false", "fn", "for", "if", "impl", "in", "let", "loop", "match", "mod",
+    "move", "mut", "pub", "ref", "return", "self", "Self", "static", "struct",
+    "super", "trait", "true", "type", "unsafe", "use", "where", "while",
+    "async", "await", "dyn", "abstract", "become", "box", "do", "final",
+    "macro", "override", "priv", "try", "typeof", "unsized", "virtual", "yield",
+})
+
+
+def _escape_keyword(name: str) -> str:
+    """Prefix Rust keywords with r# so they form valid raw identifiers."""
+    if name in _RUST_KEYWORDS:
+        return f"r#{name}"
+    return name
+
+
 def _module_name(source_file: str) -> str:
     stem = Path(source_file).stem
-    return re.sub(r"[^a-z0-9_]", "_", _to_snake(stem))
+    raw = re.sub(r"[^a-z0-9_]", "_", _to_snake(stem))
+    return _escape_keyword(raw)
 
 
 def _struct_name(node_id: str) -> str:
@@ -86,18 +104,7 @@ def _struct_name(node_id: str) -> str:
 
 def _sanitize_param_name(name: str) -> str:
     """Escape Rust keywords used as parameter names."""
-    _RUST_KEYWORDS = {
-        "type", "self", "Self", "super", "crate", "mod", "use", "pub", "fn",
-        "let", "mut", "const", "static", "struct", "enum", "trait", "impl",
-        "where", "for", "in", "if", "else", "match", "loop", "while", "break",
-        "continue", "return", "move", "ref", "box", "async", "await", "dyn",
-        "extern", "unsafe", "union", "abstract", "become", "do", "final",
-        "macro", "override", "priv", "try", "typeof", "unsized", "virtual",
-        "yield",
-    }
-    if name in _RUST_KEYWORDS:
-        return f"r#{name}"
-    return name
+    return _escape_keyword(name)
 
 
 def generate_skeleton(manifest_path: Path, target_path: Path) -> None:
@@ -222,7 +229,7 @@ def generate_skeleton(manifest_path: Path, target_path: Path) -> None:
 
             # Methods
             for m in methods_by_class.get(node.node_id, []):
-                mname = _to_snake(m.node_id.split("__")[-1])
+                mname = _escape_keyword(_to_snake(m.node_id.split("__")[-1]))
                 params = ", ".join(
                     f"{_sanitize_param_name(k)}: {t(v)}"
                     for k, v in m.parameter_types.items()
@@ -242,7 +249,7 @@ def generate_skeleton(manifest_path: Path, target_path: Path) -> None:
         for node in nodes:
             if node.node_kind != NodeKind.FREE_FUNCTION:
                 continue
-            fname = _to_snake(node.node_id.split("__")[-1])
+            fname = _escape_keyword(_to_snake(node.node_id.split("__")[-1]))
             params = ", ".join(
                 f"{_sanitize_param_name(k)}: {t(v)}"
                 for k, v in node.parameter_types.items()
