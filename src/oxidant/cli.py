@@ -86,6 +86,89 @@ def phase_a(
     typer.echo("  Run a single Opus call with the detected patterns as input.")
 
 
+@app.command("phase-b")
+def phase_b(
+    config: Path = typer.Option("oxidant.config.json", "--config", "-c"),
+    manifest: Path = typer.Option("conversion_manifest.json", "--manifest"),
+    snippets_dir: Path = typer.Option("snippets", "--snippets-dir"),
+    dry_run: bool = typer.Option(
+        False, "--dry-run",
+        help="Print the first node's prompt then exit — no API calls made.",
+    ),
+) -> None:
+    """Run Phase B: translate all nodes in topological order via Claude Code.
+
+    Requires a compiled skeleton from ``oxidant phase-a``.
+    Structural nodes (class/interface/enum/type_alias) are auto-converted first.
+    Exhausted nodes are written to ``review_queue.json``.
+    """
+    import json as _json
+
+    from oxidant.assembly.assemble import check_and_assemble
+    from oxidant.graph.graph import translation_graph
+    from oxidant.graph.nodes import build_context, pick_next_node
+    from oxidant.graph.state import OxidantState
+    from oxidant.models.manifest import Manifest as _Manifest
+
+    cfg = _json.loads(config.read_text())
+    manifest_obj = _Manifest.load(manifest)
+
+    count = manifest_obj.auto_convert_structural_nodes(manifest)
+    if count:
+        typer.echo(f"Auto-converted {count} structural nodes.")
+
+    snippets_dir.mkdir(parents=True, exist_ok=True)
+    target_path = Path(cfg["target_repo"])
+
+    initial_state = OxidantState(
+        manifest_path=str(manifest.resolve()),
+        target_path=str(target_path.resolve()),
+        snippets_dir=str(snippets_dir.resolve()),
+        config=cfg,
+        current_node_id=None,
+        current_prompt=None,
+        current_snippet=None,
+        current_tier=None,
+        attempt_count=0,
+        last_error=None,
+        verify_status=None,
+        review_queue=[],
+        done=False,
+    )
+
+    if dry_run:
+        s = pick_next_node(initial_state)
+        if s.get("done"):
+            typer.echo("No eligible nodes — all CONVERTED or blocked.")
+            return
+        # Merge update back into state for build_context
+        merged = {**initial_state, **s}
+        s2 = build_context(merged)
+        node_id = s.get("current_node_id")
+        prompt = s2.get("current_prompt", "")
+        typer.echo(f"Node: {node_id}")
+        typer.echo(f"Prompt length: {len(prompt)} chars")
+        typer.echo("\n--- prompt (first 3000 chars) ---")
+        typer.echo(prompt[:3000])
+        return
+
+    final_state = translation_graph.invoke(initial_state)
+
+    review_queue = final_state.get("review_queue", [])
+    if review_queue:
+        import json
+        rq_path = Path("review_queue.json")
+        rq_path.write_text(json.dumps(review_queue, indent=2))
+        typer.echo(f"\n{len(review_queue)} nodes queued for human review → {rq_path}")
+
+    manifest_final = _Manifest.load(manifest)
+    assembled = check_and_assemble(manifest_final, target_path)
+    if assembled:
+        typer.echo(f"Assembled {len(assembled)} module(s).")
+
+    typer.echo("\nPhase B complete.")
+
+
 @app.command()
 def translate(
     source: str = typer.Argument(..., help="Path to a .ts file"),
