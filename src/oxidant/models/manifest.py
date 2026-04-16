@@ -64,6 +64,11 @@ class ConversionNode(BaseModel):
     last_error: Optional[str] = None
 
 
+_STRUCTURAL_KINDS: frozenset[NodeKind] = frozenset({
+    NodeKind.CLASS, NodeKind.INTERFACE, NodeKind.ENUM, NodeKind.TYPE_ALIAS,
+})
+
+
 class Manifest(BaseModel):
     version: str = "1.0"
     source_repo: str
@@ -78,7 +83,12 @@ class Manifest(BaseModel):
         path.write_text(self.model_dump_json(indent=2))
 
     def eligible_nodes(self) -> list[ConversionNode]:
-        """NOT_STARTED nodes whose every dependency is CONVERTED."""
+        """NOT_STARTED nodes whose every in-manifest dependency is CONVERTED.
+
+        Dependencies referencing node IDs outside this manifest are ignored —
+        they represent unexported or cross-repo code not extracted by Phase A.
+        """
+        manifest_ids = set(self.nodes.keys())
         converted = {
             nid for nid, node in self.nodes.items()
             if node.status == NodeStatus.CONVERTED
@@ -86,9 +96,34 @@ class Manifest(BaseModel):
         return [
             node for node in self.nodes.values()
             if node.status == NodeStatus.NOT_STARTED
-            and all(dep in converted for dep in node.type_dependencies)
-            and all(dep in converted for dep in node.call_dependencies)
+            and all(
+                dep in converted
+                for dep in node.type_dependencies
+                if dep in manifest_ids
+            )
+            and all(
+                dep in converted
+                for dep in node.call_dependencies
+                if dep in manifest_ids
+            )
         ]
+
+    def auto_convert_structural_nodes(self, path: Path) -> int:
+        """Mark all structural nodes (no function body to translate) as CONVERTED.
+
+        CLASS, INTERFACE, ENUM, and TYPE_ALIAS nodes are fully represented by the
+        skeleton — they require no agent invocation. Returns the count converted.
+        """
+        count = 0
+        for node_id, node in self.nodes.items():
+            if node.node_kind in _STRUCTURAL_KINDS and node.status == NodeStatus.NOT_STARTED:
+                self.nodes[node_id] = node.model_copy(
+                    update={"status": NodeStatus.CONVERTED}
+                )
+                count += 1
+        if count:
+            self.save(path)
+        return count
 
     def update_node(self, path: Path, node_id: str, **fields: object) -> None:
         """Update a node's fields and persist the manifest to disk."""
