@@ -453,8 +453,8 @@
       "bfs_level": null,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "in_progress",
-      "snippet_path": null,
+      "status": "converted",
+      "snippet_path": "/Users/ceres/Desktop/SignalCanvas/oxidant/snippets/drawing_graph/modules__drawing__src__drawingGraph__DrawingGraph__getDrawingGraph.rs",
       "attempt_count": 0,
       "last_error": null
     },
@@ -483,8 +483,8 @@
       "bfs_level": null,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
-      "snippet_path": null,
+      "status": "converted",
+      "snippet_path": "/Users/ceres/Desktop/SignalCanvas/oxidant/snippets/drawing_graph/modules__drawing__src__drawingGraph__DrawingGraph__findNode.rs",
       "attempt_count": 0,
       "last_error": null
     },
@@ -543,8 +543,8 @@
       "bfs_level": null,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
-      "snippet_path": null,
+      "status": "converted",
+      "snippet_path": "/Users/ceres/Desktop/SignalCanvas/oxidant/snippets/drawing_graph/modules__drawing__src__drawingGraph__DrawingGraph__createGeometry.rs",
       "attempt_count": 0,
       "last_error": null
     },
@@ -574,8 +574,8 @@
       "bfs_level": null,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
-      "snippet_path": null,
+      "status": "converted",
+      "snippet_path": "/Users/ceres/Desktop/SignalCanvas/oxidant/snippets/drawing_graph/modules__drawing__src__drawingGraph__DrawingGraph__createEdgeGeometry.rs",
       "attempt_count": 0,
       "last_error": null
     },
@@ -609,10 +609,10 @@
       "bfs_level": null,
       "tier": "opus",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "Branch parity: TypeScript=22 branches, Rust=1 (below 60% floor)"
     },
     "modules__drawing__src__drawingGraph__DrawingGraph__createNodeGeometry": {
       "node_id": "modules__drawing__src__drawingGraph__DrawingGraph__createNodeGeometry",
@@ -714,10 +714,10 @@
       "bfs_level": null,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "    Checking msagl-rs v0.1.0 (/Users/ceres/Desktop/SignalCanvas/oxidant/corpora/msagl-rs)\nsrc/adjacent_swaps_with_constraints.rs:12:226: error[E0425]: cannot find type `LayerInfo` in module `crate::layer_info`: not found in `crate::layer_info`\nsrc/all_pairs_distances.rs:12:51: error[E0405]: cannot find trait `IGeomGraph` in module `crate::i_geom_graph`: not found in `crate::i_geom_graph`\nsrc/broken_cone_side.rs:12:152: error[E0425]: cannot find type `ConeSide` in module `crate::cone_side`: not found in `crate::cone_side`\nsrc/bundle_router.rs:36:132: error[E0425]: cannot find type `Port` in module `crate::port`: not found in `crate::port`\nsrc/bundle_router.rs:44:154: error[E0425]: cannot find type `Port` in module `crate::port`: not found in `crate::port`\nsrc/combinatorial_nudger.rs:56:232: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/combinatorial_nudger.rs:60:120: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/combinatorial_nudger.rs:60:207: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/combinatorial_nudger.rs:72:175: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:12:45: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:16:61: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:16:93: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:20:60: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:20:92: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\ns"
     },
     "modules__drawing__src__drawingNode__DrawingNode": {
       "node_id": "modules__drawing__src__drawingNode__DrawingNode",
@@ -781,10 +781,10 @@
       "bfs_level": null,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "    Checking msagl-rs v0.1.0 (/Users/ceres/Desktop/SignalCanvas/oxidant/corpora/msagl-rs)\nsrc/adjacent_swaps_with_constraints.rs:12:226: error[E0425]: cannot find type `LayerInfo` in module `crate::layer_info`: not found in `crate::layer_info`\nsrc/all_pairs_distances.rs:12:51: error[E0405]: cannot find trait `IGeomGraph` in module `crate::i_geom_graph`: not found in `crate::i_geom_graph`\nsrc/broken_cone_side.rs:12:152: error[E0425]: cannot find type `ConeSide` in module `crate::cone_side`: not found in `crate::cone_side`\nsrc/bundle_router.rs:36:132: error[E0425]: cannot find type `Port` in module `crate::port`: not found in `crate::port`\nsrc/bundle_router.rs:44:154: error[E0425]: cannot find type `Port` in module `crate::port`: not found in `crate::port`\nsrc/combinatorial_nudger.rs:56:232: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/combinatorial_nudger.rs:60:120: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/combinatorial_nudger.rs:60:207: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/combinatorial_nudger.rs:72:175: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:12:45: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:16:61: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:16:93: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:20:60: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:20:92: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\ns"
     },
     "modules__drawing__src__drawingNode__DrawingNode__clone": {
       "node_id": "modules__drawing__src__drawingNode__DrawingNode__clone",
@@ -1214,10 +1214,10 @@
       "bfs_level": null,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "    Checking msagl-rs v0.1.0 (/Users/ceres/Desktop/SignalCanvas/oxidant/corpora/msagl-rs)\nsrc/adjacent_swaps_with_constraints.rs:12:226: error[E0425]: cannot find type `LayerInfo` in module `crate::layer_info`: not found in `crate::layer_info`\nsrc/all_pairs_distances.rs:12:51: error[E0405]: cannot find trait `IGeomGraph` in module `crate::i_geom_graph`: not found in `crate::i_geom_graph`\nsrc/broken_cone_side.rs:12:152: error[E0425]: cannot find type `ConeSide` in module `crate::cone_side`: not found in `crate::cone_side`\nsrc/bundle_router.rs:36:132: error[E0425]: cannot find type `Port` in module `crate::port`: not found in `crate::port`\nsrc/bundle_router.rs:44:154: error[E0425]: cannot find type `Port` in module `crate::port`: not found in `crate::port`\nsrc/combinatorial_nudger.rs:56:232: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/combinatorial_nudger.rs:60:120: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/combinatorial_nudger.rs:60:207: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/combinatorial_nudger.rs:72:175: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:12:45: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:16:61: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:16:93: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:20:60: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\nsrc/compass_vector.rs:20:92: error[E0425]: cannot find type `Direction` in module `crate::direction`: not found in `crate::direction`\ns"
     },
     "modules__parser__src__dotparser__DotParser__newNode": {
       "node_id": "modules__parser__src__dotparser__DotParser__newNode",
@@ -1249,7 +1249,7 @@
       "bfs_level": null,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "in_progress",
       "snippet_path": null,
       "attempt_count": 0,
       "last_error": null

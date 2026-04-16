@@ -1,0 +1,1 @@
+crate::drawing_object::DrawingObject::get_drawing_obj(g)
