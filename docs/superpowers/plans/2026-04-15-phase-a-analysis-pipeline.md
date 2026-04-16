@@ -199,7 +199,7 @@ Create `tests/test_manifest.py`:
 ```python
 import pytest
 from pathlib import Path
-from src.oxidant.models.manifest import (
+from oxidant.models.manifest import (
     ConversionNode, Manifest, NodeKind, NodeStatus, TranslationTier
 )
 
@@ -1219,8 +1219,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.oxidant.models.manifest import ConversionNode, Manifest, NodeKind, TranslationTier
-from src.oxidant.analysis.classify_tiers import classify_manifest
+from oxidant.models.manifest import ConversionNode, Manifest, NodeKind, TranslationTier
+from oxidant.analysis.classify_tiers import classify_manifest
 
 
 def _node(node_id: str, complexity: int = 1, idioms: list[str] | None = None) -> ConversionNode:
@@ -1301,7 +1301,7 @@ from pathlib import Path
 
 import anthropic
 
-from src.oxidant.models.manifest import Manifest, TranslationTier
+from oxidant.models.manifest import Manifest, TranslationTier
 
 logger = logging.getLogger(__name__)
 
@@ -1409,8 +1409,8 @@ from pathlib import Path
 
 import pytest
 
-from src.oxidant.models.manifest import ConversionNode, Manifest, NodeKind, TranslationTier
-from src.oxidant.analysis.generate_skeleton import map_ts_type, generate_skeleton
+from oxidant.models.manifest import ConversionNode, Manifest, NodeKind, TranslationTier
+from oxidant.analysis.generate_skeleton import map_ts_type, generate_skeleton
 
 
 # ── Type mapper unit tests ────────────────────────────────────────────────────
@@ -1523,7 +1523,7 @@ import textwrap
 from collections import defaultdict
 from pathlib import Path
 
-from src.oxidant.models.manifest import ConversionNode, Manifest, NodeKind
+from oxidant.models.manifest import ConversionNode, Manifest, NodeKind
 
 # TypeScript built-ins → Rust
 _PRIMITIVES: dict[str, str] = {
@@ -1907,7 +1907,7 @@ def phase_a(
 
     # A3: Topological sort
     typer.echo("A3: computing topological order...")
-    from src.oxidant.models.manifest import Manifest
+    from oxidant.models.manifest import Manifest
     manifest = Manifest.load(manifest_out)
     try:
         manifest.compute_topology()
@@ -1920,12 +1920,12 @@ def phase_a(
         typer.echo("A4: skipped (--skip-tiers)")
     else:
         typer.echo("A4: classifying tiers...")
-        from src.oxidant.analysis.classify_tiers import classify_manifest
+        from oxidant.analysis.classify_tiers import classify_manifest
         classify_manifest(manifest_out, model=model)
 
     # A5: Skeleton generation
     typer.echo("A5: generating Rust skeleton...")
-    from src.oxidant.analysis.generate_skeleton import generate_skeleton
+    from oxidant.analysis.generate_skeleton import generate_skeleton
     generate_skeleton(manifest_out, target_repo)
 
     # Verify skeleton compiles
