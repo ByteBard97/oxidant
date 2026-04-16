@@ -23,6 +23,9 @@ def test_map_unknown_class():
 def test_map_map_type():
     assert map_ts_type("Map<string, number>") == "std::collections::HashMap<String, f64>"
 
+def test_map_set_type():
+    assert map_ts_type("Set<string>") == "std::collections::HashSet<String>"
+
 
 # ── Integration: generated skeleton must compile ──────────────────────────────
 
