@@ -1239,7 +1239,7 @@ def _manifest(nodes: dict) -> Manifest:
     return Manifest(source_repo=".", generated_at="2026-04-15", nodes=nodes)
 
 
-@patch("src.oxidant.analysis.classify_tiers.anthropic.Anthropic")
+@patch("oxidant.analysis.classify_tiers.anthropic.Anthropic")
 def test_simple_node_classified_haiku(mock_cls, tmp_path):
     mock_cls.return_value.messages.create.return_value = MagicMock(
         content=[MagicMock(text='{"tier": "haiku", "reason": "simple getter"}')]
@@ -1251,7 +1251,7 @@ def test_simple_node_classified_haiku(mock_cls, tmp_path):
     assert Manifest.load(p).nodes["x__foo"].tier == TranslationTier.HAIKU
 
 
-@patch("src.oxidant.analysis.classify_tiers.anthropic.Anthropic")
+@patch("oxidant.analysis.classify_tiers.anthropic.Anthropic")
 def test_complex_node_classified_opus(mock_cls, tmp_path):
     mock_cls.return_value.messages.create.return_value = MagicMock(
         content=[MagicMock(text='{"tier": "opus", "reason": "cyclic references"}')]
@@ -1266,7 +1266,7 @@ def test_complex_node_classified_opus(mock_cls, tmp_path):
     assert result.tier_reason
 
 
-@patch("src.oxidant.analysis.classify_tiers.anthropic.Anthropic")
+@patch("oxidant.analysis.classify_tiers.anthropic.Anthropic")
 def test_invalid_json_falls_back_to_sonnet(mock_cls, tmp_path):
     mock_cls.return_value.messages.create.return_value = MagicMock(
         content=[MagicMock(text="not json")]
