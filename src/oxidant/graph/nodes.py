@@ -23,6 +23,12 @@ _DEFAULT_MAX_ATTEMPTS = 3
 
 def pick_next_node(state: OxidantState) -> dict:
     """Select the lowest-topological-order eligible node, or signal done."""
+    max_nodes = state.get("max_nodes")
+    nodes_this_run = state.get("nodes_this_run", 0)
+    if max_nodes is not None and nodes_this_run >= max_nodes:
+        logger.info("Reached --max-nodes limit (%d). Stopping.", max_nodes)
+        return {"current_node_id": None, "done": True}
+
     manifest = Manifest.load(Path(state["manifest_path"]))
     eligible = manifest.eligible_nodes()
 
@@ -185,7 +191,7 @@ def update_manifest(state: OxidantState) -> dict:
         attempt_count=state.get("attempt_count", 0),
     )
     logger.info("CONVERTED: %s → %s", node_id, snippet_path)
-    return {}
+    return {"nodes_this_run": state.get("nodes_this_run", 0) + 1}
 
 
 def queue_for_review(state: OxidantState) -> dict:
@@ -211,4 +217,4 @@ def queue_for_review(state: OxidantState) -> dict:
     }
     logger.warning("HUMAN_REVIEW: %s (exhausted all retries)", node_id)
     # Return only the NEW entry — the operator.add reducer accumulates it
-    return {"review_queue": [entry]}
+    return {"review_queue": [entry], "nodes_this_run": state.get("nodes_this_run", 0) + 1}

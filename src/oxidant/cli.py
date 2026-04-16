@@ -136,6 +136,10 @@ def phase_b(
         False, "--dry-run",
         help="Print the first node's prompt then exit — no API calls made.",
     ),
+    max_nodes: int = typer.Option(
+        None, "--max-nodes",
+        help="Stop after translating this many nodes. Useful for smoke tests.",
+    ),
 ) -> None:
     """Run Phase B: translate all nodes in topological order via Claude Code.
 
@@ -175,6 +179,8 @@ def phase_b(
         verify_status=None,
         review_queue=[],
         done=False,
+        max_nodes=max_nodes,
+        nodes_this_run=0,
     )
 
     if dry_run:

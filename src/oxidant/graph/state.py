@@ -26,3 +26,5 @@ class OxidantState(TypedDict):
 
     # ── Loop control ──────────────────────────────────────────────────────────
     done: bool
+    max_nodes: Optional[int]     # stop after this many nodes (None = run all)
+    nodes_this_run: int          # incremented each time a node completes or is queued
