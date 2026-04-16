@@ -145,7 +145,7 @@ def test_handles_malformed_json_lines_gracefully(tmp_path):
     assert len(warnings) == 1
 
 
-def test_no_code_field_warning_skipped(tmp_path):
+def test_no_code_field_warning_included(tmp_path):
     """Warnings without a lint code (e.g. bare 'unused variable') are included with empty code."""
     line = json.dumps({
         "reason": "compiler-message",
