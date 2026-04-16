@@ -91,7 +91,11 @@ def _intersect_with_manifest(
     files_with_errors: list[str],
     manifest_path: Path,
 ) -> list[str]:
-    """Return files from files_with_errors that have a CONVERTED node in the manifest.
+    """Return Rust files from files_with_errors that correspond to CONVERTED manifest nodes.
+
+    The manifest stores TypeScript source paths (e.g. ``geomGraph.ts``).
+    Cargo reports Rust file paths (e.g. ``src/geom_graph.rs``).
+    The correspondence is via stem: ``_module_name("geomGraph.ts") == Path("src/geom_graph.rs").stem``.
 
     If manifest_path does not exist, returns an empty list (safe fallback for
     projects that haven't run Phase A/B yet).
@@ -99,15 +103,16 @@ def _intersect_with_manifest(
     if not manifest_path.exists():
         return []
 
+    from oxidant.analysis.generate_skeleton import _module_name
     from oxidant.models.manifest import Manifest, NodeStatus
 
     manifest = Manifest.load(manifest_path)
-    converted_source_files = {
-        node.source_file
+    converted_rust_stems: set[str] = {
+        _module_name(node.source_file)
         for node in manifest.nodes.values()
         if node.status == NodeStatus.CONVERTED
     }
-    return [f for f in files_with_errors if f in converted_source_files]
+    return [f for f in files_with_errors if Path(f).stem in converted_rust_stems]
 
 
 def run_full_build(target_path: Path) -> tuple[bool, str]:
