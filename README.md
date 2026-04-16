@@ -17,6 +17,62 @@ Oxidant drives a four-phase pipeline that reads a TypeScript codebase, analyzes 
 | **C — Refinement** | `cargo clippy` auto-fix for mechanical warnings; structural warnings surfaced for review |
 | **D — Integration** | `cargo build --release`, error parsing, manifest intersection, retranslation hints |
 
+```mermaid
+flowchart LR
+
+    subgraph phaseA ["Phase A — Analysis"]
+        direction TB
+        tsFiles[".ts source files"]
+        astExtract["ts-morph AST<br>extraction"]
+        idiomDetect["idiom detection<br>& classification"]
+        topoSort["topological sort<br>by dependency"]
+        skeleton["Rust skeleton<br>generation"]
+        tsFiles --> astExtract --> idiomDetect --> topoSort --> skeleton
+    end
+
+    manifest[("conversion_manifest.json<br>+ Rust skeletons")]
+
+    subgraph phaseB ["Phase B — Translation"]
+        direction TB
+        pickNode["pick next node<br>(topo order)"]
+        buildCtx["build context<br>TS src + deps + idioms"]
+        claudeCall["claude --print<br>(haiku → sonnet → opus)"]
+        verifySnip["verify snippet<br>stub · branch · cargo check"]
+        pickNode --> buildCtx --> claudeCall --> verifySnip
+        verifySnip -->|"fail: retry / escalate"| buildCtx
+    end
+
+    snippets[/"snippets/*.rs<br>(per-node Rust)"/]
+
+    subgraph phaseC ["Phase C — Refinement"]
+        direction TB
+        clippyFix["cargo clippy --fix<br>mechanical auto-fix"]
+        clippyReview["structural warnings<br>surfaced for review"]
+        clippyFix --> clippyReview
+    end
+
+    subgraph phaseD ["Phase D — Integration"]
+        direction TB
+        cargoBuild["cargo build --release"]
+        errorParse["error parsing +<br>retranslation hints"]
+        cargoBuild --> errorParse
+    end
+
+    phaseA ==> manifest
+    manifest ==> phaseB
+    phaseB ==> snippets
+    snippets ==> phaseC
+    phaseC ==> phaseD
+
+    classDef io fill:#fed7aa,stroke:#c2410c,color:#374151
+    classDef ai fill:#ddd6fe,stroke:#6d28d9,color:#374151
+    classDef success fill:#a7f3d0,stroke:#047857,color:#374151
+
+    class manifest,snippets io
+    class claudeCall ai
+    class verifySnip success
+```
+
 ## Quick Start
 
 ```bash
@@ -70,6 +126,54 @@ For each node, Phase B:
 3. Verifies the snippet: stub check → branch parity → `cargo check`
 4. Retries with error context, escalating haiku → sonnet → opus if needed
 5. Marks the node `CONVERTED` or queues it for human review
+
+```mermaid
+stateDiagram-v2
+    direction LR
+
+    [*] --> pick_next_node
+
+    state "pick_next_node<br>find next PENDING node" as pick_next_node
+    state "build_context<br>TS src + deps + idiom hints" as build_context
+    state "invoke_agent<br>claude --print (current tier)" as invoke_agent
+    state "verify<br>stub · branch parity · cargo check" as verify
+    state "retry_node<br>same tier, +error context" as retry_node
+    state "escalate_node<br>haiku → sonnet → opus" as escalate_node
+    state "update_manifest<br>mark CONVERTED, save snippet" as update_manifest
+    state "queue_for_review<br>mark NEEDS_REVIEW" as queue_for_review
+
+    pick_next_node --> build_context : nodes remain
+    pick_next_node --> [*] : all done
+
+    build_context --> invoke_agent
+    invoke_agent --> verify
+
+    verify --> update_manifest : PASS
+    verify --> retry_node : fail, attempts < 3
+    verify --> escalate_node : fail, attempts = 3
+    verify --> queue_for_review : fail, already at opus
+
+    retry_node --> build_context
+    escalate_node --> build_context
+
+    update_manifest --> pick_next_node
+    queue_for_review --> pick_next_node
+
+    pick_next_node:::primary
+    invoke_agent:::ai
+    verify:::decision
+    update_manifest:::success
+    queue_for_review:::error
+    retry_node:::trigger
+    escalate_node:::trigger
+
+    classDef primary fill:#3b82f6,stroke:#1e3a5f,color:#ffffff
+    classDef ai fill:#ddd6fe,stroke:#6d28d9,color:#374151
+    classDef decision fill:#fef3c7,stroke:#b45309,color:#374151
+    classDef success fill:#a7f3d0,stroke:#047857,color:#374151
+    classDef error fill:#fecaca,stroke:#b91c1c,color:#374151
+    classDef trigger fill:#fed7aa,stroke:#c2410c,color:#374151
+```
 
 ## License
 
