@@ -41,3 +41,13 @@ node_modules/
 
 # Git worktrees
 .worktrees/
+/.playwright-mcp
+docs/diagram-research.md
+
+# Claude / Superpowers tooling
+.claude/
+.superpowers/
+
+# Screenshots
+*.png
+*.jpg
