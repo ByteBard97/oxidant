@@ -100,16 +100,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
 import { useRunStore } from '../store'
-import { useConfirm } from '../composables/useConfirm'
-import { api } from '../api'
-import { connectSSE, disconnectSSE } from '../sse'
+import { useRunActions } from '../composables/useRunActions'
 import Tooltip from './Tooltip.vue'
 
 const store = useRunStore()
-const { confirm } = useConfirm()
-const error = ref('')
+const { start, pause, abort, error } = useRunActions()
 
 const modeOptions = [
   {
@@ -128,47 +124,4 @@ const modeOptions = [
     description: 'Human approves every node. Full control. Use for critical or complex files.',
   },
 ]
-
-async function start() {
-  error.value = ''
-  try {
-    const res = await api.startRun({
-      manifest_path: store.manifestPath,
-      target_path:   store.targetPath,
-      review_mode:   store.reviewMode,
-      thread_id:     store.status === 'paused' ? store.threadId : null,
-    })
-    store.setThreadId(res.thread_id)
-    connectSSE(res.thread_id)
-  } catch (e) {
-    error.value = String(e)
-  }
-}
-
-async function pause() {
-  if (!store.threadId) return
-  try {
-    await api.pauseRun(store.threadId)
-    store.setStatus('paused')
-    disconnectSSE()
-  } catch (e) {
-    error.value = String(e)
-  }
-}
-
-async function abort() {
-  if (!store.threadId) return
-  const ok = await confirm(
-    'Abort this run? State will be discarded and the run cannot be resumed.',
-    'ABORT RUN',
-  )
-  if (!ok) return
-  try {
-    await api.abortRun(store.threadId)
-    store.setStatus('aborted')
-    disconnectSSE()
-  } catch (e) {
-    error.value = String(e)
-  }
-}
 </script>

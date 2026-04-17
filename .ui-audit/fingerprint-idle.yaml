@@ -1,0 +1,57 @@
+version: 2
+page:
+  url: http://localhost:5173/
+  title: Oxidant
+  viewport:
+    width: 1440
+    height: 900
+  theme: dark
+  background: rgb(18, 20, 22)
+  layout: header + sidebar + main
+  landmarks:
+    - banner
+    - navigation
+    - main
+  capturedAt: 2026-04-17T04:48:23.919Z
+regions:
+  banner:
+    role: banner
+    bounds:
+      x: 0
+      y: 0
+      width: 1440
+      height: 48
+    background: rgb(26, 28, 30)
+    childCount: 2
+    components: []
+    _screenshotFile: screenshots/region-banner.png
+    _estimated_tokens: 42
+  navigation:
+    role: navigation
+    bounds:
+      x: 0
+      y: 48
+      width: 256
+      height: 852
+    background: rgb(26, 28, 30)
+    childCount: 3
+    components: []
+    _screenshotFile: screenshots/region-navigation.png
+    _estimated_tokens: 44
+  main:
+    role: main
+    bounds:
+      x: 256
+      y: 48
+      width: 1184
+      height: 852
+    background: rgb(26, 28, 30)
+    childCount: 2
+    components: []
+    _screenshotFile: screenshots/region-main.png
+    _estimated_tokens: 42
+ungrouped: []
+state:
+  name: idle
+  modals: none
+  selection: null

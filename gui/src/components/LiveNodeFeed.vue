@@ -47,6 +47,8 @@
 <script setup lang="ts">
 import { computed, ref, watch, nextTick } from 'vue'
 import { useRunStore } from '../store'
+import { MAX_RECENT_EVENTS } from '../utils/constants'
+import { shortId } from '../utils/strings'
 
 const store = useRunStore()
 const logEl = ref<HTMLElement | null>(null)
@@ -54,7 +56,7 @@ const logEl = ref<HTMLElement | null>(null)
 const activeNodeList = computed(() => Object.values(store.activeNodes))
 
 const parsedEvents = computed(() => {
-  return store.recentEvents.slice(0, 50).map(raw => {
+  return store.recentEvents.slice(0, MAX_RECENT_EVENTS).map(raw => {
     try { return JSON.parse(raw) } catch { return { event: 'unknown' } }
   })
 })
@@ -65,10 +67,6 @@ watch(parsedEvents, () => {
   })
 })
 
-function shortId(id: string): string {
-  const parts = id.split('/')
-  return '...' + parts.slice(-2).join('/')
-}
 
 function timestamp(_evt: Record<string, unknown>): string {
   const now = new Date()

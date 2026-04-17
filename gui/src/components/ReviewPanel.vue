@@ -90,6 +90,7 @@
 import { ref, watch } from 'vue'
 import { useRunStore } from '../store'
 import { useConfirm } from '../composables/useConfirm'
+import { shortId } from '../utils/strings'
 import { api } from '../api'
 import { connectSSE } from '../sse'
 import CodeBlock from './CodeBlock.vue'
@@ -106,10 +107,6 @@ watch(
   { immediate: true },
 )
 
-function shortId(id: string): string {
-  const parts = id.split('/')
-  return '...' + parts.slice(-2).join('/')
-}
 
 async function resume() {
   if (!store.threadId || !store.pendingReview) return
@@ -132,6 +129,7 @@ async function skip() {
   const ok = await confirm(
     'Skip this node? It will be written to the review queue and require manual attention.',
     'SKIP NODE',
+    'SKIP',
   )
   if (!ok) return
   submitting.value = true

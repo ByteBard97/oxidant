@@ -41,7 +41,7 @@
                      border-b-2 border-[#8a2a10]
                      hover:brightness-110 transition-all"
             >
-              Skip Node
+              {{ confirmLabel }}
             </button>
           </div>
 
@@ -53,7 +53,7 @@
 
 <script setup lang="ts">
 import { useConfirm } from '../composables/useConfirm'
-const { visible, title, message, accept, cancel } = useConfirm()
+const { visible, title, message, confirmLabel, accept, cancel } = useConfirm()
 </script>
 
 <style scoped>

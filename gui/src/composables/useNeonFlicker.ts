@@ -9,6 +9,12 @@ import { ref, onMounted, onUnmounted } from 'vue'
  *   drift    — slow fade down then recovery (power sag)
  *   brownout — stays dim for 1-3 s, then snaps back
  */
+// Probability that the quiet window between events is a long calm (vs short cluster)
+const LONG_PAUSE_PROBABILITY = 0.7
+// Personality roll thresholds — stutter below 0.50, drift below 0.80, else brownout
+const STUTTER_THRESHOLD  = 0.50
+const DRIFT_THRESHOLD    = 0.80
+
 export function useNeonFlicker() {
   const opacity = ref(1)
   let nextId: ReturnType<typeof setTimeout> | null = null
@@ -74,15 +80,15 @@ export function useNeonFlicker() {
   function scheduleNext() {
     // Quiet window between events: 400 ms – 9 s
     // Weighted toward long pauses (sign mostly stable)
-    const quietMs = Math.random() < 0.7
+    const quietMs = Math.random() < LONG_PAUSE_PROBABILITY
       ? rng(2000, 9000)   // long calm
       : rng(400, 1800)    // short calm (cluster of activity)
 
     nextId = setTimeout(() => {
       const roll = Math.random()
-      if      (roll < 0.50) stutter()
-      else if (roll < 0.80) drift()
-      else                   brownout()
+      if      (roll < STUTTER_THRESHOLD) stutter()
+      else if (roll < DRIFT_THRESHOLD)   drift()
+      else                               brownout()
 
       scheduleNext()
     }, quietMs)
