@@ -9,10 +9,12 @@
 ::-webkit-scrollbar-thumb:hover { background: #37393b; }
 
 /* ── Resize drag handle ──────────────────────────────────────────────────── */
-/* Resting: nearly invisible — just a 4px accent stripe.                      */
-/* Hover: tick marks appear and accent glows.                                 */
+/* Looks like a recessed rust-stained metal seam between two panels.         */
+/* Rust texture is the background of the whole handle strip; a dark mask     */
+/* sits on top at rest (mostly hiding it) and fades on hover to reveal the   */
+/* texture underneath.  The right 3px accent carries the review-state hue.   */
 .resize-handle {
-  width: 14px;
+  width: 16px;
   cursor: col-resize;
   display: flex;
   flex-direction: row;
@@ -20,34 +22,33 @@
   position: relative;
   z-index: 10;
   flex-shrink: 0;
+  /* Rust texture tiles across the strip */
+  background-image: url('/rust-texture.png');
+  background-size: 200px 200px;
+  background-position: 50% 0;
 }
 
-/* Left 10px: invisible at rest, subtle ticks on hover */
+/* Dark mask that obscures the texture at rest */
 .resize-handle-dashes {
   flex: 1;
-  background: transparent;
-  transition: background 150ms;
+  background: rgba(15, 12, 10, 0.86);
+  transition: background 220ms ease;
 }
 
-/* Right 4px: coloured accent that carries the review-state colour */
+/* Right accent stripe: review-state colour bound via Tailwind class in App.vue */
 .resize-handle-accent {
-  width: 4px;
+  width: 3px;
   flex-shrink: 0;
   transition: background 300ms, box-shadow 300ms;
 }
 
+/* Hover: lift the mask, reveal the rust, glow the accent */
 .resize-handle:hover .resize-handle-dashes {
-  background: repeating-linear-gradient(
-    to bottom,
-    #57423b99 0px,
-    #57423b99 3px,
-    transparent 3px,
-    transparent 8px
-  );
+  background: rgba(40, 20, 8, 0.38);
 }
 
 .resize-handle:hover .resize-handle-accent {
-  box-shadow: -4px 0 12px rgba(255,181,157,0.35);
+  box-shadow: -5px 0 14px rgba(255, 181, 157, 0.40);
 }
 
 /* Pulse animation for status dots */
