@@ -48,6 +48,10 @@ docs/diagram-research.md
 .claude/
 .superpowers/
 
+# Myopex UI verification output
+gui/.myopex-baseline/
+gui/.myopex-current/
+
 # Screenshots
 *.png
 *.jpg
