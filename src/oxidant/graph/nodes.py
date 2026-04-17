@@ -243,7 +243,7 @@ def supervisor_node(state: OxidantState) -> dict:
     hint_prompt = (
         f"You are reviewing a failed TypeScript-to-Rust translation.\n\n"
         f"Node: {node_id}\n"
-        f"Last error:\n{state.get('last_error', 'unknown')[:500]}\n\n"
+        f"Last error:\n{(state.get('last_error') or 'unknown')[:500]}\n\n"
         f"TypeScript source:\n```typescript\n{node.source_text[:600]}\n```\n\n"
         f"Generate a 2-3 sentence concrete hint for the translator's next attempt. "
         f"Focus on the specific error and what to do differently. Be concrete, not generic."
@@ -257,7 +257,7 @@ def supervisor_node(state: OxidantState) -> dict:
         )
     except Exception as exc:  # noqa: BLE001
         logger.warning("supervisor_node hint generation failed for %s: %s", node_id, exc)
-        hint = ""
+        hint = None
 
     review_mode = state.get("review_mode", "auto")
     if review_mode == "interactive":
@@ -275,4 +275,6 @@ def supervisor_node(state: OxidantState) -> dict:
             if human_response.get("hint"):
                 hint = str(human_response["hint"])
 
-    return {"supervisor_hint": hint, "interrupt_payload": None}
+    if hint is not None:
+        return {"supervisor_hint": hint, "interrupt_payload": None, "attempt_count": 0}
+    return {"supervisor_hint": None, "interrupt_payload": None}

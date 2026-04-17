@@ -220,6 +220,30 @@ def test_supervisor_node_returns_hint(tmp_path):
 
 # ── queue_for_review ──────────────────────────────────────────────────────────
 
+def test_supervisor_node_returns_none_hint_when_invoke_fails(tmp_path):
+    """When invoke_claude fails, supervisor_node returns None hint → routes to queue_for_review."""
+    from oxidant.graph.nodes import supervisor_node, route_after_supervisor
+    from oxidant.models.manifest import ConversionNode, Manifest, NodeKind, TranslationTier
+    from unittest.mock import patch
+
+    node = ConversionNode(
+        node_id="n1", source_file="f.ts", line_start=1, line_end=3,
+        source_text="class Foo {}", node_kind=NodeKind.CLASS, tier=TranslationTier.OPUS,
+    )
+    manifest = Manifest(source_repo="t", generated_at="2026-01-01", nodes={"n1": node})
+    (tmp_path / "m.json").write_text(manifest.model_dump_json(indent=2))
+
+    state = _base_state(str(tmp_path / "m.json"), target_path=str(tmp_path))
+    state["current_node_id"] = "n1"
+
+    with patch("oxidant.graph.nodes.invoke_claude", side_effect=RuntimeError("timeout")):
+        result = supervisor_node(state)
+
+    # Must be None so route_after_supervisor sends to queue_for_review, not build_context
+    assert result["supervisor_hint"] is None
+    assert route_after_supervisor({**state, **result}) == "queue_for_review"
+
+
 def test_queue_for_review_returns_only_new_entry(tmp_path):
     from oxidant.graph.nodes import queue_for_review
     path = tmp_path / "manifest.json"
