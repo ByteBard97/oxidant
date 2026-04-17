@@ -9,41 +9,52 @@
 ::-webkit-scrollbar-thumb:hover { background: #37393b; }
 
 /* ── Resize drag handle ──────────────────────────────────────────────────── */
+/* Total width = dashes zone (10px) + accent border (4px) = 14px.            */
+/* The accent border replaces ReviewPanel's border-l-4 and carries            */
+/* the review-state colour via a Tailwind class bound in App.vue.             */
 .resize-handle {
-  width: 8px;
+  width: 14px;
   cursor: col-resize;
   display: flex;
+  flex-direction: row;
   align-items: stretch;
-  justify-content: center;
-  background: transparent;
   position: relative;
   z-index: 10;
   flex-shrink: 0;
 }
 
-.resize-handle-line {
-  width: 1px;
+/* Left 10px: dashed tick-mark affordance */
+.resize-handle-dashes {
+  flex: 1;
   background: repeating-linear-gradient(
     to bottom,
-    #57423b 0px,
-    #57423b 4px,
+    #57423b55 0px,
+    #57423b55 4px,
     transparent 4px,
-    transparent 8px
+    transparent 9px
   );
-  opacity: 0.4;
-  transition: opacity 150ms, background 150ms;
+  transition: background 150ms;
 }
 
-.resize-handle:hover .resize-handle-line {
-  opacity: 1;
+/* Right 4px: coloured accent, mirrors old ReviewPanel border-l-4 */
+.resize-handle-accent {
+  width: 4px;
+  flex-shrink: 0;
+  transition: background 300ms, box-shadow 300ms;
+}
+
+.resize-handle:hover .resize-handle-dashes {
   background: repeating-linear-gradient(
     to bottom,
     #ffb59d 0px,
     #ffb59d 4px,
     transparent 4px,
-    transparent 8px
+    transparent 9px
   );
-  box-shadow: 0 0 6px rgba(255,181,157,0.4);
+}
+
+.resize-handle:hover .resize-handle-accent {
+  box-shadow: -4px 0 12px rgba(255,181,157,0.35);
 }
 
 /* Pulse animation for status dots */
