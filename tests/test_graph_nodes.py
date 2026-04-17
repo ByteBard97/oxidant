@@ -261,3 +261,9 @@ def test_queue_for_review_returns_only_new_entry(tmp_path):
     assert isinstance(update["review_queue"], list)
     assert len(update["review_queue"]) == 1
     assert update["review_queue"][0]["node_id"] == "m__foo"
+
+
+def test_build_graph_has_supervisor_node():
+    from oxidant.graph.graph import build_graph
+    g = build_graph()
+    assert "supervisor_node" in g.nodes
