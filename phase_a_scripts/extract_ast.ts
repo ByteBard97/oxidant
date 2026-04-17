@@ -96,9 +96,25 @@ for (const sf of project.getSourceFiles()) {
 
 function resolveDepId(sym: any): string | null {
   if (!sym) return null;
+  const symName = sym.getName();
   for (const decl of (sym.getDeclarations?.() ?? [])) {
-    const fp  = decl.getSourceFile().getFilePath();
-    const key = `${fp}::${sym.getName()}`;
+    const fp = decl.getSourceFile().getFilePath();
+
+    // For class methods/constructors the declIndex key is filePath::ClassName::methodName.
+    // Try the class-aware key first so this.foo() and ClassName.foo() resolve correctly.
+    try {
+      const parent = decl.getParent?.();
+      if (parent) {
+        const parentName: string | undefined = (parent as any).getName?.();
+        if (parentName) {
+          const methodKey = `${fp}::${parentName}::${symName}`;
+          if (declIndex.has(methodKey)) return declIndex.get(methodKey)!;
+        }
+      }
+    } catch { /* skip */ }
+
+    // Fallback: top-level name (free functions, interfaces, enums, classes)
+    const key = `${fp}::${symName}`;
     if (declIndex.has(key)) return declIndex.get(key)!;
   }
   return null;
