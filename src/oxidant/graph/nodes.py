@@ -98,11 +98,13 @@ def build_context(state: OxidantState) -> dict:
 def invoke_agent(state: OxidantState) -> dict:
     """Call the Claude Code subprocess and capture the Rust snippet body."""
     tier = state.get("current_tier") or TranslationTier.HAIKU.value
+    model = state.get("config", {}).get("model_tiers", {}).get(tier)
     try:
         response = invoke_claude(
             prompt=state["current_prompt"],
             cwd=state["target_path"],
             tier=tier,
+            model=model,
         )
         return {"current_snippet": response, "last_error": None}
     except Exception as exc:  # noqa: BLE001

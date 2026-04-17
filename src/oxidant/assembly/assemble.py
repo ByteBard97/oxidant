@@ -45,7 +45,12 @@ def assemble_module(
     nodes: list[ConversionNode],
     target_path: Path,
 ) -> bool:
-    """Replace the skeleton .rs file with assembled snippet content.
+    """Permanently replace all todo!() markers in the skeleton .rs file with
+    their translated snippet bodies.
+
+    This is the final "commit" step — the same injection verify.py does
+    per-node during Phase B, but applied permanently for all CONVERTED nodes
+    in the module at once.
 
     Returns True if assembly succeeded (all functional nodes CONVERTED),
     False if any functional node is not yet ready.
@@ -59,24 +64,23 @@ def assemble_module(
         logger.warning("Skeleton file not found: %s", rs_path)
         return False
 
-    lines: list[str] = [_FILE_HEADER]
+    content = rs_path.read_text()
+    replaced = 0
 
-    for kind in _SNIPPET_KIND_ORDER:
-        kind_nodes = sorted(
-            (n for n in nodes if n.node_kind == kind),
-            key=lambda n: n.topological_order or 0,
-        )
-        for node in kind_nodes:
-            snippet = _load_snippet(node)
-            if snippet is None:
-                lines.append(f"// OXIDANT: missing snippet — {node.node_id}")
-                continue
-            lines.append(f"// ── {node.node_id} ──")
-            lines.append(snippet.strip())
-            lines.append("")
+    for node in functional:
+        marker = f'todo!("OXIDANT: not yet translated — {node.node_id}")'
+        if marker not in content:
+            logger.warning("Marker not found for %s in %s", node.node_id, rs_path.name)
+            continue
+        snippet = _load_snippet(node)
+        if snippet is None:
+            logger.warning("Missing snippet for CONVERTED node %s", node.node_id)
+            continue
+        content = content.replace(marker, snippet.strip(), 1)
+        replaced += 1
 
-    rs_path.write_text("\n".join(lines) + "\n")
-    logger.info("Assembled %s (%d functional nodes)", rs_path.name, len(functional))
+    rs_path.write_text(content)
+    logger.info("Assembled %s (%d/%d nodes replaced)", rs_path.name, replaced, len(functional))
     return True
 
 

@@ -374,7 +374,7 @@ def generate_skeleton(manifest_path: Path, target_path: Path) -> None:
                 ret = t(m.return_type)
                 ret_str = f" -> {ret}" if ret != "()" else ""
                 lines += [
-                    f"    pub fn {mname}(&self, {params}){ret_str} {{",
+                    f"    pub fn {mname}(&mut self, {params}){ret_str} {{",
                     f'        todo!("OXIDANT: not yet translated — {m.node_id}")',
                     "    }",
                     "",

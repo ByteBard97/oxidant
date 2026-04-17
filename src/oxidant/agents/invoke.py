@@ -27,6 +27,7 @@ def invoke_claude(
     prompt: str,
     cwd: str | Path,
     tier: str = "sonnet",
+    model: str | None = None,
 ) -> str:
     """Call ``claude --print --output-format json`` and return the response text.
 
@@ -34,6 +35,8 @@ def invoke_claude(
         prompt: The full conversion prompt to send to the model.
         cwd: Working directory for the subprocess (skeleton project root).
         tier: Translation tier — controls the timeout ("haiku" | "sonnet" | "opus").
+        model: Explicit model ID (e.g. "claude-haiku-4-5-20251001"). If None,
+               uses the Claude Code default model.
 
     Returns:
         The assistant's response text (value of the ``result`` key in the JSON).
@@ -47,13 +50,19 @@ def invoke_claude(
 
     timeout = _TIMEOUT_BY_TIER.get(tier, _DEFAULT_TIMEOUT)
     logger.debug(
-        "invoke_claude tier=%s prompt[:200]=%r",
+        "invoke_claude tier=%s model=%s prompt[:200]=%r",
         tier,
+        model,
         prompt[:_MAX_PROMPT_LOG_CHARS],
     )
 
+    cmd = ["claude", "--print", "--output-format", "json"]
+    if model:
+        cmd += ["--model", model]
+    cmd.append(prompt)
+
     result = subprocess.run(
-        ["claude", "--print", "--output-format", "json", prompt],
+        cmd,
         env=env,
         cwd=str(cwd),
         capture_output=True,
