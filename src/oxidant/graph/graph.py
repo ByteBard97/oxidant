@@ -89,8 +89,10 @@ def build_checkpointed_graph(db_path: str) -> object:
     Args:
         db_path: Absolute path to the SQLite checkpoint file (created if absent).
     """
+    import sqlite3
     from langgraph.checkpoint.sqlite import SqliteSaver
-    checkpointer = SqliteSaver.from_conn_string(db_path)
+    conn = sqlite3.connect(db_path, check_same_thread=False)
+    checkpointer = SqliteSaver(conn)
     return build_graph(checkpointer=checkpointer)
 
 
