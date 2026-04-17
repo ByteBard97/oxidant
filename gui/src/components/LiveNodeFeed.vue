@@ -2,7 +2,7 @@
   <div class="flex flex-col h-full overflow-hidden">
 
     <!-- Active node monitor -->
-    <div class="p-4 border-b border-outline-variant/20 bg-surface-container flex flex-col gap-3 font-mono text-xs shrink-0">
+    <div class="p-4 border-b border-outline-variant/20 bg-surface-container flex flex-col gap-3 font-mono text-xs shrink-0 min-h-[84px] justify-center">
       <div class="text-zinc-500 text-[10px] tracking-widest">ACTIVE PROCESSING NODES</div>
 
       <div v-if="activeNodeList.length === 0" class="text-zinc-600 text-[10px] italic">

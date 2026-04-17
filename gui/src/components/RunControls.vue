@@ -1,56 +1,63 @@
 <template>
   <div class="flex flex-col gap-3">
-    <!-- Path inputs -->
     <div class="flex flex-col gap-2">
-      <input
-        v-model="manifestPath"
-        class="w-full bg-surface-container-lowest border-0 border-l-2 border-transparent focus:border-primary outline-none text-[11px] font-mono text-zinc-300 px-2 py-1.5 placeholder-zinc-600 transition-colors"
-        placeholder="MANIFEST PATH"
-      />
-      <input
-        v-model="targetPath"
-        class="w-full bg-surface-container-lowest border-0 border-l-2 border-transparent focus:border-primary outline-none text-[11px] font-mono text-zinc-300 px-2 py-1.5 placeholder-zinc-600 transition-colors"
-        placeholder="TARGET PATH"
-      />
-      <select
-        v-model="store.reviewMode"
-        :disabled="store.status === 'running'"
-        class="w-full bg-surface-container-lowest text-[11px] font-mono text-zinc-300 px-2 py-1.5 border-0 outline-none"
-      >
-        <option value="auto">MODE: AUTO</option>
-        <option value="supervised">MODE: SUPERVISED</option>
-        <option value="interactive">MODE: INTERACTIVE</option>
-      </select>
+      <Tooltip content="Path to conversion_manifest.json — lists all TS nodes to translate" position="right">
+        <input
+          v-model="manifestPath"
+          class="w-full bg-surface-container-lowest border-0 border-l-2 border-transparent focus:border-primary outline-none text-[11px] font-mono text-zinc-300 px-2 py-1.5 placeholder-zinc-600 transition-colors"
+          placeholder="MANIFEST PATH"
+        />
+      </Tooltip>
+      <Tooltip content="Root of the msagl-rs output repo — Rust files are written here" position="right">
+        <input
+          v-model="targetPath"
+          class="w-full bg-surface-container-lowest border-0 border-l-2 border-transparent focus:border-primary outline-none text-[11px] font-mono text-zinc-300 px-2 py-1.5 placeholder-zinc-600 transition-colors"
+          placeholder="TARGET PATH"
+        />
+      </Tooltip>
+      <Tooltip content="AUTO: supervisor decides. SUPERVISED: hint every node. INTERACTIVE: human approves all." position="right">
+        <select
+          v-model="store.reviewMode"
+          :disabled="store.status === 'running'"
+          class="w-full bg-surface-container-lowest text-[11px] font-mono text-zinc-300 px-2 py-1.5 border-0 outline-none"
+        >
+          <option value="auto">MODE: AUTO</option>
+          <option value="supervised">MODE: SUPERVISED</option>
+          <option value="interactive">MODE: INTERACTIVE</option>
+        </select>
+      </Tooltip>
     </div>
 
-    <!-- Primary CTA — grungy stamped-metal button -->
-    <button
-      @click="start"
-      :disabled="store.status === 'running'"
-      class="grungy-cta w-full text-on-primary font-bold py-2.5 px-4 text-xs font-mono uppercase tracking-widest flex justify-center items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
-    >
-      <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1">bolt</span>
-      {{ store.status === 'paused' ? '[RESUME_SEQUENCE]' : '[INITIATE_SEQUENCE]' }}
-    </button>
+    <Tooltip content="Start a new translation run (or resume a paused one)" position="right">
+      <button
+        @click="start"
+        :disabled="store.status === 'running'"
+        class="grungy-cta w-full text-on-primary font-bold py-2.5 px-4 text-xs font-mono uppercase tracking-widest flex justify-center items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1">bolt</span>
+        {{ store.status === 'paused' ? '[RESUME_SEQUENCE]' : '[INITIATE_SEQUENCE]' }}
+      </button>
+    </Tooltip>
 
-    <!-- Secondary controls -->
     <div class="flex gap-2">
-      <button
-        @click="pause"
-        :disabled="store.status !== 'running'"
-        title="Pause"
-        class="flex-1 bg-surface-container-high border border-outline-variant text-zinc-400 hover:text-white py-1.5 flex justify-center items-center disabled:opacity-40 disabled:cursor-not-allowed"
-      >
-        <span class="material-symbols-outlined text-[16px]">pause</span>
-      </button>
-      <button
-        @click="abort"
-        :disabled="store.status === 'idle' || store.status === 'complete' || store.status === 'aborted'"
-        title="Abort"
-        class="flex-1 bg-surface-container-high border border-outline-variant text-primary-container hover:bg-primary-container/10 py-1.5 flex justify-center items-center disabled:opacity-40 disabled:cursor-not-allowed"
-      >
-        <span class="material-symbols-outlined text-[16px]">stop</span>
-      </button>
+      <Tooltip content="Pause — checkpoints current state. Can be resumed." position="top">
+        <button
+          @click="pause"
+          :disabled="store.status !== 'running'"
+          class="flex-1 bg-surface-container-high border border-outline-variant text-zinc-400 hover:text-white py-1.5 flex justify-center items-center disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          <span class="material-symbols-outlined text-[16px]">pause</span>
+        </button>
+      </Tooltip>
+      <Tooltip content="Abort — terminates immediately. Cannot be resumed." position="top">
+        <button
+          @click="abort"
+          :disabled="store.status === 'idle' || store.status === 'complete' || store.status === 'aborted'"
+          class="flex-1 bg-surface-container-high border border-outline-variant text-primary-container hover:bg-primary-container/10 py-1.5 flex justify-center items-center disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          <span class="material-symbols-outlined text-[16px]">stop</span>
+        </button>
+      </Tooltip>
     </div>
 
     <div v-if="error" class="text-error text-[10px] font-mono">{{ error }}</div>
@@ -62,6 +69,7 @@ import { ref } from 'vue'
 import { useRunStore } from '../store'
 import { api } from '../api'
 import { connectSSE, disconnectSSE } from '../sse'
+import Tooltip from './Tooltip.vue'
 
 const store = useRunStore()
 const manifestPath = ref('')
