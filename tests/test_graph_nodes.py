@@ -158,7 +158,64 @@ def test_route_escalate_after_haiku_limit():
 def test_route_human_review_after_opus_limit():
     from oxidant.graph.nodes import route_after_verify
     state = _base_state("/dev/null", verify_status="CARGO", attempt_count=5, current_tier="opus")
-    assert route_after_verify(state) == "queue_for_review"
+    assert route_after_verify(state) == "supervisor"
+
+
+# ── queue_for_review ──────────────────────────────────────────────────────────
+
+def test_route_after_verify_routes_to_supervisor_at_opus_exhaustion(tmp_path):
+    """When opus attempts are exhausted, route to supervisor (not queue_for_review)."""
+    from oxidant.graph.nodes import route_after_verify
+    from oxidant.verification.verify import VerifyStatus
+
+    state = _base_state(str(tmp_path / "m.json"))
+    state["current_tier"] = "opus"
+    state["attempt_count"] = 4  # _MAX_ATTEMPTS["opus"] = 5; attempt+1 >= 5
+    state["verify_status"] = VerifyStatus.CARGO.value
+
+    result = route_after_verify(state)
+    assert result == "supervisor"
+
+
+def test_route_after_supervisor_to_build_context_when_hint_present(tmp_path):
+    from oxidant.graph.nodes import route_after_supervisor
+
+    state = _base_state(str(tmp_path / "m.json"))
+    state["supervisor_hint"] = "Use arena allocation."
+    assert route_after_supervisor(state) == "build_context"
+
+
+def test_route_after_supervisor_to_queue_when_hint_none(tmp_path):
+    from oxidant.graph.nodes import route_after_supervisor
+
+    state = _base_state(str(tmp_path / "m.json"))
+    state["supervisor_hint"] = None
+    assert route_after_supervisor(state) == "queue_for_review"
+
+
+def test_supervisor_node_returns_hint(tmp_path):
+    """supervisor_node calls invoke_claude and returns supervisor_hint."""
+    from oxidant.graph.nodes import supervisor_node
+    from oxidant.models.manifest import ConversionNode, Manifest, NodeKind, TranslationTier
+    from unittest.mock import patch
+
+    node = ConversionNode(
+        node_id="n1", source_file="f.ts", line_start=1, line_end=3,
+        source_text="class Foo {}", node_kind=NodeKind.CLASS, tier=TranslationTier.OPUS,
+    )
+    manifest = Manifest(source_repo="t", generated_at="2026-01-01", nodes={"n1": node})
+    (tmp_path / "m.json").write_text(manifest.model_dump_json(indent=2))
+
+    state = _base_state(str(tmp_path / "m.json"), target_path=str(tmp_path))
+    state["current_node_id"] = "n1"
+    state["last_error"] = "type mismatch: expected &Node, got NodeId"
+    state["review_mode"] = "auto"
+
+    with patch("oxidant.graph.nodes.invoke_claude", return_value="Use NodeId instead of &Node."):
+        result = supervisor_node(state)
+
+    assert result["supervisor_hint"] == "Use NodeId instead of &Node."
+    assert result["interrupt_payload"] is None
 
 
 # ── queue_for_review ──────────────────────────────────────────────────────────

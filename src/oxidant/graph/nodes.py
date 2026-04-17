@@ -148,7 +148,7 @@ def route_after_verify(state: OxidantState) -> str:
 
     if attempt >= max_attempts:
         if _escalate_tier(tier) is None:
-            return "queue_for_review"
+            return "supervisor"
         return "escalate"
     return "retry"
 
@@ -220,3 +220,59 @@ def queue_for_review(state: OxidantState) -> dict:
     logger.warning("HUMAN_REVIEW: %s (exhausted all retries)", node_id)
     # Return only the NEW entry — the operator.add reducer accumulates it
     return {"review_queue": [entry], "nodes_this_run": state.get("nodes_this_run", 0) + 1}
+
+
+def route_after_supervisor(state: OxidantState) -> str:
+    """If the supervisor provided a hint, retry. If None (human skipped), queue for review."""
+    if state.get("supervisor_hint") is not None:
+        return "build_context"
+    return "queue_for_review"
+
+
+def supervisor_node(state: OxidantState) -> dict:
+    """Generate a targeted hint via Sonnet, then optionally interrupt for human review.
+
+    Fires when a node has exhausted all tiers. Calls invoke_claude with a focused
+    hint-generation prompt. In 'interactive' review_mode, calls interrupt() to pause
+    the graph for human input.
+    """
+    node_id = state["current_node_id"]
+    manifest = Manifest.load(Path(state["manifest_path"]))
+    node = manifest.nodes[node_id]
+
+    hint_prompt = (
+        f"You are reviewing a failed TypeScript-to-Rust translation.\n\n"
+        f"Node: {node_id}\n"
+        f"Last error:\n{state.get('last_error', 'unknown')[:500]}\n\n"
+        f"TypeScript source:\n```typescript\n{node.source_text[:600]}\n```\n\n"
+        f"Generate a 2-3 sentence concrete hint for the translator's next attempt. "
+        f"Focus on the specific error and what to do differently. Be concrete, not generic."
+    )
+
+    try:
+        hint = invoke_claude(
+            prompt=hint_prompt,
+            cwd=state["target_path"],
+            tier="sonnet",
+        )
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("supervisor_node hint generation failed for %s: %s", node_id, exc)
+        hint = ""
+
+    review_mode = state.get("review_mode", "auto")
+    if review_mode == "interactive":
+        from langgraph.types import interrupt as lg_interrupt
+        payload = {
+            "node_id": node_id,
+            "error": state.get("last_error", ""),
+            "supervisor_hint": hint,
+            "source_preview": node.source_text[:500],
+        }
+        human_response = lg_interrupt(payload)
+        if isinstance(human_response, dict):
+            if human_response.get("skip"):
+                return {"supervisor_hint": None, "interrupt_payload": None}
+            if human_response.get("hint"):
+                hint = str(human_response["hint"])
+
+    return {"supervisor_hint": hint, "interrupt_payload": None}
