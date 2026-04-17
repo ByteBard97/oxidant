@@ -287,6 +287,36 @@ def phase_d(
     typer.echo(f"\nReport written to {target_path.resolve() / 'integration_report.json'}")
 
 
+@app.command("serve")
+def serve(
+    config: Path = typer.Option("oxidant.config.json", "--config", "-c"),
+    host: str = typer.Option("127.0.0.1", "--host"),
+    port: int = typer.Option(8000, "--port"),
+    db_path: str = typer.Option("oxidant_checkpoints.db", "--db",
+                                 help="Path to SqliteSaver checkpoint DB"),
+    gui_dist: str = typer.Option(None, "--gui-dist",
+                                  help="Path to built Vue GUI dist/ directory"),
+    reload: bool = typer.Option(False, "--reload", help="Auto-reload on code changes (dev only)"),
+) -> None:
+    """Start the FastAPI server for Phase B monitoring and control.
+
+    Opens the oxidant dashboard at http://<host>:<port>/
+    Start a run with: POST /run  {manifest_path, target_path, ...}
+    Stream progress with: GET /stream/{thread_id}
+    """
+    import uvicorn
+    from oxidant.serve.app import create_app
+
+    typer.echo(f"Starting oxidant serve on http://{host}:{port}")
+    if gui_dist:
+        typer.echo(f"Serving GUI from {gui_dist}")
+    else:
+        typer.echo("No GUI dist provided. API-only mode. Pass --gui-dist to serve the dashboard.")
+
+    application = create_app(db_path=db_path, gui_dist=gui_dist)
+    uvicorn.run(application, host=host, port=port, reload=reload)
+
+
 @app.command()
 def translate(
     source: str = typer.Argument(..., help="Path to a .ts file"),
