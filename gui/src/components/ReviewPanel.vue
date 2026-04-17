@@ -1,5 +1,5 @@
 <template>
-  <div class="w-[450px] bg-surface flex flex-col shrink-0 border-l-4 shadow-[-10px_0_20px_rgba(0,0,0,0.5)]"
+  <div class="w-full h-full bg-surface flex flex-col border-l-4 shadow-[-10px_0_20px_rgba(0,0,0,0.5)]"
        :class="store.pendingReview ? 'border-primary-container' : 'border-outline-variant/30'">
 
     <!-- Header -->
