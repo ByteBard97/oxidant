@@ -45,7 +45,7 @@
     <div class="flex flex-1 overflow-hidden">
 
       <!-- Left sidebar nav -->
-      <nav class="bg-[#1A1C1E] w-64 flex flex-col border-r border-[#2D2F31] shrink-0 h-full z-40 overflow-y-auto font-mono text-xs uppercase">
+      <nav class="bg-[#1A1C1E] w-64 flex flex-col border-r border-[#2D2F31] shrink-0 h-full z-40 overflow-y-auto font-mono text-xs uppercase relative">
         <!-- Logo panel: rust-stained backlit surface -->
         <div class="relative h-[84px] shrink-0 border-b border-[#2D2F31] flex items-center justify-center px-4 overflow-hidden"
              style="background: radial-gradient(ellipse at 55% 60%, #2a1a0a 0%, #0e0c0a 70%);">
@@ -57,6 +57,9 @@
             <img src="/oxidant-logo.svg" alt="OXIDANT" class="w-full h-auto neon-logo" />
           </div>
         </div>
+
+        <!-- Jagged rust seam over the right border -->
+        <div class="jagged-seam" aria-hidden="true" />
 
         <!-- Nav links -->
         <div class="flex flex-col py-2">

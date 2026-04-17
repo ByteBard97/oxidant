@@ -26,6 +26,30 @@
     </style>
   </head>
   <body>
+    <!-- Hidden SVG filter bank — rust-edge displaces pixels along seams -->
+    <svg style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
+      <defs>
+        <!--
+          rust-edge: fractal noise displacement that makes straight vertical
+          edges look mottled and slightly jagged. Scale=4 gives ~4px max drift.
+          Low Y baseFrequency means slow vertical variation (long undulations);
+          higher X baseFrequency gives the horizontal choppiness.
+        -->
+        <filter id="rust-edge" x="-25%" y="-1%" width="150%" height="102%"
+                color-interpolation-filters="sRGB">
+          <feTurbulence type="fractalNoise"
+                        baseFrequency="0.07 0.006"
+                        numOctaves="3"
+                        seed="13"
+                        result="noise"/>
+          <feDisplacementMap in="SourceGraphic" in2="noise"
+                             scale="4"
+                             xChannelSelector="R"
+                             yChannelSelector="G"/>
+        </filter>
+      </defs>
+    </svg>
+
     <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
