@@ -1,4 +1,5 @@
 {
+  "manifest_path": "conversion_manifest.json",
   "source_repo": "corpora/msagljs",
   "target_repo": "corpora/msagl-rs",
   "source_language": "typescript",
