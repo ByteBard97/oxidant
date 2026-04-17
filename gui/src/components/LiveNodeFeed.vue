@@ -2,26 +2,29 @@
   <div class="flex flex-col h-full overflow-hidden">
 
     <!-- Active node monitor -->
-    <div class="p-4 border-b border-outline-variant/20 bg-surface-container flex flex-col gap-3 font-mono text-xs shrink-0 min-h-[84px] justify-center">
+    <div class="px-4 pt-4 pb-2 border-b border-outline-variant/20 bg-surface-container flex flex-col gap-2 font-mono text-xs shrink-0 min-h-[84px]">
       <div class="text-zinc-500 text-[10px] tracking-widest">ACTIVE PROCESSING NODES</div>
 
-      <div v-if="activeNodeList.length === 0" class="text-zinc-600 text-[10px] italic">
-        — no active nodes —
-      </div>
-
-      <div
-        v-for="node in activeNodeList"
-        :key="node.node_id"
-        class="flex items-center justify-between bg-surface-container-lowest p-2 border-l-2"
-        :class="tierBorder(node.tier)"
-      >
-        <div class="flex items-center gap-3">
-          <span class="text-[8px] pulse-dot" :class="tierColor(node.tier)">●</span>
-          <span class="text-zinc-300 truncate w-48" :title="node.node_id">{{ shortId(node.node_id) }}</span>
+      <!-- Node list scrolls independently so it never crushes the telemetry feed -->
+      <div class="overflow-y-auto max-h-[160px] flex flex-col gap-2">
+        <div v-if="activeNodeList.length === 0" class="text-zinc-600 text-[10px] italic">
+          — no active nodes —
         </div>
-        <span class="bg-surface-container-highest text-zinc-400 px-2 py-0.5 text-[9px] uppercase tracking-wider">
-          {{ node.tier.toUpperCase() }}
-        </span>
+
+        <div
+          v-for="node in activeNodeList"
+          :key="node.node_id"
+          class="flex items-center justify-between bg-surface-container-lowest p-2 border-l-2 shrink-0"
+          :class="tierBorder(node.tier)"
+        >
+          <div class="flex items-center gap-3">
+            <span class="text-[8px] pulse-dot" :class="tierColor(node.tier)">●</span>
+            <span class="text-zinc-300 truncate min-w-0 flex-1" :title="node.node_id">{{ shortId(node.node_id) }}</span>
+          </div>
+          <span class="bg-surface-container-highest text-zinc-400 px-2 py-0.5 text-[9px] uppercase tracking-wider">
+            {{ node.tier.toUpperCase() }}
+          </span>
+        </div>
       </div>
     </div>
 

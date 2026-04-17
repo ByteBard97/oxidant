@@ -96,12 +96,28 @@
 
       <!-- Main workspace -->
       <main class="flex-1 bg-surface-container-low flex flex-row overflow-hidden">
-        <div class="flex-1 flex flex-col min-w-0 border-r border-dashed border-[#2D2F31]">
-          <RunConfigPanel  v-if="activeTab === 'run'" />
+
+        <!-- Center column -->
+        <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+          <RunConfigPanel   v-if="activeTab === 'run'" />
           <ReviewQueuePanel v-else-if="activeTab === 'review'" />
-          <LiveNodeFeed    v-else />
+          <LiveNodeFeed     v-else />
         </div>
-        <ReviewPanel />
+
+        <!-- Drag handle -->
+        <div
+          class="resize-handle shrink-0"
+          @mousedown="startDrag"
+          title="Drag to resize"
+        >
+          <div class="resize-handle-line" />
+        </div>
+
+        <!-- Right review panel — width driven by drag -->
+        <div class="flex flex-col shrink-0 overflow-hidden" :style="{ width: reviewWidth + 'px' }">
+          <ReviewPanel />
+        </div>
+
       </main>
     </div>
 
@@ -113,6 +129,7 @@
 import { ref } from 'vue'
 import { useRunStore } from './store'
 import { useNeonFlicker } from './composables/useNeonFlicker'
+import { useResize } from './composables/useResize'
 import { seedMockData } from './composables/useMockData'
 import Tooltip from './components/Tooltip.vue'
 import RunControls from './components/RunControls.vue'
@@ -126,4 +143,5 @@ import ConfirmModal from './components/ConfirmModal.vue'
 const store = useRunStore()
 const activeTab = ref<'run' | 'logs' | 'review'>('logs')
 const { opacity: neonOpacity } = useNeonFlicker()
+const { width: reviewWidth, startDrag } = useResize(450)
 </script>

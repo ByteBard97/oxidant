@@ -32,9 +32,9 @@
         :class="item.type === 'interrupt' ? 'border-l-2 border-primary-container' : 'border-l-2 border-zinc-700'"
       >
         <!-- Node ID + badge -->
-        <div class="flex items-center justify-between gap-3">
-          <span class="text-zinc-300 text-[11px] truncate" :title="item.node_id">
-            {{ shortId(item.node_id) }}
+        <div class="flex items-start justify-between gap-3">
+          <span class="text-zinc-300 text-[11px] break-all min-w-0">
+            {{ item.node_id }}
           </span>
           <span
             class="shrink-0 text-[9px] px-2 py-0.5 uppercase tracking-wider font-bold"

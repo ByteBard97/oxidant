@@ -8,6 +8,44 @@
 ::-webkit-scrollbar-thumb { background: #282a2c; }
 ::-webkit-scrollbar-thumb:hover { background: #37393b; }
 
+/* ── Resize drag handle ──────────────────────────────────────────────────── */
+.resize-handle {
+  width: 8px;
+  cursor: col-resize;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  background: transparent;
+  position: relative;
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+.resize-handle-line {
+  width: 1px;
+  background: repeating-linear-gradient(
+    to bottom,
+    #57423b 0px,
+    #57423b 4px,
+    transparent 4px,
+    transparent 8px
+  );
+  opacity: 0.4;
+  transition: opacity 150ms, background 150ms;
+}
+
+.resize-handle:hover .resize-handle-line {
+  opacity: 1;
+  background: repeating-linear-gradient(
+    to bottom,
+    #ffb59d 0px,
+    #ffb59d 4px,
+    transparent 4px,
+    transparent 8px
+  );
+  box-shadow: 0 0 6px rgba(255,181,157,0.4);
+}
+
 /* Pulse animation for status dots */
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; }
