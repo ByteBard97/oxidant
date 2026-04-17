@@ -44,8 +44,11 @@
           <span>SOURCE (TS)</span>
           <span class="text-zinc-500">{{ shortId(store.pendingReview.node_id) }}</span>
         </div>
-        <div class="bg-surface-container-lowest p-3 border border-outline-variant/20 overflow-auto max-h-52">
-          <pre class="text-[11px] font-mono text-zinc-300 leading-relaxed whitespace-pre-wrap">{{ store.pendingReview.source_preview }}</pre>
+        <div class="bg-surface-container-lowest border border-outline-variant/20 overflow-auto max-h-52">
+          <CodeBlock
+            :code="store.pendingReview.source_preview"
+            :lang="store.pendingReview.node_id.endsWith('.rs') ? 'rust' : 'typescript'"
+          />
         </div>
       </div>
 
@@ -89,6 +92,7 @@ import { useRunStore } from '../store'
 import { useConfirm } from '../composables/useConfirm'
 import { api } from '../api'
 import { connectSSE } from '../sse'
+import CodeBlock from './CodeBlock.vue'
 
 const store = useRunStore()
 const { confirm } = useConfirm()
