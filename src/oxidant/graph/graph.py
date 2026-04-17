@@ -1,7 +1,9 @@
 """LangGraph state graph for the Phase B translation loop.
 
-Wires all node functions into a compilable StateGraph. The module-level
-``translation_graph`` is the compiled graph ready for ``.invoke()``.
+Wires all node functions into a compilable StateGraph. Two compiled graphs are
+exposed:
+- ``translation_graph``: no checkpointer, for direct CLI use (``oxidant phase-b``)
+- ``build_checkpointed_graph(db_path)``: SqliteSaver checkpointer for ``oxidant serve``
 """
 from __future__ import annotations
 
@@ -14,7 +16,9 @@ from oxidant.graph.nodes import (
     pick_next_node,
     queue_for_review,
     retry_node,
+    route_after_supervisor,
     route_after_verify,
+    supervisor_node,
     update_manifest,
     verify,
 )
@@ -25,8 +29,13 @@ def _route_pick(state: OxidantState) -> str:
     return "done" if state.get("done") else "continue"
 
 
-def build_graph() -> object:
-    """Construct and compile the Phase B LangGraph state graph."""
+def build_graph(checkpointer=None) -> object:
+    """Construct and compile the Phase B LangGraph state graph.
+
+    Args:
+        checkpointer: Optional LangGraph checkpointer (e.g. SqliteSaver).
+                      Pass None for CLI usage; pass a SqliteSaver for ``oxidant serve``.
+    """
     graph: StateGraph = StateGraph(OxidantState)
 
     graph.add_node("pick_next_node", pick_next_node)
@@ -35,6 +44,7 @@ def build_graph() -> object:
     graph.add_node("verify", verify)
     graph.add_node("retry_node", retry_node)
     graph.add_node("escalate_node", escalate_node)
+    graph.add_node("supervisor_node", supervisor_node)
     graph.add_node("update_manifest", update_manifest)
     graph.add_node("queue_for_review", queue_for_review)
 
@@ -54,16 +64,35 @@ def build_graph() -> object:
             "update_manifest": "update_manifest",
             "retry": "retry_node",
             "escalate": "escalate_node",
-            "queue_for_review": "queue_for_review",
+            "supervisor": "supervisor_node",
         },
     )
     graph.add_edge("retry_node", "build_context")
     graph.add_edge("escalate_node", "build_context")
+    graph.add_conditional_edges(
+        "supervisor_node",
+        route_after_supervisor,
+        {
+            "build_context": "build_context",
+            "queue_for_review": "queue_for_review",
+        },
+    )
     graph.add_edge("update_manifest", "pick_next_node")
     graph.add_edge("queue_for_review", "pick_next_node")
 
-    return graph.compile()
+    return graph.compile(checkpointer=checkpointer)
 
 
-# Compiled graph — import and call .invoke(initial_state)
+def build_checkpointed_graph(db_path: str) -> object:
+    """Build a graph with SqliteSaver for use by ``oxidant serve``.
+
+    Args:
+        db_path: Absolute path to the SQLite checkpoint file (created if absent).
+    """
+    from langgraph.checkpoint.sqlite import SqliteSaver
+    checkpointer = SqliteSaver.from_conn_string(db_path)
+    return build_graph(checkpointer=checkpointer)
+
+
+# Compiled graph without checkpointer — used by ``oxidant phase-b`` CLI
 translation_graph = build_graph()
