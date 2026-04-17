@@ -135,3 +135,22 @@ def test_extract_rust_signature_missing_returns_comment(tmp_path):
 
     sig = _extract_rust_signature("simple__nonexistent", tmp_path, "simple.ts")
     assert sig.startswith("//")
+
+
+def test_build_prompt_includes_supervisor_hint(tmp_path):
+    """When supervisor_hint is provided, it appears in the prompt."""
+    node = _make_node("foo")
+    manifest = _make_manifest({"foo": node})
+    config = {"crate_inventory": [], "architectural_decisions": {}}
+
+    prompt = build_prompt(
+        node=node,
+        manifest=manifest,
+        config=config,
+        target_path=tmp_path,
+        snippets_dir=tmp_path,
+        workspace=tmp_path,
+        supervisor_hint="Use arena allocation instead of Box<dyn Trait>.",
+    )
+    assert "Supervisor Hint" in prompt
+    assert "arena allocation" in prompt

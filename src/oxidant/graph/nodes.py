@@ -82,8 +82,10 @@ def build_context(state: OxidantState) -> dict:
         workspace=workspace,
         last_error=state.get("last_error"),
         attempt_count=state.get("attempt_count", 0),
+        supervisor_hint=state.get("supervisor_hint"),
     )
-    return {"current_prompt": prompt}
+    # Clear the hint so it isn't re-injected on subsequent retries
+    return {"current_prompt": prompt, "supervisor_hint": None}
 
 
 def invoke_agent(state: OxidantState) -> dict:
