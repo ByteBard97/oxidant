@@ -40,6 +40,7 @@ Node ID: {node_id}
 ```
 {deps_section}\
 {idiom_section}\
+{supervisor_section}\
 {retry_section}\
 Respond with ONLY the Rust function body. No markdown, no explanation.\
 """
@@ -131,6 +132,7 @@ def build_prompt(
     workspace: Path,
     last_error: str | None = None,
     attempt_count: int = 0,
+    supervisor_hint: str | None = None,
 ) -> str:
     """Build the full conversion prompt for one manifest node."""
     crates = ", ".join(config.get("crate_inventory", []))
@@ -156,6 +158,14 @@ def build_prompt(
             f"Fix this error:\n```\n{last_error}\n```\n"
         )
 
+    supervisor_section = ""
+    if supervisor_hint:
+        supervisor_section = (
+            f"\n## Supervisor Hint\n"
+            f"A supervisor agent has reviewed previous failures and suggests:\n"
+            f"{supervisor_hint}\n"
+        )
+
     return _PROMPT_TEMPLATE.format(
         crates=crates,
         arch_decisions=arch_lines,
@@ -165,5 +175,6 @@ def build_prompt(
         rust_signature=rust_sig,
         deps_section=deps_section,
         idiom_section=idiom_section,
+        supervisor_section=supervisor_section,
         retry_section=retry_section,
     )
