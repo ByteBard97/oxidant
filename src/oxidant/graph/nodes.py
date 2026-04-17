@@ -33,19 +33,26 @@ def pick_next_node(state: OxidantState) -> dict:
     eligible = manifest.eligible_nodes()
 
     if not eligible:
-        remaining = [
-            n for n in manifest.nodes.values()
-            if n.status == NodeStatus.NOT_STARTED
-        ]
-        if remaining:
-            logger.warning(
-                "%d nodes blocked by unresolvable dependencies.", len(remaining)
-            )
-        else:
-            logger.info("All nodes converted. Phase B complete.")
+        logger.info("All nodes converted. Phase B complete.")
         return {"current_node_id": None, "done": True}
 
     node = min(eligible, key=lambda n: n.topological_order or 0)
+
+    # Log when breaking a dependency cycle (node has unconverted in-manifest deps)
+    manifest_ids = set(manifest.nodes.keys())
+    converted_ids = {
+        nid for nid, n in manifest.nodes.items()
+        if n.status == NodeStatus.CONVERTED
+    }
+    unconverted_deps = [
+        dep for dep in node.type_dependencies + node.call_dependencies
+        if dep in manifest_ids and dep not in converted_ids
+    ]
+    if unconverted_deps:
+        logger.warning(
+            "Cycle break: processing %s with %d unconverted deps: %s",
+            node.node_id, len(unconverted_deps), unconverted_deps[:3],
+        )
     manifest.update_node(
         Path(state["manifest_path"]), node.node_id, status=NodeStatus.IN_PROGRESS
     )
