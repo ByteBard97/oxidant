@@ -8015,10 +8015,10 @@
       "bfs_level": null,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "in_progress",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "todo! marker not found for modules__core__src__layout__driver__shiftToFirstQuarter in driver.rs"
     },
     "modules__core__src__layout__edgeLabelPlacement__PointSet": {
       "node_id": "modules__core__src__layout__edgeLabelPlacement__PointSet",
@@ -8259,10 +8259,10 @@
       "bfs_level": null,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "todo! marker not found for modules__core__src__layout__edgeLabelPlacement__RectangleObstacle__constructor in edge_label_placement.rs"
     },
     "modules__core__src__layout__edgeLabelPlacement__LabelInfo": {
       "node_id": "modules__core__src__layout__edgeLabelPlacement__LabelInfo",
@@ -8410,10 +8410,10 @@
       "bfs_level": null,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "Snippet contains todo!() or unimplemented!()"
     },
     "modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__constructorG": {
       "node_id": "modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__constructorG",
@@ -8442,10 +8442,10 @@
       "bfs_level": null,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "todo! marker not found for modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__constructorG in edge_label_placement.rs"
     },
     "modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__constructorGA": {
       "node_id": "modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__constructorGA",
@@ -8477,10 +8477,10 @@
       "bfs_level": null,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "todo! marker not found for modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__constructorGA in edge_label_placement.rs"
     },
     "modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__interpolateGranularity": {
       "node_id": "modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__interpolateGranularity",
@@ -8538,10 +8538,10 @@
       "bfs_level": null,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "Snippet contains todo!() or unimplemented!()"
     },
     "modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__CurvePoints": {
       "node_id": "modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__CurvePoints",
@@ -8570,10 +8570,10 @@
       "bfs_level": null,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "todo! marker not found for modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__CurvePoints in edge_label_placement.rs"
     },
     "modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__compareByArgument": {
       "node_id": "modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__compareByArgument",
@@ -8638,10 +8638,10 @@
       "bfs_level": null,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "todo! marker not found for modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__SubdivideCurveSegment in edge_label_placement.rs"
     },
     "modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__PlaceLabelsAtDefaultPositions": {
       "node_id": "modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__PlaceLabelsAtDefaultPositions",
@@ -8671,10 +8671,10 @@
       "bfs_level": null,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "todo! marker not found for modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__PlaceLabelsAtDefaultPositions in edge_label_placement.rs"
     },
     "modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__GetEdgeObstacles": {
       "node_id": "modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__GetEdgeObstacles",
@@ -8703,10 +8703,10 @@
       "bfs_level": null,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "todo! marker not found for modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__GetEdgeObstacles in edge_label_placement.rs"
     },
     "modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__AddLabelObstacle": {
       "node_id": "modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__AddLabelObstacle",
@@ -8735,10 +8735,10 @@
       "bfs_level": null,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "todo! marker not found for modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__AddLabelObstacle in edge_label_placement.rs"
     },
     "modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__run": {
       "node_id": "modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__run",
@@ -8791,10 +8791,10 @@
       "bfs_level": null,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "todo! marker not found for modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__PlaceLabel in edge_label_placement.rs"
     },
     "modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__getLabelInfo": {
       "node_id": "modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__getLabelInfo",
@@ -8821,10 +8821,10 @@
       "bfs_level": null,
       "tier": "haiku",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "todo! marker not found for modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__getLabelInfo in edge_label_placement.rs"
     },
     "modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__PlaceLabelAtFirstPosition": {
       "node_id": "modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__PlaceLabelAtFirstPosition",
@@ -8858,10 +8858,10 @@
       "bfs_level": null,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "Snippet contains todo!() or unimplemented!()"
     },
     "modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__StartIndex": {
       "node_id": "modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__StartIndex",
@@ -8889,10 +8889,10 @@
       "bfs_level": null,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "todo! marker not found for modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__StartIndex in edge_label_placement.rs"
     },
     "modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__CalculateCenterLabelInfoCenter": {
       "node_id": "modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__CalculateCenterLabelInfoCenter",
@@ -8917,10 +8917,10 @@
       "bfs_level": null,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "Snippet contains todo!() or unimplemented!()"
     },
     "modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__PlaceEdgeLabelHorizontally": {
       "node_id": "modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__PlaceEdgeLabelHorizontally",
@@ -8953,10 +8953,10 @@
       "bfs_level": null,
       "tier": "opus",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "Command '['claude', '--print', '--output-format', 'json', 'You are translating a TypeScript function to Rust as part of converting the msagl-js graph layout library.\\n\\n## Critical Rules\\n- Output ONLY the Rust function body (the code between the outer braces). No signatures, no markdown fences, no explanation.\\n- Do NOT use todo!(), unimplemented!(), or panic!()\\n- Do NOT simplify, optimize, or restructure — translate semantically faithfully\\n- Match every conditional branch in the TypeScript source exactly\\n- Use only approved crates: slotmap, petgraph, nalgebra, thiserror, itertools, ordered-float, serde, serde_json\\n\\n## Architectural Decisions\\n- graph_ownership_strategy: arena_slotmap\\n- error_handling: thiserror\\n\\n## Node to Convert\\nKind: method\\nNode ID: modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__PlaceEdgeLabelHorizontally\\n\\n### TypeScript Source\\n```typescript\\npublic PlaceEdgeLabelHorizontally(edge: GeomEdge): boolean {\\n    const label = edge.label\\n    // approximate label with a rectangle\\n    // process candidate points for label ordered by priority\\n    // check candidate point for conflicts - if none then stop and keep placement\\n    const labelInfo = this.getLabelInfo(label)\\n    const curvePoints = labelInfo.edgePoints\\n    const wh = new Size(label.width, label.height)\\n    let bestConflictIndex = -1\\n    let bestRectangle = Rectangle.mkEmpty()\\n    const curve = edge.curve\\n    for (const index of EdgeLabelPlacement.ExpandingSearch(\\n      this.StartIndex(\\n        label,\\n        curvePoints.map((p) => p[1]),\\n      ),\\n      0,\\n      curvePoints.length,\\n    )) {\\n      const cp = curvePoints[index]\\n\\n      let der = curve.derivative(cp[0])\\n      if (closeDistEps(der.lengthSquared, 0)) {\\n        continue\\n      }\\n      der = der.normalize()\\n\\n      for (const side of EdgeLabelPlacement.GetPossibleSides(this.getLabelInfo(label).placementSide, der)) {\\n        const queryRect: Rectangle = EdgeLabelPlacement.GetLabelBounds(cp[1], der, wh, side)\\n        const conflictIndex: number = this.ConflictIndexRL(queryRect, label)\\n        if (conflictIndex > bestConflictIndex) {\\n          bestConflictIndex = conflictIndex\\n          bestRectangle = queryRect\\n          // If the best location was found, we\\'re done\\n          if (bestConflictIndex === Number.MAX_VALUE) {\\n            break\\n          }\\n        }\\n      }\\n\\n      // If the best location was found, we\\'re done\\n      if (bestConflictIndex === Number.MAX_VALUE) {\\n        break\\n      }\\n    }\\n\\n    if (bestConflictIndex >= 0) {\\n      this.SetLabelBounds(this.getLabelInfo(label), bestRectangle)\\n      const r = new RectangleObstacle(bestRectangle, null)\\n      this.AddLabelObstacle(r)\\n      const labelInfo = this.getLabelInfo(label)\\n      if (bestConflictIndex === 0) labelInfo.placementResult = LabelPlacementResult.OverlapsOtherLabels\\n      else if (bestConflictIndex === 1) labelInfo.placementResult = LabelPlacementResult.OverlapsNodes\\n      else if (bestConflictIndex === 2) labelInfo.placementResult = LabelPlacementResult.OverlapsEdges\\n      else labelInfo.placementResult = LabelPlacementResult.OverlapsNothing\\n      return true\\n    }\\n\\n    return false\\n  }\\n```\\n\\n### Rust Function Signature (from skeleton — do not change)\\n```rust\\n// signature not found for modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__PlaceEdgeLabelHorizontally in edge_label_placement.rs\\n```\\n\\n## Idiom Translations\\n## null_undefined\\n\\nTypeScript `null | undefined` maps to `Option<T>`. Common patterns:\\n\\n```rust\\n// TS: if (x == null) { ... }\\nif x.is_none() { ... }\\n\\n// TS: if (x != null) { ... }\\nif let Some(val) = x { ... }\\n// or: if x.is_some() { ... }\\n\\n// TS: x ?? defaultVal\\nx.unwrap_or(default_val)\\n\\n// TS: x?.method()\\nx.as_ref().map(|v| v.method())\\n// or for Rc<RefCell<T>>:\\nx.as_ref().map(|v| v.borrow().method())\\n\\n// TS: return null;\\nreturn None;\\n\\n// TS: x!  (non-null assertion)\\nx.unwrap()   // or x.expect(\"reason\")\\n```\\n\\nFor msagl graph nodes that are `null` when not yet attached:\\nuse `Option<Rc<RefCell<T>>>` in the skeleton types.\\n\\n---\\n\\n## array_method_chain\\n\\nTypeScript array method chains (`map`, `filter`, `reduce`, etc.) become\\niterator chains in Rust:\\n\\n```rust\\n// TS: arr.map(x => x * 2)\\narr.iter().map(|x| x * 2.0).collect::<Vec<_>>()\\n\\n// TS: arr.filter(x => x > 0)\\narr.iter().filter(|&&x| x > 0.0).copied().collect::<Vec<_>>()\\n\\n// TS: arr.reduce((acc, x) => acc + x, 0)\\narr.iter().fold(0.0_f64, |acc, &x| acc + x)\\n\\n// TS: arr.find(x => x.id == target)\\narr.iter().find(|x| x.id == target)  // returns Option<&T>\\n\\n// TS: arr.some(x => condition)\\narr.iter().any(|x| condition)\\n\\n// TS: arr.every(x => condition)\\narr.iter().all(|x| condition)\\n\\n// TS: arr.forEach(x => { ... })\\nfor x in &arr { ... }\\n\\n// TS: arr.flatMap(x => x.children)\\narr.iter().flat_map(|x| x.children.iter()).collect::<Vec<_>>()\\n```\\n\\nFor msagl geometry collections, prefer iterator adapters over intermediate Vecs.\\n\\n---\\n\\n## closure_capture\\n\\nTypeScript arrow functions and function expressions that capture variables:\\n\\n```rust\\n// TS: const f = (x: number) => x * 2;\\nlet f = |x: f64| x * 2.0;\\n\\n// TS: arr.filter(n => n > threshold)   where threshold is captured\\narr.iter().filter(|&&n| n > threshold)\\n\\n// TS: capturing mutable state:\\n// const sum = 0; arr.forEach(x => sum += x);\\nlet mut sum = 0.0_f64;\\nfor x in &arr { sum += x; }\\n// Rust closures can capture &mut, but not if captured by multiple closures.\\n// Use a for loop when mutation is involved.\\n\\n// TS: () => { ... }  as callback stored in struct\\n// Use Box<dyn Fn()> or Box<dyn FnMut()> for heap-stored callbacks.\\n```\\n\\n---\\n\\n## number_as_index\\n\\nTypeScript allows using `number` as an array index. Rust requires `usize`:\\n\\n```rust\\n// TS: arr[i]   where i is number\\narr[i as usize]\\n\\n// TS: for (let i = 0; i < arr.length; i++)\\nfor i in 0..arr.len() { ... }   // i is usize automatically\\n\\n// TS: arr.length\\narr.len()\\n```\\n\\nWhen an index comes from an external computation that might be negative,\\nguard first:\\n```rust\\nif i >= 0 { arr[i as usize] }\\n```\\n\\n---\\n\\n## dynamic_property_access\\n\\nTypeScript `obj[key]` with string/number keys maps to:\\n\\n```rust\\n// TS: map[key]  where map is Map<string, V>\\nmap.get(&key)          // returns Option<&V>\\nmap[&key]              // panics if missing — use only when certain\\n\\n// TS: arr[i]  where arr is an array/typed array\\narr[i as usize]        // cast index to usize\\n\\n// TS: obj[key] = val  for Map\\nmap.insert(key, val);\\n\\n// TS: delete obj[key]\\nmap.remove(&key);\\n```\\n\\nFor msagl\\'s `idToGeomNode` and similar id-keyed maps, use `HashMap<NodeId, ...>`.\\n\\n---\\n\\n## mutable_shared_state\\n\\nTypeScript class properties are mutable by default and shared freely via\\nobject references.\\n\\n**For simple field mutation on `&mut self`:**\\n```rust\\n// TS: this.someField = value;\\nself.some_field = value;\\n\\n// TS: let count = 0; count++;\\nlet mut count = 0i32; count += 1;\\n```\\n\\nDo NOT reach for `RefCell` for local variables or for `self` fields accessed\\nthrough `&mut self`.\\n\\n**For graph entities that hold references to other graph entities (Node, Edge,\\nGeomNode, GeomEdge, etc.):** use the **arena allocation pattern** — see\\n`arena_allocation` idiom. Do NOT use `Rc<RefCell<T>>` for these; it creates\\nnested borrow chains that become unmanageable. `Rc<RefCell<T>>` is only\\nappropriate for non-graph shared state that genuinely needs shared ownership\\nwith interior mutability (e.g., a shared configuration object).\\n\\n**For shared non-graph state that needs `Rc<RefCell<T>>`:**\\n```rust\\n// TS: node.someField = value;   where node is a truly shared ref\\nnode.borrow_mut().some_field = value;\\n```\\n\\n---\\n\\n## Previous Attempt Failed (attempt 4)\\nFix this error:\\n```\\ntodo! marker not found for modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__PlaceEdgeLabelHorizontally in edge_label_placement.rs\\n```\\nRespond with ONLY the Rust function body. No markdown, no explanation.']' timed out after 360 seconds"
     },
     "modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__GetLabelBounds": {
       "node_id": "modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__GetLabelBounds",
@@ -8988,10 +8988,10 @@
       "bfs_level": null,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "todo! marker not found for modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__GetLabelBounds in edge_label_placement.rs"
     },
     "modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__SetLabelBounds": {
       "node_id": "modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__SetLabelBounds",
@@ -9020,10 +9020,10 @@
       "bfs_level": null,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "todo! marker not found for modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__SetLabelBounds in edge_label_placement.rs"
     },
     "modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__GetPossibleSides": {
       "node_id": "modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__GetPossibleSides",
@@ -9148,10 +9148,10 @@
       "bfs_level": null,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "todo! marker not found for modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__PlaceEdgeLabelOnCurve in edge_label_placement.rs"
     },
     "modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__CaseOfCoveredLengthGreaterThanLabelLength": {
       "node_id": "modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__CaseOfCoveredLengthGreaterThanLabelLength",
@@ -9188,10 +9188,10 @@
       "bfs_level": null,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "todo! marker not found for modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__CaseOfCoveredLengthGreaterThanLabelLength in edge_label_placement.rs"
     },
     "modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__GoOverOrderedPointsAndAddLabelObstacels": {
       "node_id": "modules__core__src__layout__edgeLabelPlacement__EdgeLabelPlacement__GoOverOrderedPointsAndAddLabelObstacels",
@@ -9267,7 +9267,7 @@
       "bfs_level": null,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "in_progress",
       "snippet_path": null,
       "attempt_count": 0,
       "last_error": null
