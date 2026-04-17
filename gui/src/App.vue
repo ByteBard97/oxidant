@@ -15,30 +15,31 @@
         </Tooltip>
         <div class="flex items-center gap-2">
           <Tooltip content="Memory usage — active node contexts" position="bottom">
-            <button @click="memoryModal.open()" class="text-zinc-500 hover:text-white transition-colors p-1">
+            <button data-testid="btn-memory" @click="memoryModal.open()" class="text-zinc-500 hover:text-white transition-colors p-1">
               <span class="material-symbols-outlined text-[20px]">memory</span>
             </button>
           </Tooltip>
           <Tooltip content="System health — worker + GPU sensors" position="bottom">
-            <button @click="sensorsModal.open()" class="text-zinc-500 hover:text-white transition-colors p-1">
+            <button data-testid="btn-sensors" @click="sensorsModal.open()" class="text-zinc-500 hover:text-white transition-colors p-1">
               <span class="material-symbols-outlined text-[20px]">sensors</span>
             </button>
           </Tooltip>
           <Tooltip content="Supervisor shell" position="bottom">
-            <button @click="terminalOpen = !terminalOpen" class="transition-colors p-1"
+            <button data-testid="btn-terminal" @click="terminalOpen = !terminalOpen" class="transition-colors p-1"
                     :class="terminalOpen ? 'text-secondary' : 'text-zinc-500 hover:text-white'">
               <span class="material-symbols-outlined text-[20px]">terminal</span>
             </button>
           </Tooltip>
           <!-- Option B: review panel toggle button in header -->
           <Tooltip content="Toggle review panel" position="bottom">
-            <button @click="reviewOpen = !reviewOpen" class="transition-colors p-1"
+            <button data-testid="btn-review-toggle" @click="reviewOpen = !reviewOpen" class="transition-colors p-1"
                     :class="reviewOpen ? 'text-secondary' : 'text-zinc-500 hover:text-white'">
               <span class="material-symbols-outlined text-[20px]">dock_to_right</span>
             </button>
           </Tooltip>
           <Tooltip content="[DEV] Seed UI with mock pipeline data" position="bottom">
             <button
+              data-testid="btn-seed"
               @click="seedMockData()"
               class="text-zinc-600 hover:text-tertiary transition-colors p-1 border-l border-dashed border-outline-variant/30 pl-2 ml-1"
             >
@@ -72,7 +73,7 @@
         <!-- Nav links — active indicator is a dedicated .rust-seam strip, not a CSS border -->
         <div class="flex flex-col py-2">
           <Tooltip content="Configure paths, mode, and start/stop the run" position="right">
-            <a class="relative text-zinc-500 py-3 px-4 flex items-center gap-3 hover:bg-zinc-800 transition-all cursor-pointer"
+            <a data-testid="nav-run" class="relative text-zinc-500 py-3 px-4 flex items-center gap-3 hover:bg-zinc-800 transition-all cursor-pointer"
                :class="activeTab === 'run' && 'bg-secondary/10 text-secondary'"
                @click="activeTab = 'run'">
               <div v-if="activeTab === 'run'" class="rust-seam absolute right-0 inset-y-0 w-[4px] bg-secondary" aria-hidden="true" />
@@ -81,7 +82,7 @@
             </a>
           </Tooltip>
           <Tooltip content="Live SSE telemetry feed — node events as they happen" position="right">
-            <a class="relative text-zinc-500 py-3 px-4 flex items-center gap-3 hover:bg-zinc-800 transition-all cursor-pointer"
+            <a data-testid="nav-logs" class="relative text-zinc-500 py-3 px-4 flex items-center gap-3 hover:bg-zinc-800 transition-all cursor-pointer"
                :class="activeTab === 'logs' && 'bg-secondary/10 text-secondary'"
                @click="activeTab = 'logs'">
               <div v-if="activeTab === 'logs'" class="rust-seam absolute right-0 inset-y-0 w-[4px] bg-secondary" aria-hidden="true" />
@@ -90,7 +91,7 @@
             </a>
           </Tooltip>
           <Tooltip content="Nodes that failed auto-translation and need human review" position="right">
-            <a class="relative text-zinc-500 py-3 px-4 flex items-center gap-3 hover:bg-zinc-800 transition-all cursor-pointer"
+            <a data-testid="nav-review" class="relative text-zinc-500 py-3 px-4 flex items-center gap-3 hover:bg-zinc-800 transition-all cursor-pointer"
                :class="activeTab === 'review' && 'bg-secondary/10 text-secondary'"
                @click="activeTab = 'review'">
               <div v-if="activeTab === 'review'" class="rust-seam absolute right-0 inset-y-0 w-[4px] bg-secondary" aria-hidden="true" />
