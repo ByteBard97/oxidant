@@ -59,6 +59,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRunStore } from '../store'
+import { shortId } from '../utils/strings'
 
 const store = useRunStore()
 
@@ -90,13 +91,9 @@ const queueItems = computed<QueueItem[]>(() => {
           time:    new Date().toLocaleTimeString(),
         })
       }
-    } catch { /* ignore malformed events */ }
+    } catch (e) { console.warn('ReviewQueuePanel: failed to parse event', raw, e) }
   })
   return items
 })
 
-function shortId(id: string): string {
-  const parts = id.split('/')
-  return parts.length > 2 ? '…/' + parts.slice(-2).join('/') : id
-}
 </script>

@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, reactive } from 'vue'
+import { MAX_RECENT_EVENTS } from './utils/constants'
 
 export type RunStatus = 'idle' | 'running' | 'paused' | 'interrupted' | 'complete' | 'aborted' | 'error'
 
@@ -69,10 +70,11 @@ export const useRunStore = defineStore('run', () => {
     let evt: SSEEvent
     try {
       evt = JSON.parse(raw) as SSEEvent
-    } catch {
+    } catch (e) {
+      console.warn('applyEvent: failed to parse SSE message', raw, e)
       return
     }
-    recentEvents.value = [raw, ...recentEvents.value].slice(0, 50)
+    recentEvents.value = [raw, ...recentEvents.value].slice(0, MAX_RECENT_EVENTS)
 
     switch (evt.event) {
       case 'node_start':
