@@ -102,6 +102,8 @@
         <ReviewPanel />
       </main>
     </div>
+
+    <ConfirmModal />
   </div>
 </template>
 
@@ -115,6 +117,7 @@ import RunControls from './components/RunControls.vue'
 import ProgressDashboard from './components/ProgressDashboard.vue'
 import LiveNodeFeed from './components/LiveNodeFeed.vue'
 import ReviewPanel from './components/ReviewPanel.vue'
+import ConfirmModal from './components/ConfirmModal.vue'
 
 const store = useRunStore()
 const activeTab = ref<'run' | 'logs' | 'review'>('logs')
