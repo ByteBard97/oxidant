@@ -3,14 +3,14 @@
     <div class="flex flex-col gap-2">
       <Tooltip content="Path to conversion_manifest.json — lists all TS nodes to translate" position="right">
         <input
-          v-model="manifestPath"
+          v-model="store.manifestPath"
           class="w-full bg-surface-container-lowest border-0 border-l-2 border-transparent focus:border-primary outline-none text-[11px] font-mono text-zinc-300 px-2 py-1.5 placeholder-zinc-600 transition-colors"
           placeholder="MANIFEST PATH"
         />
       </Tooltip>
       <Tooltip content="Root of the msagl-rs output repo — Rust files are written here" position="right">
         <input
-          v-model="targetPath"
+          v-model="store.targetPath"
           class="w-full bg-surface-container-lowest border-0 border-l-2 border-transparent focus:border-primary outline-none text-[11px] font-mono text-zinc-300 px-2 py-1.5 placeholder-zinc-600 transition-colors"
           placeholder="TARGET PATH"
         />
@@ -66,6 +66,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+// manifestPath + targetPath live in the store so RunControls and RunConfigPanel stay in sync
 import { useRunStore } from '../store'
 import { useConfirm } from '../composables/useConfirm'
 import { api } from '../api'
@@ -74,16 +75,14 @@ import Tooltip from './Tooltip.vue'
 
 const store = useRunStore()
 const { confirm } = useConfirm()
-const manifestPath = ref('')
-const targetPath = ref('')
 const error = ref('')
 
 async function start() {
   error.value = ''
   try {
     const res = await api.startRun({
-      manifest_path: manifestPath.value,
-      target_path: targetPath.value,
+      manifest_path: store.manifestPath,
+      target_path: store.targetPath,
       review_mode: store.reviewMode,
       thread_id: store.status === 'paused' ? store.threadId : null,
     })

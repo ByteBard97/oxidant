@@ -97,7 +97,9 @@
       <!-- Main workspace -->
       <main class="flex-1 bg-surface-container-low flex flex-row overflow-hidden">
         <div class="flex-1 flex flex-col min-w-0 border-r border-dashed border-[#2D2F31]">
-          <LiveNodeFeed />
+          <RunConfigPanel  v-if="activeTab === 'run'" />
+          <ReviewQueuePanel v-else-if="activeTab === 'review'" />
+          <LiveNodeFeed    v-else />
         </div>
         <ReviewPanel />
       </main>
@@ -116,6 +118,8 @@ import Tooltip from './components/Tooltip.vue'
 import RunControls from './components/RunControls.vue'
 import ProgressDashboard from './components/ProgressDashboard.vue'
 import LiveNodeFeed from './components/LiveNodeFeed.vue'
+import RunConfigPanel from './components/RunConfigPanel.vue'
+import ReviewQueuePanel from './components/ReviewQueuePanel.vue'
 import ReviewPanel from './components/ReviewPanel.vue'
 import ConfirmModal from './components/ConfirmModal.vue'
 

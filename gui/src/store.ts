@@ -49,6 +49,8 @@ export const useRunStore = defineStore('run', () => {
   const threadId = ref<string | null>(null)
   const status = ref<RunStatus>('idle')
   const reviewMode = ref<'auto' | 'interactive' | 'supervised'>('auto')
+  const manifestPath = ref('')
+  const targetPath = ref('')
   const activeNodes = reactive<Record<string, NodeProgress>>({})
   const pendingReview = ref<InterruptPayload | null>(null)
   const recentEvents = ref<string[]>([])
@@ -153,7 +155,8 @@ export const useRunStore = defineStore('run', () => {
   }
 
   return {
-    threadId, status, reviewMode, activeNodes, pendingReview, recentEvents, stats,
+    threadId, status, reviewMode, manifestPath, targetPath,
+    activeNodes, pendingReview, recentEvents, stats,
     setThreadId, setStatus, applyEvent, applyNodeStart, applyNodeComplete,
     applyNodeEscalate, applyInterrupt, applyRunComplete, clearReview, reset,
   }
