@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Oxidant Dashboard - Interrupted</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&amp;family=Inter:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .font-mono {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        }
+        /* Custom Scrollbar for Terminal aesthetic */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(12, 14, 16, 0.6); 
+            border-left: 1px dashed rgba(87, 66, 59, 0.5);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(40, 42, 44, 0.8); 
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(55, 57, 59, 0.9); 
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary-container": "#045047",
+                      "surface-container": "#1e2022",
+                      "on-tertiary-fixed-variant": "#6e3900",
+                      "on-secondary-container": "#82c1b5",
+                      "on-surface-variant": "#dfc0b7",
+                      "on-primary-fixed": "#390b00",
+                      "surface-dim": "#121416",
+                      "inverse-primary": "#a53b14",
+                      "outline": "#a68b82",
+                      "surface-container-highest": "#333537",
+                      "on-background": "#e2e2e5",
+                      "error-container": "#93000a",
+                      "secondary": "#94d2c7",
+                      "on-secondary-fixed": "#00201c",
+                      "surface-container-lowest": "#0c0e10",
+                      "on-primary": "#5d1800",
+                      "surface": "#0f172a",
+                      "inverse-surface": "#e2e2e5",
+                      "on-error-container": "#ffdad6",
+                      "secondary-fixed": "#afefe3",
+                      "tertiary-fixed-dim": "#ffb77d",
+                      "tertiary-container": "#ab5c00",
+                      "on-tertiary-container": "#fff4ee",
+                      "on-surface": "#e2e2e5",
+                      "primary": "#ffb59d",
+                      "tertiary-fixed": "#ffdcc3",
+                      "secondary-fixed-dim": "#94d2c7",
+                      "primary-fixed": "#ffdbd0",
+                      "primary-container": "#be4d25",
+                      "surface-bright": "#37393b",
+                      "inverse-on-surface": "#2f3133",
+                      "on-secondary-fixed-variant": "#045047",
+                      "background": "#0f172a",
+                      "on-error": "#690005",
+                      "surface-container-low": "transparent",
+                      "surface-container-high": "#282a2c",
+                      "surface-variant": "#333537",
+                      "primary-fixed-dim": "#ffb59d",
+                      "on-tertiary-fixed": "#2f1500",
+                      "outline-variant": "#57423b",
+                      "on-tertiary": "#4d2600",
+                      "on-secondary": "#003731",
+                      "on-primary-container": "#fff4f1",
+                      "surface-tint": "#ffb59d",
+                      "tertiary": "#ffb77d",
+                      "on-primary-fixed-variant": "#842600",
+                      "error": "#ffb4ab"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0px",
+                      "lg": "0px",
+                      "xl": "0px",
+                      "full": "0px"
+              },
+              "spacing": {},
+              "fontFamily": {
+                      "headline": [
+                              "Space Grotesk"
+                      ],
+                      "body": [
+                              "Inter"
+                      ],
+                      "label": [
+                              "Space Grotesk"
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+</head>
+<body class="bg-[#0f172a] text-on-surface h-screen flex flex-col font-body overflow-hidden relative z-0">
+<div class="fixed inset-0 pointer-events-none z-[-1] mix-blend-overlay opacity-[0.40]" style="background-image: url('https://lh3.googleusercontent.com/aida/ADBb0uimX5cAIKdd2NC-vp57YsW3h9fwsrK6xpZabF_asZxK_ts71nM-j89MDwi_31YNIdtOnSYcRw61qTRXTKWFv5Ly8c51H-0R6AfxNPHQCdFzkubdMUwQOLxj-Y9KzIrpV4A-9qo-dWK-cg3Y5AIAxJaAToJEBE37ePVpijjH4St9bBqsRP51nJnKw7ZFFlcZHNEfiWM24Hg4tE_Hw_TFdc9GbKBGDgWYDotx63ToMxE-tNXwUrjSgo-hAbT8'); background-size: cover; background-repeat: no-repeat; background-position: center;"></div>
+<!-- TopNavBar -->
+<header class="bg-[#1b2336]/60 backdrop-blur-md text-on-surface flex justify-between items-center w-full px-4 h-12 border-b border-[#2D2F31] shrink-0 font-mono text-sm tracking-tighter uppercase relative z-50">
+<div class="flex items-center gap-6 h-full relative z-10">
+<span class="font-black text-xl text-[#BE4D25] tracking-widest">[TERMINAL.LOGS]</span>
+</div>
+<div class="flex items-center gap-4 h-full relative z-10">
+<div class="flex items-center gap-2 text-[#438177] bg-[#438177]/10 px-3 py-1 border border-[#438177]/30">
+<span class="text-[8px] animate-pulse">●</span>
+<span>CONNECTED</span>
+</div>
+<div class="flex items-center gap-3">
+<button class="text-zinc-500 hover:text-white transition-colors p-1" title="memory">
+<span class="material-symbols-outlined text-[20px]">memory</span>
+</button>
+<button class="text-zinc-500 hover:text-white transition-colors p-1" title="sensors">
+<span class="material-symbols-outlined text-[20px]">sensors</span>
+</button>
+<button class="text-zinc-500 hover:text-white transition-colors p-1" title="terminal">
+<span class="material-symbols-outlined text-[20px]">terminal</span>
+</button>
+</div>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- SideNavBar -->
+<nav class="bg-[#1b2336]/60 backdrop-blur-md w-[120px] flex flex-col border-r border-[#2D2F31] shrink-0 h-full relative z-40 overflow-y-auto font-mono text-xs uppercase">
+<div class="relative z-10 flex flex-col h-full">
+<!-- Header/Profile Area -->
+<div class="p-2 border-b border-[#2D2F31] flex flex-row items-center justify-center gap-2">
+<div class="w-6 h-6 shrink-0 flex items-center justify-center">
+    {{DATA:DOCUMENT:DOCUMENT_15}}
+</div>
+<span class="font-black text-xs text-[#BE4D25] tracking-[0.1em] py-1">OXIDANT</span>
+</div>
+<!-- Stacked Items -->
+<div class="flex flex-col flex-1 text-[10px]">
+<a class="text-zinc-500 py-3 px-2 flex items-center justify-center text-center hover:bg-zinc-800/50 transition-all border-b border-[#2D2F31]" href="#">
+    [RUN_CONFIGURATION]
+</a>
+<a class="text-zinc-500 py-3 px-2 flex items-center justify-center text-center hover:bg-zinc-800/50 transition-all border-b border-[#2D2F31]" href="#">
+    [SESSION_TELEMETRY]
+</a>
+<a class="text-zinc-500 py-3 px-2 flex items-center justify-center text-center hover:bg-zinc-800/50 transition-all border-b border-[#2D2F31]" href="#">
+    [SETTINGS]
+</a>
+<a class="text-zinc-500 py-3 px-2 flex items-center justify-center text-center hover:bg-zinc-800/50 transition-all border-b border-[#2D2F31]" href="#">
+    [DOCS]
+</a>
+</div>
+</div>
+</nav>
+<!-- Main Workspace Canvas -->
+<main class="flex-1 bg-transparent flex flex-col md:flex-row overflow-hidden relative">
+<!-- Center Feed: Active Nodes & Logs -->
+<div class="flex-1 flex flex-col min-w-0 border-r border-[#2D2F31] border-dashed">
+<!-- Active Node Monitor -->
+<div class="p-4 border-b border-outline-variant/20 bg-[#1b2336]/60 backdrop-blur-sm flex flex-col gap-3 font-mono text-xs">
+<div class="text-zinc-400 text-[10px] mb-1">ACTIVE PROCESSING NODES</div>
+<!-- Node Row 1 -->
+<div class="flex items-center justify-between bg-[#0c0e10]/60 backdrop-blur-sm p-2 border-l-2 border-[#438177]">
+<div class="flex items-center gap-3">
+<span class="text-[8px] text-[#438177] animate-pulse">●</span>
+<span class="text-zinc-200 truncate w-48" title="/src/core/auth.ts">.../core/auth.ts</span>
+</div>
+<span class="bg-surface-container-highest/80 text-zinc-300 px-2 py-0.5 text-[9px]">TIER 1 NODE</span>
+</div>
+<!-- Node Row 2 -->
+<div class="flex items-center justify-between bg-[#0c0e10]/60 backdrop-blur-sm p-2 border-l-2 border-[#BE4D25]">
+<div class="flex items-center gap-3">
+<span class="text-[8px] text-[#BE4D25] animate-pulse">●</span>
+<span class="text-zinc-200 truncate w-48" title="/src/utils/parser.rs">.../utils/parser.rs</span>
+</div>
+<span class="bg-surface-container-highest/80 text-zinc-300 px-2 py-0.5 text-[9px]">TIER 2 NODE</span>
+</div>
+</div>
+<!-- Telemetry Feed (Logs) -->
+<div class="flex-1 overflow-auto p-4 bg-transparent font-mono text-[11px] leading-relaxed text-on-surface-variant drop-shadow-md whitespace-nowrap">
+<div class="mb-2"><span class="text-zinc-400 drop-shadow-md">[14:02:01]</span> <span class="text-[#438177]">INFO</span> Starting conversion sequence...</div>
+<div class="mb-2"><span class="text-zinc-400 drop-shadow-md">[14:02:05]</span> <span class="text-[#438177]">INFO</span> Node /src/core/auth.ts loaded.</div>
+<div class="mb-2"><span class="text-zinc-400 drop-shadow-md">[14:02:08]</span> <span class="text-zinc-300">DEBUG</span> Analyzing dependencies...</div>
+<div class="mb-2"><span class="text-zinc-400 drop-shadow-md">[14:02:12]</span> <span class="text-[#BE4D25]">WARN</span> Type mismatch detected in /src/utils/parser.rs at line 42.</div>
+<div class="mb-2"><span class="text-zinc-400 drop-shadow-md">[14:02:15]</span> <span class="text-[#BE4D25]">WARN</span> Halting conversion. Manual review required.</div>
+<div class="mb-2"><span class="text-zinc-400 drop-shadow-md">[14:02:16]</span> <span class="text-primary font-bold">STATE CHANGED: INTERRUPTED</span></div>
+<div class="mt-4 border-t border-dashed border-outline-variant/50 pt-2 text-zinc-300 font-bold">Awaiting Operator Input...</div>
+</div>
+</div>
+<!-- Review Panel (Right Side) -->
+<div class="w-full md:w-2/5 lg:w-[450px] bg-[#1b2336]/60 backdrop-blur-md flex flex-col shrink-0 relative z-30 shadow-[-10px_0_20px_rgba(0,0,0,0.5)] border-l-4 border-[#f97316]">
+<div class="relative z-10 flex flex-col h-full">
+<!-- Review Panel Header -->
+<div class="p-4 bg-transparent border-b border-[#2D2F31] flex justify-between items-center relative">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#BE4D25] text-[18px]">warning</span>
+<h2 class="font-headline font-bold text-sm tracking-wide text-white uppercase">Manual Review Required</h2>
+</div>
+<!-- Review Mode Dropdown -->
+<select class="bg-[#0c0e10]/60 border border-outline-variant text-xs font-mono text-zinc-200 py-1 px-2 focus:ring-0 focus:border-primary backdrop-blur-sm">
+<option value="auto">AUTO (Permissive)</option>
+<option value="strict">STRICT (Halt on Any)</option>
+<option selected="" value="interactive">INTERACTIVE (All Nodes)</option>
+</select>
+</div>
+<!-- Review Content -->
+<div class="flex-1 overflow-y-auto p-4 flex flex-col gap-6">
+<!-- Issue Summary -->
+<div class="bg-[#0c0e10]/60 border-l-2 border-[#BE4D25] p-3 font-mono text-xs text-zinc-200 backdrop-blur-sm shadow-md">
+<div class="text-[#BE4D25] mb-1 font-bold">ERR_TYPE_MISMATCH</div>
+                        Expected `Result<string, error="">`, found `Option<string>`. Cannot map safely without explicit fallback.
+                    </string></string,></div>
+<!-- Source Code Block (Taller) -->
+<div class="flex flex-col shadow-md">
+<div class="bg-[#2D2F31]/80 backdrop-blur-sm px-3 py-1 flex justify-between items-center text-[10px] font-mono text-zinc-300">
+<span>SOURCE (TS)</span>
+<span>.../utils/parser.rs</span>
+</div>
+<div class="bg-[#080c16]/60 p-3 border border-outline-variant/30 overflow-x-auto overflow-y-auto h-48 backdrop-blur-sm">
+<pre class="text-[11px] font-mono text-zinc-200 leading-relaxed"><code><span class="text-zinc-500">38 |</span> async function fetchConfig(raw: string): Promise&lt;Config&gt; {
+<span class="text-zinc-500">39 |</span>     const parsed = await JSON.parse(raw);
+<span class="text-zinc-500">40 |</span>     return parsed;
+<span class="text-zinc-500">41 |</span> }
+<span class="text-[#ffb4ab] bg-[#BE4D25]/20 block w-full">42 | export function loadSettings(raw: string): Promise&lt;Config&gt; {</span>
+<span class="text-[#ffb4ab] bg-[#BE4D25]/20 block w-full">43 |     const config = fetchConfig(raw); // ^ Expected Promise, found pending</span>
+<span class="text-zinc-500">44 |</span>     return config;
+<span class="text-zinc-500">45 |</span> }
+<span class="text-zinc-500">46 |</span>
+<span class="text-zinc-500">47 |</span> function fallback(): string {
+<span class="text-zinc-500">48 |</span>     return "default";
+<span class="text-zinc-500">49 |</span> }</code></pre>
+</div>
+</div>
+<!-- Resolution Input -->
+<div class="flex flex-col gap-2 mt-auto">
+<label class="text-xs font-mono text-zinc-300 uppercase drop-shadow-md">Operator Resolution</label>
+<textarea class="w-full bg-[#0c0e10]/60 border-0 focus:ring-0 focus:border-l-2 focus:border-primary text-sm font-mono text-white p-3 h-auto resize-none border-l-2 border-transparent transition-all outline-dashed outline-1 outline-outline-variant/40 backdrop-blur-sm shadow-md" placeholder="Enter Rust type override or translation hint..." rows="5"></textarea>
+</div>
+<!-- Action Buttons -->
+<div class="flex gap-3 shadow-md">
+<button class="flex-1 bg-[#2a3449]/60 text-primary border border-dashed border-outline-variant py-2 text-sm font-mono font-bold hover:bg-surface-bright/80 transition-colors uppercase backdrop-blur-sm">
+                            Skip Node
+                        </button>
+<button class="flex-1 bg-gradient-to-r from-secondary-container/80 to-[#033d36]/80 text-on-secondary-container border-b-2 border-[#022b26] py-2 text-sm font-mono font-bold hover:opacity-90 transition-opacity uppercase drop-shadow-md backdrop-blur-sm">
+                            Apply Fix
+                        </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

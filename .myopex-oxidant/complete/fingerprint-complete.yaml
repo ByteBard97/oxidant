@@ -1,0 +1,75 @@
+version: 2
+page:
+  url: http://localhost:8000/
+  title: Oxidant
+  viewport:
+    width: 1440
+    height: 900
+  theme: dark
+  background: rgb(15, 15, 15)
+  layout: header + main + aside
+  landmarks:
+    - banner
+    - main
+    - complementary
+  capturedAt: 2026-04-17T02:52:28.171Z
+regions:
+  banner:
+    role: banner
+    bounds:
+      x: 0
+      y: 0
+      width: 1440
+      height: 46
+    background: rgb(10, 10, 10)
+    childCount: 2
+    components: []
+    _screenshotFile: screenshots/region-banner.png
+    _estimated_tokens: 42
+  main:
+    role: main
+    bounds:
+      x: 0
+      y: 46
+      width: 1440
+      height: 854
+    background: rgba(0, 0, 0, 0)
+    childCount: 2
+    components:
+      - id: main/complementary[0]
+        props:
+          role: complementary
+          name: ""
+          bounds: &a1
+            x: 0
+            y: 46
+            width: 340
+            height: 854
+          visible: true
+          backgroundColor: rgba(0, 0, 0, 0)
+          color: rgb(229, 229, 229)
+          fontSize: 16px
+          borderWidth: 0px 1px 0px 0px
+          opacity: "1"
+          display: block
+          overflow: auto
+          textOverflow: false
+          textContent: Manifest:Target:Review mode:autosupervisedinteractiveStartPauseAbort0converted0in progress0needs reviewidle
+          childCount: 2
+          resolveStatus: ok
+          screenshotFile: screenshots/main-complementary-0-.png
+    _screenshotFile: screenshots/region-main.png
+    _estimated_tokens: 198
+  complementary:
+    role: complementary
+    bounds: *a1
+    background: rgba(0, 0, 0, 0)
+    childCount: 2
+    components: []
+    _screenshotFile: screenshots/region-complementary.png
+    _estimated_tokens: 46
+ungrouped: []
+state:
+  name: complete
+  modals: none
+  selection: null

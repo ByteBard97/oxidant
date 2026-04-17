@@ -1,36 +1,83 @@
 <template>
-  <div v-if="store.status === 'interrupted' && store.pendingReview" class="review-panel">
-    <div class="panel-header">Review Required</div>
+  <div class="w-[450px] bg-surface flex flex-col shrink-0 border-l-4 shadow-[-10px_0_20px_rgba(0,0,0,0.5)]"
+       :class="store.pendingReview ? 'border-primary-container' : 'border-outline-variant/30'">
 
-    <div class="section">
-      <div class="section-title">Node</div>
-      <div class="node-id">{{ store.pendingReview.node_id }}</div>
+    <!-- Header -->
+    <div class="p-4 bg-surface-container-high border-b border-[#2D2F31] flex justify-between items-center shrink-0">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary-container text-[18px]">warning</span>
+        <h2 class="font-headline font-bold text-sm tracking-wide text-white uppercase">Manual Review Required</h2>
+      </div>
+      <select
+        v-model="store.reviewMode"
+        class="bg-surface-container-lowest border border-outline-variant text-xs font-mono text-zinc-300 py-1 px-2 focus:outline-none focus:border-primary"
+      >
+        <option value="auto">AUTO (Permissive)</option>
+        <option value="supervised">SUPERVISED</option>
+        <option value="interactive">INTERACTIVE (All Nodes)</option>
+      </select>
     </div>
 
-    <div class="section">
-      <div class="section-title">Error</div>
-      <pre class="error-text">{{ store.pendingReview.error }}</pre>
+    <!-- Idle state -->
+    <div v-if="!store.pendingReview" class="flex-1 flex flex-col items-center justify-center p-8 gap-4 text-center">
+      <span class="material-symbols-outlined text-zinc-700 text-[48px]">checklist</span>
+      <div class="font-mono text-[11px] text-zinc-600 uppercase tracking-widest">No Review Pending</div>
+      <div class="font-mono text-[10px] text-zinc-700">Nodes will appear here when<br/>manual review is required.</div>
     </div>
 
-    <div class="section">
-      <div class="section-title">Source preview</div>
-      <pre class="source-text">{{ store.pendingReview.source_preview }}</pre>
-    </div>
+    <!-- Active review content -->
+    <div v-else class="flex-1 overflow-y-auto p-4 flex flex-col gap-5">
 
-    <div class="section">
-      <div class="section-title">Supervisor hint (editable)</div>
-      <textarea v-model="hint" rows="4" class="hint-input" />
-    </div>
+      <!-- Error summary -->
+      <div class="bg-surface-container-lowest border-l-2 border-primary-container p-3 font-mono text-xs text-zinc-200">
+        <div class="text-primary-container mb-1 font-bold text-[10px] tracking-widest">
+          ERR · {{ shortId(store.pendingReview.node_id) }}
+        </div>
+        <pre class="whitespace-pre-wrap text-zinc-300 leading-relaxed">{{ store.pendingReview.error }}</pre>
+      </div>
 
-    <div class="button-row">
-      <button @click="resume" class="btn btn-resume" :disabled="submitting">
-        {{ submitting ? 'Resuming…' : 'Resume with hint' }}
-      </button>
-      <button @click="skip" class="btn btn-skip" :disabled="submitting">
-        Skip this node
-      </button>
+      <!-- Source preview -->
+      <div class="flex flex-col shadow-md">
+        <div class="bg-[#2D2F31] px-3 py-1 flex justify-between items-center text-[10px] font-mono text-zinc-400">
+          <span>SOURCE (TS)</span>
+          <span class="text-zinc-500">{{ shortId(store.pendingReview.node_id) }}</span>
+        </div>
+        <div class="bg-surface-container-lowest p-3 border border-outline-variant/20 overflow-auto max-h-52">
+          <pre class="text-[11px] font-mono text-zinc-300 leading-relaxed whitespace-pre-wrap">{{ store.pendingReview.source_preview }}</pre>
+        </div>
+      </div>
+
+      <!-- Resolution textarea -->
+      <div class="flex flex-col gap-2 flex-1">
+        <label class="text-xs font-mono text-zinc-400 uppercase tracking-widest">Operator Resolution</label>
+        <textarea
+          v-model="hint"
+          rows="5"
+          class="w-full bg-surface-container-lowest border-l-2 border-transparent focus:border-primary outline-dashed outline-1 outline-outline-variant/30 text-sm font-mono text-white p-3 resize-none transition-colors focus:outline-none"
+          placeholder="Enter Rust type override or translation hint..."
+        />
+      </div>
+
+      <!-- Action buttons -->
+      <div class="flex gap-3">
+        <button
+          @click="skip"
+          :disabled="submitting"
+          class="flex-1 bg-surface-container-highest text-primary border border-dashed border-outline-variant py-2 text-sm font-mono font-bold hover:bg-surface-bright transition-colors uppercase disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          Skip Node
+        </button>
+        <button
+          @click="resume"
+          :disabled="submitting"
+          class="flex-1 bg-gradient-to-r from-secondary-container to-[#033d36] text-on-secondary-container border-b-2 border-[#022b26] py-2 text-sm font-mono font-bold hover:opacity-90 transition-opacity uppercase disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          {{ submitting ? 'Applying…' : 'Apply Fix' }}
+        </button>
+      </div>
+
+      <div v-if="error" class="text-error text-[10px] font-mono">{{ error }}</div>
     </div>
-    <div v-if="error" class="error-msg">{{ error }}</div>
   </div>
 </template>
 
@@ -45,14 +92,16 @@ const hint = ref('')
 const submitting = ref(false)
 const error = ref('')
 
-// Pre-fill hint when a new review arrives
 watch(
   () => store.pendingReview,
-  (payload) => {
-    hint.value = payload?.supervisor_hint ?? ''
-  },
+  (payload) => { hint.value = payload?.supervisor_hint ?? '' },
   { immediate: true },
 )
+
+function shortId(id: string): string {
+  const parts = id.split('/')
+  return '...' + parts.slice(-2).join('/')
+}
 
 async function resume() {
   if (!store.threadId || !store.pendingReview) return
@@ -87,31 +136,3 @@ async function skip() {
   }
 }
 </script>
-
-<style scoped>
-.review-panel {
-  position: fixed; right: 0; top: 0; bottom: 0; width: 420px;
-  background: #0a0a0a; border-left: 2px solid #f97316;
-  padding: 20px; overflow-y: auto; z-index: 100;
-}
-.panel-header { font-size: 14px; font-weight: bold; color: #f97316; margin-bottom: 16px; }
-.section { margin-bottom: 16px; }
-.section-title { font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
-.node-id { font-size: 13px; color: #60a5fa; word-break: break-all; }
-.error-text, .source-text {
-  font-size: 12px; background: #1a1a1a; padding: 8px; border-radius: 4px;
-  max-height: 120px; overflow-y: auto; white-space: pre-wrap; color: #fca5a5;
-}
-.source-text { color: #a3e635; }
-.hint-input {
-  width: 100%; background: #1a1a1a; border: 1px solid #444; color: #e5e5e5;
-  padding: 8px; border-radius: 4px; font-family: inherit; font-size: 13px;
-  resize: vertical;
-}
-.button-row { display: flex; gap: 8px; margin-top: 8px; }
-.btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-family: inherit; }
-.btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.btn-resume { background: #166534; color: #fff; }
-.btn-skip { background: #3b0764; color: #fff; }
-.error-msg { margin-top: 8px; color: #f87171; font-size: 12px; }
-</style>
