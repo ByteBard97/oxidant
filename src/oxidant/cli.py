@@ -181,6 +181,9 @@ def phase_b(
         done=False,
         max_nodes=max_nodes,
         nodes_this_run=0,
+        supervisor_hint=None,
+        interrupt_payload=None,
+        review_mode=cfg.get("review_mode", "auto"),
     )
 
     if dry_run:
