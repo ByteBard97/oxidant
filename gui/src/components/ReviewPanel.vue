@@ -30,11 +30,14 @@
     <div v-else class="p-4 flex flex-col gap-5">
 
       <!-- Error summary -->
-      <div class="bg-surface-container-lowest border-l-2 border-primary-container p-3 font-mono text-xs text-zinc-200">
-        <div class="text-primary-container mb-1 font-bold text-[10px] tracking-widest">
-          ERR · {{ shortId(store.pendingReview.node_id) }}
+      <div class="flex bg-surface-container-lowest font-mono text-xs text-zinc-200">
+        <div class="rust-seam w-[2px] self-stretch bg-primary-container" aria-hidden="true" />
+        <div class="p-3 flex-1">
+          <div class="text-primary-container mb-1 font-bold text-[10px] tracking-widest">
+            ERR · {{ shortId(store.pendingReview.node_id) }}
+          </div>
+          <pre class="whitespace-pre-wrap text-zinc-300 leading-relaxed">{{ store.pendingReview.error }}</pre>
         </div>
-        <pre class="whitespace-pre-wrap text-zinc-300 leading-relaxed">{{ store.pendingReview.error }}</pre>
       </div>
 
       <!-- Source preview -->

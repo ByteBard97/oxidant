@@ -58,31 +58,34 @@
           </div>
         </div>
 
-        <!-- Jagged rust seam over the right border -->
-        <div class="jagged-seam" aria-hidden="true" />
+        <!-- Sidebar right-border seam -->
+        <div class="rust-seam rust-seam-overlay" aria-hidden="true" />
 
-        <!-- Nav links -->
+        <!-- Nav links — active indicator is a dedicated .rust-seam strip, not a CSS border -->
         <div class="flex flex-col py-2">
           <Tooltip content="Configure paths, mode, and start/stop the run" position="right">
-            <a class="text-zinc-500 py-3 px-4 flex items-center gap-3 hover:bg-zinc-800 transition-all cursor-pointer"
-               :class="activeTab === 'run' && 'bg-secondary/10 text-secondary border-r-4 border-secondary'"
+            <a class="relative text-zinc-500 py-3 px-4 flex items-center gap-3 hover:bg-zinc-800 transition-all cursor-pointer"
+               :class="activeTab === 'run' && 'bg-secondary/10 text-secondary'"
                @click="activeTab = 'run'">
+              <div v-if="activeTab === 'run'" class="rust-seam absolute right-0 inset-y-0 w-[4px] bg-secondary" aria-hidden="true" />
               <span class="material-symbols-outlined text-[18px]">play_arrow</span>
               [RUN_CONTROLS]
             </a>
           </Tooltip>
           <Tooltip content="Live SSE telemetry feed — node events as they happen" position="right">
-            <a class="text-zinc-500 py-3 px-4 flex items-center gap-3 hover:bg-zinc-800 transition-all cursor-pointer"
-               :class="activeTab === 'logs' && 'bg-secondary/10 text-secondary border-r-4 border-secondary'"
+            <a class="relative text-zinc-500 py-3 px-4 flex items-center gap-3 hover:bg-zinc-800 transition-all cursor-pointer"
+               :class="activeTab === 'logs' && 'bg-secondary/10 text-secondary'"
                @click="activeTab = 'logs'">
+              <div v-if="activeTab === 'logs'" class="rust-seam absolute right-0 inset-y-0 w-[4px] bg-secondary" aria-hidden="true" />
               <span class="material-symbols-outlined text-[18px]">analytics</span>
               [CONV_LOGS]
             </a>
           </Tooltip>
           <Tooltip content="Nodes that failed auto-translation and need human review" position="right">
-            <a class="text-zinc-500 py-3 px-4 flex items-center gap-3 hover:bg-zinc-800 transition-all cursor-pointer"
-               :class="activeTab === 'review' && 'bg-secondary/10 text-secondary border-r-4 border-secondary'"
+            <a class="relative text-zinc-500 py-3 px-4 flex items-center gap-3 hover:bg-zinc-800 transition-all cursor-pointer"
+               :class="activeTab === 'review' && 'bg-secondary/10 text-secondary'"
                @click="activeTab = 'review'">
+              <div v-if="activeTab === 'review'" class="rust-seam absolute right-0 inset-y-0 w-[4px] bg-secondary" aria-hidden="true" />
               <span class="material-symbols-outlined text-[18px]">checklist</span>
               [REV_QUEUE]
               <span v-if="store.stats.needsReview > 0" class="ml-auto text-primary-container font-bold">{{ store.stats.needsReview }}</span>
@@ -115,7 +118,7 @@
         >
           <div class="resize-handle-dashes" />
           <div
-            class="resize-handle-accent"
+            class="rust-seam resize-handle-accent"
             :class="store.pendingReview ? 'bg-primary-container' : 'bg-outline-variant/30'"
           />
         </div>
