@@ -9,9 +9,8 @@
 ::-webkit-scrollbar-thumb:hover { background: #37393b; }
 
 /* ── Resize drag handle ──────────────────────────────────────────────────── */
-/* Total width = dashes zone (10px) + accent border (4px) = 14px.            */
-/* The accent border replaces ReviewPanel's border-l-4 and carries            */
-/* the review-state colour via a Tailwind class bound in App.vue.             */
+/* Resting: nearly invisible — just a 4px accent stripe.                      */
+/* Hover: tick marks appear and accent glows.                                 */
 .resize-handle {
   width: 14px;
   cursor: col-resize;
@@ -23,20 +22,14 @@
   flex-shrink: 0;
 }
 
-/* Left 10px: dashed tick-mark affordance */
+/* Left 10px: invisible at rest, subtle ticks on hover */
 .resize-handle-dashes {
   flex: 1;
-  background: repeating-linear-gradient(
-    to bottom,
-    #57423b55 0px,
-    #57423b55 4px,
-    transparent 4px,
-    transparent 9px
-  );
+  background: transparent;
   transition: background 150ms;
 }
 
-/* Right 4px: coloured accent, mirrors old ReviewPanel border-l-4 */
+/* Right 4px: coloured accent that carries the review-state colour */
 .resize-handle-accent {
   width: 4px;
   flex-shrink: 0;
@@ -46,10 +39,10 @@
 .resize-handle:hover .resize-handle-dashes {
   background: repeating-linear-gradient(
     to bottom,
-    #ffb59d 0px,
-    #ffb59d 4px,
-    transparent 4px,
-    transparent 9px
+    #57423b99 0px,
+    #57423b99 3px,
+    transparent 3px,
+    transparent 8px
   );
 }
 
