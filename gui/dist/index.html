@@ -1,17 +1,57 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Oxidant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <style>
       * { box-sizing: border-box; margin: 0; padding: 0; }
-      body { font-family: ui-monospace, 'Cascadia Code', monospace; background: #0f0f0f; color: #e5e5e5; }
+      html, body { height: 100%; overflow: hidden; background: #121416; }
+
+      /* Rust texture overlay — real iron-oxide photo, screen-blended */
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 9999;
+        background-image: url('/rust-texture.png');
+        background-size: 600px 600px;
+        background-repeat: repeat;
+        opacity: 0.12;
+        mix-blend-mode: screen;
+      }
     </style>
-    <script type="module" crossorigin src="/assets/index-Bt49Pk4G.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-BY9ccqwt.css">
+    <script type="module" crossorigin src="/assets/index-C9C4ydFt.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-BnlJnlWt.css">
   </head>
   <body>
+    <!-- Hidden SVG filter bank — rust-edge displaces pixels along seams -->
+    <svg style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
+      <defs>
+        <!--
+          rust-edge: fractal noise displacement that makes straight vertical
+          edges look mottled and slightly jagged. Scale=4 gives ~4px max drift.
+          Low Y baseFrequency means slow vertical variation (long undulations);
+          higher X baseFrequency gives the horizontal choppiness.
+        -->
+        <filter id="rust-edge" x="-25%" y="-1%" width="150%" height="102%"
+                color-interpolation-filters="sRGB">
+          <feTurbulence type="fractalNoise"
+                        baseFrequency="0.07 0.006"
+                        numOctaves="3"
+                        seed="13"
+                        result="noise"/>
+          <feDisplacementMap in="SourceGraphic" in2="noise"
+                             scale="4"
+                             xChannelSelector="R"
+                             yChannelSelector="G"/>
+        </filter>
+      </defs>
+    </svg>
+
     <div id="app"></div>
   </body>
 </html>

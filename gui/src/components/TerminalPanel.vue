@@ -57,7 +57,7 @@ import { ref, nextTick, onMounted } from 'vue'
 import { useRunStore } from '../store'
 
 defineProps<{ height: number }>()
-const emit = defineEmits<{
+defineEmits<{
   close: []
   dragstart: [e: MouseEvent]
 }>()

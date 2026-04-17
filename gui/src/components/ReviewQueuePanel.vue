@@ -63,7 +63,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRunStore } from '../store'
-import { shortId } from '../utils/strings'
 
 const store = useRunStore()
 
