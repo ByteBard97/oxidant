@@ -313,7 +313,7 @@ def serve(
     else:
         typer.echo("No GUI dist provided. API-only mode. Pass --gui-dist to serve the dashboard.")
 
-    application = create_app(db_path=db_path, gui_dist=gui_dist)
+    application = create_app(db_path=db_path, gui_dist=gui_dist, config_path=str(config.resolve()))
     uvicorn.run(application, host=host, port=port, reload=reload)
 
 

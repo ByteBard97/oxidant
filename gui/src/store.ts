@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, reactive } from 'vue'
 import { MAX_RECENT_EVENTS } from './utils/constants'
+import { api } from './api'
 
 export type RunStatus = 'idle' | 'running' | 'paused' | 'interrupted' | 'complete' | 'aborted' | 'error'
 
@@ -50,8 +51,14 @@ export const useRunStore = defineStore('run', () => {
   const threadId = ref<string | null>(null)
   const status = ref<RunStatus>('idle')
   const reviewMode = ref<'auto' | 'interactive' | 'supervised'>('auto')
-  const manifestPath = ref('conversion_manifest.json')
-  const targetPath = ref('corpora/msagl-rs')
+  const manifestPath = ref('')
+  const targetPath = ref('')
+
+  // Fetch defaults from server config on first load
+  api.getDefaults().then(d => {
+    if (!manifestPath.value && d.manifest_path) manifestPath.value = d.manifest_path
+    if (!targetPath.value && d.target_path) targetPath.value = d.target_path
+  }).catch(() => { /* server may not be running yet */ })
   const activeNodes = reactive<Record<string, NodeProgress>>({})
   const pendingReview = ref<InterruptPayload | null>(null)
   const recentEvents = ref<string[]>([])

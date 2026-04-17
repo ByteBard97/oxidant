@@ -56,4 +56,7 @@ export const api = {
 
   getReviewQueue: () =>
     get<unknown[]>('/review-queue'),
+
+  getDefaults: () =>
+    get<{ manifest_path?: string; target_path?: string; snippets_dir?: string }>('/api/defaults'),
 }

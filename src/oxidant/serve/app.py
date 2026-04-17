@@ -44,7 +44,7 @@ class ResumeRequest(BaseModel):
     skip: bool = False
 
 
-def create_app(db_path: str, gui_dist: str | None = None) -> FastAPI:
+def create_app(db_path: str, gui_dist: str | None = None, config_path: str | None = None) -> FastAPI:
     """Factory that creates a configured FastAPI app.
 
     Args:
@@ -149,6 +149,26 @@ def create_app(db_path: str, gui_dist: str | None = None) -> FastAPI:
         except Exception as exc:
             raise HTTPException(status_code=500, detail=str(exc))
         return JSONResponse({"thread_id": thread_id, "status": "running"})
+
+    @app.get("/api/defaults")
+    async def get_defaults() -> JSONResponse:
+        """Return default manifest/target paths from oxidant.config.json."""
+        cfg_path = Path(config_path) if config_path else Path("oxidant.config.json")
+        if not cfg_path.exists():
+            return JSONResponse({})
+        try:
+            cfg = json.loads(cfg_path.read_text())
+        except Exception:
+            return JSONResponse({})
+        # Resolve paths relative to the config file's directory
+        cfg_dir = cfg_path.parent
+        manifest = cfg.get("manifest_path", "conversion_manifest.json")
+        target = cfg.get("target_repo", "")
+        return JSONResponse({
+            "manifest_path": str((cfg_dir / manifest).resolve()),
+            "target_path": str((cfg_dir / target).resolve()) if target else "",
+            "snippets_dir": str((cfg_dir / cfg.get("snippets_dir", "snippets")).resolve()),
+        })
 
     @app.get("/review-queue")
     async def get_review_queue() -> JSONResponse:
