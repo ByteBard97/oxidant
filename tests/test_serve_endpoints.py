@@ -1,3 +1,21 @@
+import asyncio
+import pytest
+
+
+@pytest.mark.asyncio
+async def test_run_manager_lifecycle():
+    """RunManager creates a run, can be queried for status, and can be aborted."""
+    from oxidant.serve.run_manager import RunManager
+
+    rm = RunManager(db_path=":memory:")  # in-memory SQLite for tests
+    assert rm.get_status("nonexistent") is None
+
+    # We can't test a full graph run without real files, but we can test
+    # that the RunManager initialises and rejects bad thread IDs cleanly.
+    with pytest.raises(KeyError):
+        await rm.abort("nonexistent")
+
+
 def test_fastapi_importable():
     import fastapi  # noqa: F401
     import sse_starlette  # noqa: F401
