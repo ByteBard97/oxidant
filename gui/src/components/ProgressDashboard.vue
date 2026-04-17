@@ -1,42 +1,60 @@
 <template>
-  <div class="progress-dashboard">
-    <div class="stat-row">
-      <div class="stat">
-        <span class="stat-value converted">{{ store.stats.converted }}</span>
-        <span class="stat-label">converted</span>
-      </div>
-      <div class="stat">
-        <span class="stat-value in-progress">{{ store.stats.inProgress }}</span>
-        <span class="stat-label">in progress</span>
-      </div>
-      <div class="stat">
-        <span class="stat-value needs-review">{{ store.stats.needsReview }}</span>
-        <span class="stat-label">needs review</span>
-      </div>
+  <div class="flex flex-col gap-2 bg-surface-container-lowest p-3 border border-outline-variant/30">
+    <div class="text-[10px] text-zinc-500 mb-1 tracking-widest">SESSION TELEMETRY</div>
+
+    <!-- Segmented LED progress bar -->
+    <div class="flex gap-[2px] h-2.5 w-full mb-1">
+      <div
+        v-for="i in totalSegments"
+        :key="i"
+        class="flex-1"
+        :class="i <= filledSegments ? 'bg-secondary' : 'bg-surface-container-highest'"
+      ></div>
     </div>
-    <div class="status-badge" :class="store.status">{{ store.status }}</div>
+
+    <div class="flex justify-between items-center text-[10px] font-mono">
+      <span class="text-zinc-400">CONVERTED</span>
+      <span class="text-secondary font-bold">{{ store.stats.converted.toLocaleString() }}</span>
+    </div>
+    <div class="flex justify-between items-center text-[10px] font-mono">
+      <span class="text-zinc-400">IN PROGRESS</span>
+      <span class="text-white">{{ store.stats.inProgress }}</span>
+    </div>
+    <div class="flex justify-between items-center text-[10px] font-mono">
+      <span class="text-zinc-400">NEEDS REVIEW</span>
+      <span class="text-primary-container">{{ store.stats.needsReview }}</span>
+    </div>
+
+    <!-- Status badge -->
+    <div class="mt-1 text-[10px] font-mono font-bold tracking-widest"
+         :class="statusColor">
+      [{{ store.status.toUpperCase() }}]
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useRunStore } from '../store'
-const store = useRunStore()
-</script>
 
-<style scoped>
-.progress-dashboard { padding: 16px; border-bottom: 1px solid #333; }
-.stat-row { display: flex; gap: 32px; }
-.stat { display: flex; flex-direction: column; align-items: center; }
-.stat-value { font-size: 28px; font-weight: bold; }
-.stat-value.converted { color: #4ade80; }
-.stat-value.in-progress { color: #60a5fa; }
-.stat-value.needs-review { color: #f97316; }
-.stat-label { font-size: 11px; color: #888; margin-top: 2px; }
-.status-badge { display: inline-block; margin-top: 12px; padding: 2px 10px;
-  border-radius: 4px; font-size: 12px; background: #1a1a1a; border: 1px solid #444; }
-.status-badge.running { border-color: #60a5fa; color: #60a5fa; }
-.status-badge.complete { border-color: #4ade80; color: #4ade80; }
-.status-badge.interrupted { border-color: #f97316; color: #f97316; }
-.status-badge.aborted { border-color: #f87171; color: #f87171; }
-.status-badge.paused { border-color: #a78bfa; color: #a78bfa; }
-</style>
+const store = useRunStore()
+
+const totalSegments = 10
+const filledSegments = computed(() => {
+  const total = store.stats.converted + store.stats.needsReview + store.stats.inProgress
+  if (total === 0) return 0
+  const ratio = store.stats.converted / total
+  return Math.round(ratio * totalSegments)
+})
+
+const statusColor = computed(() => {
+  switch (store.status) {
+    case 'running':    return 'text-secondary'
+    case 'complete':   return 'text-secondary'
+    case 'interrupted':return 'text-primary-container'
+    case 'aborted':    return 'text-error'
+    case 'paused':     return 'text-tertiary'
+    default:           return 'text-zinc-500'
+  }
+})
+</script>

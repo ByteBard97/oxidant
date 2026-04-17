@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Oxidant Dashboard - Interrupted</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&amp;family=Inter:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .font-mono {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        }
+        /* Custom Scrollbar for Terminal aesthetic */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0c0e10; 
+            border-left: 1px dashed #57423b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #282a2c; 
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #37393b; 
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary-container": "#045047",
+                      "surface-container": "#1e2022",
+                      "on-tertiary-fixed-variant": "#6e3900",
+                      "on-secondary-container": "#82c1b5",
+                      "on-surface-variant": "#dfc0b7",
+                      "on-primary-fixed": "#390b00",
+                      "surface-dim": "#121416",
+                      "inverse-primary": "#a53b14",
+                      "outline": "#a68b82",
+                      "surface-container-highest": "#333537",
+                      "on-background": "#e2e2e5",
+                      "error-container": "#93000a",
+                      "secondary": "#94d2c7",
+                      "on-secondary-fixed": "#00201c",
+                      "surface-container-lowest": "#0c0e10",
+                      "on-primary": "#5d1800",
+                      "surface": "#121416",
+                      "inverse-surface": "#e2e2e5",
+                      "on-error-container": "#ffdad6",
+                      "secondary-fixed": "#afefe3",
+                      "tertiary-fixed-dim": "#ffb77d",
+                      "tertiary-container": "#ab5c00",
+                      "on-tertiary-container": "#fff4ee",
+                      "on-surface": "#e2e2e5",
+                      "primary": "#ffb59d",
+                      "tertiary-fixed": "#ffdcc3",
+                      "secondary-fixed-dim": "#94d2c7",
+                      "primary-fixed": "#ffdbd0",
+                      "primary-container": "#be4d25",
+                      "surface-bright": "#37393b",
+                      "inverse-on-surface": "#2f3133",
+                      "on-secondary-fixed-variant": "#045047",
+                      "background": "#121416",
+                      "on-error": "#690005",
+                      "surface-container-low": "#1a1c1e",
+                      "surface-container-high": "#282a2c",
+                      "surface-variant": "#333537",
+                      "primary-fixed-dim": "#ffb59d",
+                      "on-tertiary-fixed": "#2f1500",
+                      "outline-variant": "#57423b",
+                      "on-tertiary": "#4d2600",
+                      "on-secondary": "#003731",
+                      "on-primary-container": "#fff4f1",
+                      "surface-tint": "#ffb59d",
+                      "tertiary": "#ffb77d",
+                      "on-primary-fixed-variant": "#842600",
+                      "error": "#ffb4ab"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0px",
+                      "lg": "0px",
+                      "xl": "0px",
+                      "full": "0px"
+              },
+              "spacing": {},
+              "fontFamily": {
+                      "headline": [
+                              "Space Grotesk"
+                      ],
+                      "body": [
+                              "Inter"
+                      ],
+                      "label": [
+                              "Space Grotesk"
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+</head>
+<body class="bg-surface text-on-surface h-screen flex flex-col font-body overflow-hidden">
+<!-- TopNavBar -->
+<header class="bg-[#1A1C1E] text-on-surface flex justify-between items-center w-full px-4 h-12 border-b border-[#2D2F31] shrink-0 font-mono text-sm tracking-tighter uppercase relative z-50">
+<div class="flex items-center gap-6 h-full">
+<span class="font-black text-xl text-[#BE4D25] tracking-widest">[TERMINAL.LOGS]</span>
+</div>
+<div class="flex items-center gap-4 h-full">
+<div class="flex items-center gap-2 text-[#438177] bg-[#438177]/10 px-3 py-1 border border-[#438177]/30">
+<span class="text-[8px] animate-pulse">●</span>
+<span>CONNECTED</span>
+</div>
+<div class="flex items-center gap-3">
+<button class="text-zinc-500 hover:text-white transition-colors p-1" title="memory">
+<span class="material-symbols-outlined text-[20px]">memory</span>
+</button>
+<button class="text-zinc-500 hover:text-white transition-colors p-1" title="sensors">
+<span class="material-symbols-outlined text-[20px]">sensors</span>
+</button>
+<button class="text-zinc-500 hover:text-white transition-colors p-1" title="terminal">
+<span class="material-symbols-outlined text-[20px]">terminal</span>
+</button>
+</div>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- SideNavBar -->
+<nav class="bg-[#1A1C1E] w-64 flex flex-col border-r border-[#2D2F31] shrink-0 h-full relative z-40 overflow-y-auto font-mono text-xs uppercase">
+<!-- Header/Profile Area -->
+<div class="p-4 border-b border-[#2D2F31] flex items-center gap-3"><span class="font-black text-2xl text-[#BE4D25] tracking-[0.2em] py-2">OXIDANT</span></div>
+<!-- Main Tabs -->
+<div class="flex flex-col py-2">
+<a class="text-zinc-500 py-3 px-4 flex items-center gap-3 hover:bg-zinc-800 transition-all" href="#">
+<span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                    [RUN_CONTROLS]
+                </a>
+<a class="text-zinc-500 py-3 px-4 flex items-center gap-3 hover:bg-zinc-800 transition-all" href="#">
+<span class="material-symbols-outlined text-[18px]">database</span>
+                    [SESSION_DATA]
+                </a>
+<a class="bg-[#438177]/10 text-[#438177] border-r-4 border-[#438177] py-3 px-4 flex items-center gap-3 transition-all" href="#">
+<span class="material-symbols-outlined text-[18px]">analytics</span>
+                    [CONV_LOGS]
+                </a>
+<a class="text-zinc-500 py-3 px-4 flex items-center gap-3 hover:bg-zinc-800 transition-all" href="#">
+<span class="material-symbols-outlined text-[18px]">checklist</span>
+                    [REV_QUEUE]
+                </a>
+<a class="text-zinc-500 py-3 px-4 flex items-center gap-3 hover:bg-zinc-800 transition-all" href="#">
+<span class="material-symbols-outlined text-[18px]">settings</span>
+                    [SYS_DEFS]
+                </a>
+</div>
+<!-- Run Controls & Telemetry Moved Here -->
+<div class="mt-auto border-t border-[#2D2F31] p-4 flex flex-col gap-4">
+<!-- CTA / Controls -->
+<button class="w-full bg-gradient-to-r from-primary to-primary-container text-on-primary font-bold py-2 px-4 hover:opacity-90 transition-opacity flex justify-center items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">rocket_launch</span>
+                    [INITIATE_SEQUENCE]
+                </button>
+<div class="flex gap-2 w-full">
+<button class="flex-1 bg-surface-container-high border border-outline-variant text-zinc-400 hover:text-white py-1 flex justify-center items-center" title="Start">
+<span class="material-symbols-outlined text-[16px]">play_arrow</span>
+</button>
+<button class="flex-1 bg-surface-container-high border border-outline-variant text-zinc-400 hover:text-white py-1 flex justify-center items-center" title="Pause">
+<span class="material-symbols-outlined text-[16px]">pause</span>
+</button>
+<button class="flex-1 bg-surface-container-high border border-outline-variant text-[#BE4D25] hover:bg-[#BE4D25]/10 py-1 flex justify-center items-center" title="Stop">
+<span class="material-symbols-outlined text-[16px]">stop</span>
+</button>
+</div>
+<!-- Session Telemetry -->
+<div class="flex flex-col gap-2 bg-surface-container-lowest p-3 border border-outline-variant/30">
+<div class="text-[10px] text-zinc-500 mb-1">SESSION TELEMETRY</div>
+<!-- Segmented Progress Bar -->
+<div class="flex gap-[2px] h-3 w-full mb-2">
+<div class="flex-1 bg-secondary"></div>
+<div class="flex-1 bg-secondary"></div>
+<div class="flex-1 bg-secondary"></div>
+<div class="flex-1 bg-secondary"></div>
+<div class="flex-1 bg-secondary"></div>
+<div class="flex-1 bg-secondary"></div>
+<div class="flex-1 bg-surface-container-highest"></div>
+<div class="flex-1 bg-surface-container-highest"></div>
+<div class="flex-1 bg-surface-container-highest"></div>
+<div class="flex-1 bg-surface-container-highest"></div>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-zinc-400">CONVERTED</span>
+<span class="text-[#438177] font-bold">1,024</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-zinc-400">IN PROGRESS</span>
+<span class="text-white">3</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-zinc-400">NEEDS REVIEW</span>
+<span class="text-[#BE4D25]">1</span>
+</div>
+</div>
+</div>
+<!-- Footer Tabs -->
+<div class="border-t border-[#2D2F31] flex flex-col py-2 mt-auto">
+<a class="text-zinc-500 py-2 px-4 flex items-center gap-3 hover:bg-zinc-800 transition-all" href="#"><span class="material-symbols-outlined text-[16px]">settings</span>[SETTINGS]</a>
+<a class="text-zinc-500 py-2 px-4 flex items-center gap-3 hover:bg-zinc-800 transition-all" href="#"><span class="material-symbols-outlined text-[16px]">description</span>[DOCS]</a>
+</div>
+</nav>
+<!-- Main Workspace Canvas -->
+<main class="flex-1 bg-surface-container-low flex flex-col md:flex-row overflow-hidden">
+<!-- Center Feed: Active Nodes & Logs -->
+<div class="flex-1 flex flex-col min-w-0 border-r border-[#2D2F31] border-dashed">
+<!-- Active Node Monitor -->
+<div class="p-4 border-b border-outline-variant/20 bg-surface-container flex flex-col gap-3 font-mono text-xs">
+<div class="text-zinc-500 text-[10px] mb-1">ACTIVE PROCESSING NODES</div>
+<!-- Node Row 1 -->
+<div class="flex items-center justify-between bg-surface-container-lowest p-2 border-l-2 border-[#438177]">
+<div class="flex items-center gap-3">
+<span class="text-[8px] text-[#438177] animate-pulse">●</span>
+<span class="text-zinc-300 truncate w-48" title="/src/core/auth.ts">.../core/auth.ts</span>
+</div>
+<span class="bg-surface-container-highest text-zinc-400 px-2 py-0.5 text-[9px]">TIER 1 NODE</span>
+</div>
+<!-- Node Row 2 -->
+<div class="flex items-center justify-between bg-surface-container-lowest p-2 border-l-2 border-[#BE4D25]">
+<div class="flex items-center gap-3">
+<span class="text-[8px] text-[#BE4D25] animate-pulse">●</span>
+<span class="text-zinc-300 truncate w-48" title="/src/utils/parser.rs">.../utils/parser.rs</span>
+</div>
+<span class="bg-surface-container-highest text-zinc-400 px-2 py-0.5 text-[9px]">TIER 2 NODE</span>
+</div>
+</div>
+<!-- Telemetry Feed (Logs) -->
+<div class="flex-1 overflow-y-auto p-4 bg-surface-container-lowest font-mono text-[11px] leading-relaxed text-on-surface-variant">
+<div class="mb-2"><span class="text-zinc-500">[14:02:01]</span> <span class="text-[#438177]">INFO</span> Starting conversion sequence...</div>
+<div class="mb-2"><span class="text-zinc-500">[14:02:05]</span> <span class="text-[#438177]">INFO</span> Node /src/core/auth.ts loaded.</div>
+<div class="mb-2"><span class="text-zinc-500">[14:02:08]</span> <span class="text-zinc-400">DEBUG</span> Analyzing dependencies...</div>
+<div class="mb-2"><span class="text-zinc-500">[14:02:12]</span> <span class="text-[#BE4D25]">WARN</span> Type mismatch detected in /src/utils/parser.rs at line 42.</div>
+<div class="mb-2"><span class="text-zinc-500">[14:02:15]</span> <span class="text-[#BE4D25]">WARN</span> Halting conversion. Manual review required.</div>
+<div class="mb-2"><span class="text-zinc-500">[14:02:16]</span> <span class="text-primary font-bold">STATE CHANGED: INTERRUPTED</span></div>
+<div class="mt-4 border-t border-dashed border-outline-variant/30 pt-2 text-zinc-600">Awaiting Operator Input...</div>
+</div>
+</div>
+<!-- Review Panel (Right Side) -->
+<div class="w-full md:w-2/5 lg:w-[450px] bg-surface flex flex-col shrink-0 relative z-30 shadow-[-10px_0_20px_rgba(0,0,0,0.5)]">
+<!-- Review Panel Header -->
+<div class="p-4 bg-surface-container-high border-b border-[#2D2F31] flex justify-between items-center">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#BE4D25] text-[18px]">warning</span>
+<h2 class="font-headline font-bold text-sm tracking-wide text-white uppercase">Manual Review Required</h2>
+</div>
+<!-- Review Mode Dropdown -->
+<select class="bg-surface-container-lowest border border-outline-variant text-xs font-mono text-zinc-300 py-1 px-2 focus:ring-0 focus:border-primary">
+<option value="auto">AUTO (Permissive)</option>
+<option value="strict">STRICT (Halt on Any)</option>
+<option selected="" value="interactive">INTERACTIVE (All Nodes)</option>
+</select>
+</div>
+<!-- Review Content -->
+<div class="flex-1 overflow-y-auto p-4 flex flex-col gap-6">
+<!-- Issue Summary -->
+<div class="bg-surface-container-lowest border-l-2 border-[#BE4D25] p-3 font-mono text-xs text-zinc-300">
+<div class="text-[#BE4D25] mb-1 font-bold">ERR_TYPE_MISMATCH</div>
+                        Expected `Result<string, error="">`, found `Option<string>`. Cannot map safely without explicit fallback.
+                    </string></string,></div>
+<!-- Source Code Block (Taller) -->
+<div class="flex flex-col">
+<div class="bg-[#2D2F31] px-3 py-1 flex justify-between items-center text-[10px] font-mono text-zinc-400">
+<span>SOURCE (TS)</span>
+<span>.../utils/parser.rs</span>
+</div>
+<div class="bg-[#0c0e10] p-3 border border-outline-variant/20 overflow-x-auto h-48">
+<pre class="text-[11px] font-mono text-zinc-300 leading-relaxed"><code><span class="text-zinc-500">38 |</span> async function fetchConfig(raw: string): Promise&lt;Config&gt; {
+<span class="text-zinc-500">39 |</span>     const parsed = await JSON.parse(raw);
+<span class="text-zinc-500">40 |</span>     return parsed;
+<span class="text-zinc-500">41 |</span> }
+<span class="text-[#BE4D25] bg-[#BE4D25]/10 block w-full">42 | export function loadSettings(raw: string): Promise&lt;Config&gt; {</span>
+<span class="text-[#BE4D25] bg-[#BE4D25]/10 block w-full">43 |     const config = fetchConfig(raw); // ^ Expected Promise, found pending</span>
+<span class="text-zinc-500">44 |</span>     return config;
+<span class="text-zinc-500">45 |</span> }
+<span class="text-zinc-500">46 |</span>
+<span class="text-zinc-500">47 |</span> function fallback(): string {
+<span class="text-zinc-500">48 |</span>     return "default";
+<span class="text-zinc-500">49 |</span> }</code></pre>
+</div>
+</div>
+<!-- Resolution Input -->
+<div class="flex flex-col gap-2 mt-auto">
+<label class="text-xs font-mono text-zinc-400 uppercase">Operator Resolution</label>
+<textarea class="w-full bg-surface-container-lowest border-0 focus:ring-0 focus:border-l-2 focus:border-primary text-sm font-mono text-zinc-300 p-3 h-24 resize-none border-l-2 border-transparent transition-all outline-dashed outline-1 outline-outline-variant/20" placeholder="Enter override code or notes..."></textarea>
+</div>
+<!-- Action Buttons -->
+<div class="flex gap-3">
+<button class="flex-1 bg-surface-container-highest text-primary border border-dashed border-outline-variant py-2 text-sm font-mono font-bold hover:bg-surface-bright transition-colors uppercase">
+                            Skip Node
+                        </button>
+<button class="flex-1 bg-gradient-to-r from-secondary-container to-[#033d36] text-on-secondary-container border-b-2 border-[#022b26] py-2 text-sm font-mono font-bold hover:opacity-90 transition-opacity uppercase">
+                            Apply Fix
+                        </button>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Weathered Texture Overlay -->
+<div class="fixed inset-0 pointer-events-none z-[100] mix-blend-overlay opacity-15" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA1FxI_ldElSh1Hiht0RhL8ehUOmeaHZWyyzsU4bUxh23Nj5iTFpnaO_rxmvPh0HWSWn47lujkak3tdeNLWJlpoXOxQNh5CVToDdb2qyxyg2P4A4JeIJDz8s4n2c2gUftyCy_3wQyZMLwDzmBz2Cxe9mVjbDIegmOTphsElgYuendCEDQ7HcJ99o_gcyri-3JnPnw2zP8GIZFj3IUOi4Pyt5hhg4jsWovvT3akMcrbVMpyiKcDwwpVCNO1po1roaWNN0QWtctV1HagA'); background-size: cover; background-repeat: no-repeat; background-position: center;"></div>
+</body></html>

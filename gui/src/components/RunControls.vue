@@ -1,41 +1,59 @@
 <template>
-  <div class="run-controls">
-    <div class="control-row">
-      <label for="manifest-path">Manifest:</label>
-      <input id="manifest-path" v-model="manifestPath" placeholder="/path/to/conversion_manifest.json" />
-    </div>
-    <div class="control-row">
-      <label for="target-path">Target:</label>
-      <input id="target-path" v-model="targetPath" placeholder="/path/to/msagl-rs" />
-    </div>
-    <div class="control-row">
-      <label>Review mode:</label>
-      <select v-model="store.reviewMode" :disabled="store.status === 'running'">
-        <option value="auto">auto</option>
-        <option value="supervised">supervised</option>
-        <option value="interactive">interactive</option>
+  <div class="flex flex-col gap-3">
+    <!-- Path inputs -->
+    <div class="flex flex-col gap-2">
+      <input
+        v-model="manifestPath"
+        class="w-full bg-surface-container-lowest border-0 border-l-2 border-transparent focus:border-primary outline-none text-[11px] font-mono text-zinc-300 px-2 py-1.5 placeholder-zinc-600 transition-colors"
+        placeholder="MANIFEST PATH"
+      />
+      <input
+        v-model="targetPath"
+        class="w-full bg-surface-container-lowest border-0 border-l-2 border-transparent focus:border-primary outline-none text-[11px] font-mono text-zinc-300 px-2 py-1.5 placeholder-zinc-600 transition-colors"
+        placeholder="TARGET PATH"
+      />
+      <select
+        v-model="store.reviewMode"
+        :disabled="store.status === 'running'"
+        class="w-full bg-surface-container-lowest text-[11px] font-mono text-zinc-300 px-2 py-1.5 border-0 outline-none"
+      >
+        <option value="auto">MODE: AUTO</option>
+        <option value="supervised">MODE: SUPERVISED</option>
+        <option value="interactive">MODE: INTERACTIVE</option>
       </select>
     </div>
-    <div class="button-row">
-      <button
-        @click="start"
-        :disabled="store.status === 'running'"
-        class="btn btn-start"
-      >
-        {{ store.status === 'paused' ? 'Resume' : 'Start' }}
-      </button>
+
+    <!-- Primary CTA — grungy stamped-metal button -->
+    <button
+      @click="start"
+      :disabled="store.status === 'running'"
+      class="grungy-cta w-full text-on-primary font-bold py-2.5 px-4 text-xs font-mono uppercase tracking-widest flex justify-center items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+    >
+      <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1">bolt</span>
+      {{ store.status === 'paused' ? '[RESUME_SEQUENCE]' : '[INITIATE_SEQUENCE]' }}
+    </button>
+
+    <!-- Secondary controls -->
+    <div class="flex gap-2">
       <button
         @click="pause"
         :disabled="store.status !== 'running'"
-        class="btn btn-pause"
-      >Pause</button>
+        title="Pause"
+        class="flex-1 bg-surface-container-high border border-outline-variant text-zinc-400 hover:text-white py-1.5 flex justify-center items-center disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        <span class="material-symbols-outlined text-[16px]">pause</span>
+      </button>
       <button
         @click="abort"
         :disabled="store.status === 'idle' || store.status === 'complete' || store.status === 'aborted'"
-        class="btn btn-abort"
-      >Abort</button>
+        title="Abort"
+        class="flex-1 bg-surface-container-high border border-outline-variant text-primary-container hover:bg-primary-container/10 py-1.5 flex justify-center items-center disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        <span class="material-symbols-outlined text-[16px]">stop</span>
+      </button>
     </div>
-    <div v-if="error" class="error-msg">{{ error }}</div>
+
+    <div v-if="error" class="text-error text-[10px] font-mono">{{ error }}</div>
   </div>
 </template>
 
@@ -89,20 +107,3 @@ async function abort() {
   }
 }
 </script>
-
-<style scoped>
-.run-controls { padding: 16px; border-bottom: 1px solid #333; }
-.control-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-.control-row label { width: 90px; color: #aaa; font-size: 13px; }
-.control-row input, .control-row select {
-  flex: 1; background: #1a1a1a; border: 1px solid #444; color: #e5e5e5;
-  padding: 4px 8px; border-radius: 4px; font-family: inherit; font-size: 13px;
-}
-.button-row { display: flex; gap: 8px; margin-top: 8px; }
-.btn { padding: 6px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-family: inherit; }
-.btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.btn-start { background: #166534; color: #fff; }
-.btn-pause { background: #92400e; color: #fff; }
-.btn-abort { background: #7f1d1d; color: #fff; }
-.error-msg { margin-top: 8px; color: #f87171; font-size: 12px; }
-</style>

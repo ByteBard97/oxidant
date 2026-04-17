@@ -1,0 +1,181 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom scrollbar — terminal aesthetic */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #0c0e10; border-left: 1px dashed #57423b; }
+::-webkit-scrollbar-thumb { background: #282a2c; }
+::-webkit-scrollbar-thumb:hover { background: #37393b; }
+
+/* Pulse animation for status dots */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+.pulse-dot { animation: pulse-dot 1.5s ease-in-out infinite; }
+
+/* ── Grungy CTA button — stamped worn metal ─────────────────────────────── */
+.grungy-cta {
+  position: relative;
+  overflow: hidden;
+  /* Harsh, uneven gradient — not smooth, shifts diagonally */
+  background:
+    linear-gradient(
+      128deg,
+      #c96020 0%,
+      #a84010 30%,
+      #d07030 52%,
+      #7a2808 72%,
+      #be5520 100%
+    );
+  /* Worn pressed-metal edges */
+  box-shadow:
+    inset 0  1px 0   rgba(255,200,120,0.25),   /* top highlight: bare metal */
+    inset 0 -2px 0   rgba(0,0,0,0.55),          /* bottom shadow: pressed edge */
+    inset  2px 0 0   rgba(255,180,80,0.12),
+    inset -2px 0 0   rgba(0,0,0,0.35),
+    0 2px 8px rgba(0,0,0,0.6);
+  color: #1a0800;
+  transition: filter 120ms;
+}
+
+/* Rust texture baked into the surface */
+.grungy-cta::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url('/rust-texture.png');
+  background-size: 200px 200px;
+  opacity: 0.22;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+/* Scratched-metal grain on top */
+.grungy-cta::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(
+      92deg,
+      transparent 0px,
+      transparent 2px,
+      rgba(0,0,0,0.06) 2px,
+      rgba(0,0,0,0.06) 3px
+    );
+  pointer-events: none;
+}
+
+.grungy-cta:not(:disabled):hover {
+  filter: brightness(1.12) contrast(1.05);
+}
+
+.grungy-cta:not(:disabled):active {
+  filter: brightness(0.88);
+  box-shadow:
+    inset 0  2px 4px rgba(0,0,0,0.6),
+    inset 0 -1px 0   rgba(255,200,120,0.1),
+    0 1px 3px rgba(0,0,0,0.5);
+}
+
+/* ── Neon logo — ramshackle glass tube, uneven burn ────────────────────── */
+
+/* Outer wrap: whole-element stutter (power fluctuation) */
+@keyframes neon-flicker {
+  0%    { opacity: 1.00; }
+  4%    { opacity: 1.00; }
+  4.5%  { opacity: 0.60; }
+  5%    { opacity: 1.00; }
+  5.5%  { opacity: 0.80; }
+  6%    { opacity: 1.00; }
+  28%   { opacity: 1.00; }
+  28.2% { opacity: 0.55; }
+  28.4% { opacity: 1.00; }
+  55%   { opacity: 1.00; }
+  55.3% { opacity: 0.40; }
+  55.5% { opacity: 0.85; }
+  55.7% { opacity: 0.40; }
+  56%   { opacity: 1.00; }
+  80%   { opacity: 1.00; }
+  80.3% { opacity: 0.72; }
+  80.7% { opacity: 1.00; }
+  100%  { opacity: 1.00; }
+}
+
+/* Inner SVG: glow pressure oscillates, biased low-left (one end colder) */
+@keyframes neon-breathe {
+  0%   {
+    filter:
+      drop-shadow(0 0 1px #fff0d0)
+      drop-shadow(-2px 1px 8px #ffc84088)
+      drop-shadow(0 0 18px #d4760a)
+      drop-shadow(0 0 35px #9a3c0688);
+  }
+  35%  {
+    filter:
+      drop-shadow(0 0 3px #fffdf0)
+      drop-shadow(2px -1px 12px #ffe0a0cc)
+      drop-shadow(0 0 26px #e8921a)
+      drop-shadow(0 0 55px #c4650aaa);
+  }
+  65%  {
+    filter:
+      drop-shadow(0 0 1px #fff0d0)
+      drop-shadow(-3px 2px 6px #ffb04055)
+      drop-shadow(0 0 14px #c06008)
+      drop-shadow(0 0 28px #8a300466);
+  }
+  100% {
+    filter:
+      drop-shadow(0 0 1px #fff0d0)
+      drop-shadow(-2px 1px 8px #ffc84088)
+      drop-shadow(0 0 18px #d4760a)
+      drop-shadow(0 0 35px #9a3c0688);
+  }
+}
+
+/* Scanlines drawn over the logo panel */
+@keyframes scanline-drift {
+  from { background-position: 0 0; }
+  to   { background-position: 0 100px; }
+}
+
+.neon-logo-wrap {
+  /* opacity driven by useNeonFlicker composable — no CSS animation here */
+  position: relative;
+  transition: opacity 40ms linear;
+}
+
+/* scanline + grain overlay */
+.neon-logo-wrap::after {
+  content: '';
+  position: absolute;
+  inset: -16px -20px;          /* bleed beyond the image edge */
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 3px,
+      rgba(0,0,0,0.18) 3px,
+      rgba(0,0,0,0.18) 4px
+    );
+  background-size: 100% 4px;
+  animation: scanline-drift 4s linear infinite;
+  mix-blend-mode: multiply;
+}
+
+.neon-logo {
+  animation: neon-breathe 4.2s ease-in-out infinite;
+  /* slightly skewed to look like it was mounted crooked */
+  transform: rotate(-0.4deg) skewX(0.3deg);
+  transform-origin: left center;
+  /* SVG fill override: warm amber tube core */
+  filter:
+    drop-shadow(0 0 1px #fff0d0)
+    drop-shadow(-2px 1px 8px #ffc84088)
+    drop-shadow(0 0 18px #d4760a)
+    drop-shadow(0 0 35px #9a3c0688);
+}
