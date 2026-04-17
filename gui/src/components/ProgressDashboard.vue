@@ -4,7 +4,7 @@
 
     <!-- Segmented LED progress bar -->
     <Tooltip content="Translation progress — each segment = 10% of total nodes processed" position="right">
-      <div class="flex gap-[3px] h-3 w-full mb-1 cursor-default">
+      <div class="flex gap-[3px] h-4 w-full mb-1 cursor-default">
         <div
           v-for="i in totalSegments"
           :key="i"
@@ -100,22 +100,54 @@ const statusDescription = computed(() => {
 <style>
 .led-segment {
   position: relative;
+  overflow: visible;
 }
 
+/* ── Off state: barely-there ghost teal ─────────────────────────────────── */
 .led-off {
-  background: #1b2927;  /* dim: barely-visible ghost of the teal */
+  background: #1b2927;
 }
 
+/* ── On state: gradient body + filament wire ─────────────────────────────── */
 .led-on {
-  background: #94d2c7;
+  /* Top/bottom edges darker (glass rim), bright band through center (filament zone) */
+  background: linear-gradient(
+    to bottom,
+    #2e6e67 0%,
+    #6bbab2 22%,
+    #94d2c7 38%,
+    #cdf0eb 47%,
+    #edfaf8 50%,   /* filament peak — near-white-hot centre */
+    #cdf0eb 53%,
+    #94d2c7 62%,
+    #6bbab2 78%,
+    #2e6e67 100%
+  );
   animation:
-    led-breathe 2s ease-in-out infinite,   /* duration overridden per-segment via style */
+    led-breathe 2s ease-in-out infinite,
     led-fault   3.5s steps(1, end) infinite;
+}
+
+/* Filament wire — the actual glowing element inside the tube */
+.led-on::after {
+  content: '';
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 50%;
+  height: 1px;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 0;
+  box-shadow:
+    0 0 1px rgba(255,255,255,1),
+    0 0 4px rgba(200,240,235,0.9),
+    0 0 8px rgba(148,210,199,0.6);
+  pointer-events: none;
 }
 
 @keyframes led-breathe {
   0%, 100% {
-    background: #94d2c7;
     box-shadow:
       0 0  3px #94d2c7,
       0 0  8px rgba(148,210,199,0.70),
@@ -123,7 +155,18 @@ const statusDescription = computed(() => {
       0 0 28px rgba(148,210,199,0.15);
   }
   50% {
-    background: #b2e8e0;
+    background: linear-gradient(
+      to bottom,
+      #3a8880 0%,
+      #7eccc4 20%,
+      #a8ddd7 36%,
+      #daf5f2 47%,
+      #f5fffd 50%,
+      #daf5f2 53%,
+      #a8ddd7 64%,
+      #7eccc4 80%,
+      #3a8880 100%
+    );
     box-shadow:
       0 0  5px #b2e8e0,
       0 0 14px rgba(148,210,199,0.90),
@@ -133,7 +176,7 @@ const statusDescription = computed(() => {
   }
 }
 
-/* Independent fault flicker — same snap-cut technique as the tooltip */
+/* Fault flicker: brightness snaps affect gradient + filament together */
 @keyframes led-fault {
   0%   { filter: brightness(1);    }
   8%   { filter: brightness(0.05); }
