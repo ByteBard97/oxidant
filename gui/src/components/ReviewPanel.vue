@@ -1,6 +1,5 @@
 <template>
-  <div class="w-full h-full bg-surface flex flex-col border-l-4 shadow-[-10px_0_20px_rgba(0,0,0,0.5)]"
-       :class="store.pendingReview ? 'border-primary-container' : 'border-outline-variant/30'">
+  <div class="w-full bg-surface flex flex-col shadow-[-10px_0_20px_rgba(0,0,0,0.5)]">
 
     <!-- Header -->
     <div class="px-4 bg-surface-container-high border-b border-[#2D2F31] flex justify-between items-center shrink-0 min-h-[84px]">
@@ -21,14 +20,14 @@
     </div>
 
     <!-- Idle state -->
-    <div v-if="!store.pendingReview" class="flex-1 flex flex-col items-center justify-center p-8 gap-4 text-center">
+    <div v-if="!store.pendingReview" class="flex flex-col items-center justify-center p-8 gap-4 text-center" style="min-height: 200px">
       <span class="material-symbols-outlined text-zinc-700 text-[48px]">checklist</span>
       <div class="font-mono text-[11px] text-zinc-600 uppercase tracking-widest">No Review Pending</div>
       <div class="font-mono text-[10px] text-zinc-700">Nodes will appear here when<br/>manual review is required.</div>
     </div>
 
     <!-- Active review content -->
-    <div v-else class="flex-1 overflow-y-auto p-4 flex flex-col gap-5">
+    <div v-else class="p-4 flex flex-col gap-5">
 
       <!-- Error summary -->
       <div class="bg-surface-container-lowest border-l-2 border-primary-container p-3 font-mono text-xs text-zinc-200">
@@ -44,7 +43,7 @@
           <span>SOURCE (TS)</span>
           <span class="text-zinc-500">{{ shortId(store.pendingReview.node_id) }}</span>
         </div>
-        <div class="bg-surface-container-lowest border border-outline-variant/20 overflow-auto max-h-52">
+        <div class="bg-surface-container-lowest border border-outline-variant/20 overflow-x-auto">
           <CodeBlock
             :code="store.pendingReview.source_preview"
             :lang="store.pendingReview.node_id.endsWith('.rs') ? 'rust' : 'typescript'"
@@ -53,7 +52,7 @@
       </div>
 
       <!-- Resolution textarea -->
-      <div class="flex flex-col gap-2 flex-1">
+      <div class="flex flex-col gap-2">
         <label class="text-xs font-mono text-zinc-400 uppercase tracking-widest">Operator Resolution</label>
         <textarea
           v-model="hint"

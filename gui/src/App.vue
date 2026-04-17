@@ -104,17 +104,21 @@
           <LiveNodeFeed     v-else />
         </div>
 
-        <!-- Drag handle -->
+        <!-- Drag handle — IS the visual separator; accent colour tracks review state -->
         <div
           class="resize-handle shrink-0"
           @mousedown="startDrag"
-          title="Drag to resize"
+          title="Drag to resize panels"
         >
-          <div class="resize-handle-line" />
+          <div class="resize-handle-dashes" />
+          <div
+            class="resize-handle-accent"
+            :class="store.pendingReview ? 'bg-primary-container' : 'bg-outline-variant/30'"
+          />
         </div>
 
-        <!-- Right review panel — width driven by drag -->
-        <div class="flex flex-col shrink-0 overflow-hidden" :style="{ width: reviewWidth + 'px' }">
+        <!-- Right review panel — width driven by drag; scrolls as one unit -->
+        <div class="shrink-0 overflow-y-auto overflow-x-hidden" :style="{ width: reviewWidth + 'px' }">
           <ReviewPanel />
         </div>
 
