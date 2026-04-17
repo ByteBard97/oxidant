@@ -67,11 +67,13 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRunStore } from '../store'
+import { useConfirm } from '../composables/useConfirm'
 import { api } from '../api'
 import { connectSSE, disconnectSSE } from '../sse'
 import Tooltip from './Tooltip.vue'
 
 const store = useRunStore()
+const { confirm } = useConfirm()
 const manifestPath = ref('')
 const targetPath = ref('')
 const error = ref('')
@@ -105,7 +107,11 @@ async function pause() {
 
 async function abort() {
   if (!store.threadId) return
-  if (!confirm('Abort this run? It cannot be resumed.')) return
+  const ok = await confirm(
+    'Abort this run? State will be discarded and the run cannot be resumed.',
+    'ABORT RUN',
+  )
+  if (!ok) return
   try {
     await api.abortRun(store.threadId)
     store.setStatus('aborted')
