@@ -28,9 +28,12 @@
       <div
         v-for="item in queueItems"
         :key="item.node_id"
-        class="border-b border-outline-variant/15 p-4 flex flex-col gap-2 hover:bg-surface-container/50 transition-colors"
-        :class="item.type === 'interrupt' ? 'border-l-2 border-primary-container' : 'border-l-2 border-zinc-700'"
+        class="border-b border-outline-variant/15 flex hover:bg-surface-container/50 transition-colors"
       >
+        <div class="rust-seam w-[2px] self-stretch"
+             :class="item.type === 'interrupt' ? 'bg-primary-container' : 'bg-zinc-700'"
+             aria-hidden="true" />
+        <div class="p-4 flex flex-col gap-2 flex-1">
         <!-- Node ID + badge -->
         <div class="flex items-start justify-between gap-3">
           <span class="text-zinc-300 text-[11px] break-all min-w-0">
@@ -51,6 +54,7 @@
 
         <!-- Timestamp -->
         <div class="text-[9px] text-zinc-700 tracking-wider">{{ item.time }}</div>
+        </div><!-- end inner flex-1 -->
       </div>
     </div>
   </div>

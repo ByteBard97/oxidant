@@ -14,16 +14,18 @@
         <div
           v-for="node in activeNodeList"
           :key="node.node_id"
-          class="flex items-center justify-between bg-surface-container-lowest p-2 border-l-2 shrink-0"
-          :class="tierBorder(node.tier)"
+          class="flex shrink-0 bg-surface-container-lowest"
         >
-          <div class="flex items-center gap-3">
-            <span class="text-[8px] pulse-dot" :class="tierColor(node.tier)">●</span>
-            <span class="text-zinc-300 truncate min-w-0 flex-1" :title="node.node_id">{{ shortId(node.node_id) }}</span>
+          <div class="rust-seam w-[2px] self-stretch" :class="tierBgColor(node.tier)" aria-hidden="true" />
+          <div class="flex items-center justify-between p-2 flex-1">
+            <div class="flex items-center gap-3">
+              <span class="text-[8px] pulse-dot" :class="tierColor(node.tier)">●</span>
+              <span class="text-zinc-300 truncate min-w-0 flex-1" :title="node.node_id">{{ shortId(node.node_id) }}</span>
+            </div>
+            <span class="bg-surface-container-highest text-zinc-400 px-2 py-0.5 text-[9px] uppercase tracking-wider">
+              {{ node.tier.toUpperCase() }}
+            </span>
           </div>
-          <span class="bg-surface-container-highest text-zinc-400 px-2 py-0.5 text-[9px] uppercase tracking-wider">
-            {{ node.tier.toUpperCase() }}
-          </span>
         </div>
       </div>
     </div>
@@ -93,10 +95,9 @@ function levelColor(evt: string): string {
   return 'text-secondary'
 }
 
-function tierBorder(tier: string): string {
-  if (tier === 'opus') return 'border-primary-container'
-  if (tier === 'sonnet') return 'border-secondary'
-  return 'border-secondary'
+function tierBgColor(tier: string): string {
+  if (tier === 'opus') return 'bg-primary-container'
+  return 'bg-secondary'
 }
 
 function tierColor(tier: string): string {

@@ -8,11 +8,34 @@
 ::-webkit-scrollbar-thumb { background: #282a2c; }
 ::-webkit-scrollbar-thumb:hover { background: #37393b; }
 
+/* ── rust-seam — single class for all jagged vertical border strips ─────── */
+/* Apply to any dedicated thin strip element (no text content).              */
+/* Color + size come from Tailwind utilities on the same element.            */
+/* The #rust-edge SVG filter (index.html) displaces pixels to produce        */
+/* organically imperfect, mottled-metal edges.                               */
+.rust-seam {
+  filter: url(#rust-edge);
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+/* Sidebar right-border overlay — absolutely positioned over the 1px border  */
+.rust-seam-overlay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: -2px;
+  width: 5px;
+  z-index: 50;
+  background: linear-gradient(to right,
+    transparent 0px,
+    rgba(45, 47, 49, 0.9) 1px,
+    rgba(45, 47, 49, 0.9) 2px,
+    transparent 3px
+  );
+}
+
 /* ── Resize drag handle ──────────────────────────────────────────────────── */
-/* Looks like a recessed rust-stained metal seam between two panels.         */
-/* Rust texture is the background of the whole handle strip; a dark mask     */
-/* sits on top at rest (mostly hiding it) and fades on hover to reveal the   */
-/* texture underneath.  The right 3px accent carries the review-state hue.   */
 .resize-handle {
   width: 16px;
   cursor: col-resize;
@@ -22,56 +45,30 @@
   position: relative;
   z-index: 10;
   flex-shrink: 0;
-  /* Rust texture tiles across the strip */
   background-image: url('/rust-texture.png');
   background-size: 200px 200px;
   background-position: 50% 0;
 }
 
-/* Dark mask that obscures the texture at rest */
+/* Dark mask — obscures texture at rest, lifts on hover */
 .resize-handle-dashes {
   flex: 1;
   background: rgba(15, 12, 10, 0.86);
   transition: background 220ms ease;
 }
 
-/* Right accent stripe: review-state colour bound via Tailwind class in App.vue */
-/* rust-edge filter makes the left/right edges of the stripe slightly irregular */
+/* Accent stripe — width + colour set by Tailwind, filter via .rust-seam */
 .resize-handle-accent {
   width: 3px;
-  flex-shrink: 0;
   transition: background 300ms, box-shadow 300ms;
-  filter: url(#rust-edge);
 }
 
-/* Hover: lift the mask, reveal the rust, glow the accent */
 .resize-handle:hover .resize-handle-dashes {
   background: rgba(40, 20, 8, 0.38);
 }
 
 .resize-handle:hover .resize-handle-accent {
   box-shadow: -5px 0 14px rgba(255, 181, 157, 0.40);
-}
-
-/* ── Jagged panel seam — sidebar right edge ─────────────────────────────── */
-/* A narrow overlay strip with rust-edge filter sits over the border,        */
-/* making the sharp 1px line appear mottled and physically imperfect.        */
-.jagged-seam {
-  position: absolute;
-  top: 0;
-  right: -2px;
-  width: 5px;
-  height: 100%;
-  pointer-events: none;
-  z-index: 50;
-  /* Faint rust-tone bleed that gets displaced */
-  background: linear-gradient(to right,
-    transparent 0px,
-    rgba(45, 47, 49, 0.9) 1px,
-    rgba(45, 47, 49, 0.9) 2px,
-    transparent 3px
-  );
-  filter: url(#rust-edge);
 }
 
 /* Pulse animation for status dots */
