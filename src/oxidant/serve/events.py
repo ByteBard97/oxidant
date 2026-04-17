@@ -110,7 +110,10 @@ def event_from_node_update(node_name: str, update: dict) -> list[str]:
             events.append(NodeStartEvent(node_id=node_id, tier=tier).to_json())
 
     elif node_name == "update_manifest":
-        events.append(StatusEvent(status="node_converted").to_json())
+        node_id = update.get("current_node_id", "")
+        tier = update.get("current_tier", "unknown")
+        attempts = update.get("attempt_count", 0)
+        events.append(NodeCompleteEvent(node_id=node_id, tier=tier, attempts=attempts).to_json())
 
     elif node_name == "escalate_node":
         pass  # enriched by next pick_next_node event

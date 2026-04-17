@@ -185,15 +185,22 @@ def update_manifest(state: OxidantState) -> dict:
     snippet_path = snippet_dir / f"{safe_id}.rs"
     snippet_path.write_text(snippet)
 
+    attempt_count = state.get("attempt_count", 0)
     manifest.update_node(
         Path(state["manifest_path"]),
         node_id,
         status=NodeStatus.CONVERTED,
         snippet_path=str(snippet_path),
-        attempt_count=state.get("attempt_count", 0),
+        attempt_count=attempt_count,
     )
     logger.info("CONVERTED: %s → %s", node_id, snippet_path)
-    return {"nodes_this_run": state.get("nodes_this_run", 0) + 1}
+    return {
+        "nodes_this_run": state.get("nodes_this_run", 0) + 1,
+        # Pass through for SSE event emission — same values already in state
+        "current_node_id": node_id,
+        "current_tier": state.get("current_tier") or TranslationTier.HAIKU.value,
+        "attempt_count": attempt_count,
+    }
 
 
 def queue_for_review(state: OxidantState) -> dict:

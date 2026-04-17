@@ -80,13 +80,23 @@ class RunManager:
         config = {"configurable": {"thread_id": thread_id}}
 
         async def _stream():
-            from oxidant.serve.events import event_from_node_update
+            from oxidant.serve.events import event_from_node_update, RunCompleteEvent
             try:
                 async for chunk in graph.astream(initial_state, config=config, stream_mode="updates"):
                     for node_name, update in chunk.items():
                         for json_str in event_from_node_update(node_name, update):
                             await run.event_queue.put(json_str)
                 run.status = "complete"
+                # Emit authoritative final counts from manifest before closing stream
+                try:
+                    from oxidant.models.manifest import Manifest, NodeStatus
+                    from pathlib import Path as _Path
+                    manifest = Manifest.load(_Path(initial_state["manifest_path"]))
+                    converted = sum(1 for n in manifest.nodes.values() if n.status == NodeStatus.CONVERTED)
+                    needs_review = sum(1 for n in manifest.nodes.values() if n.status == NodeStatus.HUMAN_REVIEW)
+                    await run.event_queue.put(RunCompleteEvent(converted=converted, needs_review=needs_review).to_json())
+                except Exception as exc:
+                    logger.warning("Could not emit RunCompleteEvent: %s", exc)
                 await run.event_queue.put(None)  # sentinel: stream done
             except asyncio.CancelledError:
                 # Task cancelled by pause() or abort() — status already set by caller
