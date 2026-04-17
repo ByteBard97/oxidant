@@ -86,10 +86,12 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useRunStore } from '../store'
+import { useConfirm } from '../composables/useConfirm'
 import { api } from '../api'
 import { connectSSE } from '../sse'
 
 const store = useRunStore()
+const { confirm } = useConfirm()
 const hint = ref('')
 const submitting = ref(false)
 const error = ref('')
@@ -123,7 +125,11 @@ async function resume() {
 
 async function skip() {
   if (!store.threadId || !store.pendingReview) return
-  if (!confirm('Skip this node? It will be queued for human review.')) return
+  const ok = await confirm(
+    'Skip this node? It will be written to the review queue and require manual attention.',
+    'SKIP NODE',
+  )
+  if (!ok) return
   submitting.value = true
   error.value = ''
   try {
