@@ -24,6 +24,32 @@ def _write_manifest(path: Path, nodes: dict) -> Manifest:
     return m
 
 
+def test_oxidant_state_has_supervisor_fields():
+    """OxidantState must contain the three new supervisor/serve fields."""
+    state = OxidantState(
+        manifest_path="/tmp/m.json",
+        target_path="/tmp/t",
+        snippets_dir="/tmp/s",
+        config={},
+        current_node_id=None,
+        current_prompt=None,
+        current_snippet=None,
+        current_tier=None,
+        attempt_count=0,
+        last_error=None,
+        verify_status=None,
+        review_queue=[],
+        done=False,
+        # New fields:
+        supervisor_hint=None,
+        interrupt_payload=None,
+        review_mode="auto",
+    )
+    assert state["review_mode"] == "auto"
+    assert state["supervisor_hint"] is None
+    assert state["interrupt_payload"] is None
+
+
 def _base_state(manifest_path: str, target_path: str = "/nonexistent", **kw) -> OxidantState:
     defaults: dict = {
         "manifest_path": manifest_path,
@@ -39,6 +65,9 @@ def _base_state(manifest_path: str, target_path: str = "/nonexistent", **kw) -> 
         "verify_status": None,
         "review_queue": [],
         "done": False,
+        "supervisor_hint": None,
+        "interrupt_payload": None,
+        "review_mode": "auto",
     }
     defaults.update(kw)
     return OxidantState(**defaults)

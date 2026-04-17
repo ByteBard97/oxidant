@@ -19,5 +19,6 @@
   },
   "max_attempts": { "haiku": 3, "sonnet": 4, "opus": 5 },
   "parallelism": 4,
-  "subscription_auth": true
+  "subscription_auth": true,
+  "review_mode": "auto"
 }
