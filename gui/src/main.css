@@ -15,68 +15,115 @@
 }
 .pulse-dot { animation: pulse-dot 1.5s ease-in-out infinite; }
 
-/* ── Grungy CTA button — stamped worn metal ─────────────────────────────── */
+/* ── Grungy CTA button — hammered, oxidised, paint-chipped metal ──────── */
 .grungy-cta {
   position: relative;
   overflow: hidden;
-  /* Harsh, uneven gradient — not smooth, shifts diagonally */
+  /*
+   * Three stacked gradients:
+   * 1. blotchy radial dark stain top-left (heavy oxidation)
+   * 2. radial bright patch bottom-right (bare scuffed metal)
+   * 3. diagonal base colour
+   */
   background:
-    linear-gradient(
-      128deg,
-      #c96020 0%,
-      #a84010 30%,
-      #d07030 52%,
-      #7a2808 72%,
-      #be5520 100%
-    );
-  /* Worn pressed-metal edges */
+    radial-gradient(ellipse 60% 80% at 18% 30%,  #5a1e0488 0%, transparent 65%),
+    radial-gradient(ellipse 50% 60% at 85% 75%,  #e8903888 0%, transparent 60%),
+    radial-gradient(ellipse 40% 50% at 50% 50%,  #00000033 0%, transparent 70%),
+    linear-gradient(137deg, #b84a10 0%, #8c3208 25%, #cc6828 50%, #6e2006 70%, #aa4418 100%);
+
+  /* Paint-chip edges: bright top-left scrape, deep bottom-right shadow */
   box-shadow:
-    inset 0  1px 0   rgba(255,200,120,0.25),   /* top highlight: bare metal */
-    inset 0 -2px 0   rgba(0,0,0,0.55),          /* bottom shadow: pressed edge */
-    inset  2px 0 0   rgba(255,180,80,0.12),
-    inset -2px 0 0   rgba(0,0,0,0.35),
-    0 2px 8px rgba(0,0,0,0.6);
-  color: #1a0800;
-  transition: filter 120ms;
+    inset  0   1px 0   rgba(255, 210, 130, 0.30),
+    inset  1px 0   0   rgba(255, 180,  80, 0.15),
+    inset  0  -3px 0   rgba(0, 0, 0, 0.70),
+    inset -2px 0   0   rgba(0, 0, 0, 0.50),
+    inset  0   0  12px rgba(0, 0, 0, 0.40),
+    0 3px 10px rgba(0, 0, 0, 0.65);
+
+  color: #3d1200;
+  text-shadow: 0 1px 0 rgba(255,160,60,0.15);
+  transition: filter 120ms, color 80ms, text-shadow 80ms;
 }
 
-/* Rust texture baked into the surface */
+/* Rust texture at high opacity — coarse grain dominates */
 .grungy-cta::before {
   content: '';
   position: absolute;
-  inset: 0;
+  inset: -4px;                /* bleed past edge so tile seams aren't on the rim */
   background-image: url('/rust-texture.png');
-  background-size: 200px 200px;
-  opacity: 0.22;
+  background-size: 160px 160px;
+  background-position: 37px 22px;
+  opacity: 0.45;
   mix-blend-mode: multiply;
   pointer-events: none;
 }
 
-/* Scratched-metal grain on top */
+/* Layered scratches: coarse horizontal + fine diagonal */
 .grungy-cta::after {
   content: '';
   position: absolute;
   inset: 0;
   background-image:
     repeating-linear-gradient(
-      92deg,
-      transparent 0px,
-      transparent 2px,
-      rgba(0,0,0,0.06) 2px,
-      rgba(0,0,0,0.06) 3px
+      88deg,
+      transparent          0px,
+      transparent          4px,
+      rgba(0,0,0,0.10)     4px,
+      rgba(0,0,0,0.10)     5px,
+      transparent          5px,
+      transparent          9px,
+      rgba(255,255,255,0.03) 9px,
+      rgba(255,255,255,0.03) 10px
+    ),
+    repeating-linear-gradient(
+      174deg,
+      transparent             0px,
+      transparent             8px,
+      rgba(0,0,0,0.07)        8px,
+      rgba(0,0,0,0.07)        9px
     );
   pointer-events: none;
+  mix-blend-mode: overlay;
+}
+
+/* Bad-circuit text flicker — irregular rhythm, no smooth pulses */
+@keyframes btn-text-flicker {
+  0%    { opacity: 1;    text-shadow: 0 0 8px rgba(255,200,80,0.9), 0 0 22px rgba(240,140,20,0.6); }
+  3%    { opacity: 0.3;  text-shadow: none; }
+  4%    { opacity: 1;    text-shadow: 0 0 8px rgba(255,200,80,0.9), 0 0 22px rgba(240,140,20,0.6); }
+  11%   { opacity: 1;    text-shadow: 0 0 8px rgba(255,200,80,0.9), 0 0 22px rgba(240,140,20,0.6); }
+  12%   { opacity: 0.6;  text-shadow: 0 0 4px rgba(255,200,80,0.4); }
+  13%   { opacity: 0.1;  text-shadow: none; }
+  14%   { opacity: 1;    text-shadow: 0 0 12px rgba(255,210,90,1.0), 0 0 28px rgba(240,150,20,0.7); }
+  15%   { opacity: 0.7;  text-shadow: 0 0 5px rgba(255,200,80,0.5); }
+  16%   { opacity: 1;    text-shadow: 0 0 8px rgba(255,200,80,0.9), 0 0 22px rgba(240,140,20,0.6); }
+  33%   { opacity: 1;    text-shadow: 0 0 8px rgba(255,200,80,0.9), 0 0 22px rgba(240,140,20,0.6); }
+  34%   { opacity: 0.2;  text-shadow: none; }
+  35%   { opacity: 0.9;  text-shadow: 0 0 6px rgba(255,200,80,0.7); }
+  36%   { opacity: 0.2;  text-shadow: none; }
+  37%   { opacity: 1;    text-shadow: 0 0 8px rgba(255,200,80,0.9), 0 0 22px rgba(240,140,20,0.6); }
+  58%   { opacity: 1;    text-shadow: 0 0 8px rgba(255,200,80,0.9), 0 0 22px rgba(240,140,20,0.6); }
+  59%   { opacity: 0.5;  text-shadow: 0 0 3px rgba(255,200,80,0.3); }
+  60%   { opacity: 1;    text-shadow: 0 0 14px rgba(255,215,90,1.0), 0 0 30px rgba(240,150,20,0.8); }
+  79%   { opacity: 1;    text-shadow: 0 0 8px rgba(255,200,80,0.9), 0 0 22px rgba(240,140,20,0.6); }
+  80%   { opacity: 0.0;  text-shadow: none; }
+  81%   { opacity: 0.8;  text-shadow: 0 0 5px rgba(255,200,80,0.6); }
+  82%   { opacity: 0.0;  text-shadow: none; }
+  83%   { opacity: 1;    text-shadow: 0 0 8px rgba(255,200,80,0.9), 0 0 22px rgba(240,140,20,0.6); }
+  100%  { opacity: 1;    text-shadow: 0 0 8px rgba(255,200,80,0.9), 0 0 22px rgba(240,140,20,0.6); }
 }
 
 .grungy-cta:not(:disabled):hover {
-  filter: brightness(1.12) contrast(1.05);
+  filter: brightness(1.10) contrast(1.08) saturate(1.1);
+  color: #ffda85;
+  animation: btn-text-flicker 2.3s steps(1, end) infinite;
 }
 
 .grungy-cta:not(:disabled):active {
-  filter: brightness(0.88);
+  filter: brightness(0.82) contrast(1.12);
   box-shadow:
-    inset 0  2px 4px rgba(0,0,0,0.6),
-    inset 0 -1px 0   rgba(255,200,120,0.1),
+    inset 0  3px 8px rgba(0,0,0,0.75),
+    inset 0 -1px 0   rgba(255,200,100,0.08),
     0 1px 3px rgba(0,0,0,0.5);
 }
 

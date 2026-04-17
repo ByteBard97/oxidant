@@ -3,19 +3,21 @@
        :class="store.pendingReview ? 'border-primary-container' : 'border-outline-variant/30'">
 
     <!-- Header -->
-    <div class="p-4 bg-surface-container-high border-b border-[#2D2F31] flex justify-between items-center shrink-0">
+    <div class="px-4 bg-surface-container-high border-b border-[#2D2F31] flex justify-between items-center shrink-0 min-h-[84px]">
       <div class="flex items-center gap-2">
         <span class="material-symbols-outlined text-primary-container text-[18px]">warning</span>
         <h2 class="font-headline font-bold text-sm tracking-wide text-white uppercase">Manual Review Required</h2>
       </div>
-      <select
-        v-model="store.reviewMode"
-        class="bg-surface-container-lowest border border-outline-variant text-xs font-mono text-zinc-300 py-1 px-2 focus:outline-none focus:border-primary"
-      >
-        <option value="auto">AUTO (Permissive)</option>
-        <option value="supervised">SUPERVISED</option>
-        <option value="interactive">INTERACTIVE (All Nodes)</option>
-      </select>
+      <Tooltip content="AUTO: pass most nodes. SUPERVISED: hint every node. INTERACTIVE: you approve each one." position="left">
+        <select
+          v-model="store.reviewMode"
+          class="bg-surface-container-lowest border border-outline-variant text-xs font-mono text-zinc-300 py-1 px-2 focus:outline-none focus:border-primary"
+        >
+          <option value="auto">AUTO (Permissive)</option>
+          <option value="supervised">SUPERVISED</option>
+          <option value="interactive">INTERACTIVE (All Nodes)</option>
+        </select>
+      </Tooltip>
     </div>
 
     <!-- Idle state -->
