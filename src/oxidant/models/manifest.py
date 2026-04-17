@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import logging
 from enum import Enum
 from pathlib import Path
 from typing import Optional
 
 from pydantic import BaseModel, Field
+
+logger = logging.getLogger(__name__)
 
 
 class NodeKind(str, Enum):
@@ -87,26 +90,41 @@ class Manifest(BaseModel):
 
         Dependencies referencing node IDs outside this manifest are ignored —
         they represent unexported or cross-repo code not extracted by Phase A.
+
+        Deadlock breaking: if no nodes pass the strict check but not_started nodes
+        remain, the graph has unresolvable dependency cycles. In that case, return
+        all not_started nodes sorted by number of unconverted deps (fewest first),
+        so Phase B can make progress through cycles by processing the least-blocked
+        node first.
         """
         manifest_ids = set(self.nodes.keys())
         converted = {
             nid for nid, node in self.nodes.items()
             if node.status == NodeStatus.CONVERTED
         }
-        return [
+
+        def _unconverted_dep_count(node: ConversionNode) -> int:
+            return sum(
+                1 for dep in node.type_dependencies + node.call_dependencies
+                if dep in manifest_ids and dep not in converted
+            )
+
+        strict = [
             node for node in self.nodes.values()
             if node.status == NodeStatus.NOT_STARTED
-            and all(
-                dep in converted
-                for dep in node.type_dependencies
-                if dep in manifest_ids
-            )
-            and all(
-                dep in converted
-                for dep in node.call_dependencies
-                if dep in manifest_ids
-            )
+            and _unconverted_dep_count(node) == 0
         ]
+        if strict:
+            return strict
+
+        # Deadlock: return remaining not_started nodes sorted by unconverted dep count
+        remaining = [
+            node for node in self.nodes.values()
+            if node.status == NodeStatus.NOT_STARTED
+        ]
+        if remaining:
+            remaining.sort(key=_unconverted_dep_count)
+        return remaining
 
     def auto_convert_structural_nodes(self, path: Path) -> int:
         """Mark all structural nodes (no function body to translate) as CONVERTED.
@@ -182,5 +200,19 @@ class Manifest(BaseModel):
                     queue.append(dependent)
 
         if order != len(self.nodes):
-            remaining = [nid for nid, deg in in_degree.items() if deg > 0]
-            raise ValueError(f"Dependency cycle detected involving: {remaining}")
+            # Dependency cycles exist (common in TypeScript geometric libraries).
+            # Assign topological orders to cycle nodes so Phase B can still process them.
+            # Sort by remaining in_degree (fewest unsatisfied deps first) to pick the
+            # best entry points into each cycle.
+            cycle_nodes = [nid for nid, deg in in_degree.items() if deg > 0]
+            cycle_nodes.sort(key=lambda nid: in_degree[nid])
+            for nid in cycle_nodes:
+                self.nodes[nid] = self.nodes[nid].model_copy(update={
+                    "topological_order": order,
+                    "bfs_level": bfs_levels.get(nid, order),
+                })
+                order += 1
+            logger.warning(
+                "Dependency cycles detected: %d nodes assigned fallback topological order.",
+                len(cycle_nodes),
+            )
