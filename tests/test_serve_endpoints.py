@@ -1,5 +1,38 @@
 import asyncio
 import pytest
+from httpx import AsyncClient, ASGITransport
+
+
+@pytest.fixture
+def app_with_tmp(tmp_path):
+    """Create a FastAPI app with temp paths (no real manifest needed for route tests)."""
+    from oxidant.serve.app import create_app
+    return create_app(
+        db_path=str(tmp_path / "checkpoints.db"),
+        gui_dist=None,  # no GUI in tests
+    )
+
+
+@pytest.mark.asyncio
+async def test_status_404_for_unknown_thread(app_with_tmp):
+    async with AsyncClient(transport=ASGITransport(app=app_with_tmp), base_url="http://test") as client:
+        r = await client.get("/status/nonexistent-thread")
+    assert r.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_review_queue_empty_initially(app_with_tmp):
+    async with AsyncClient(transport=ASGITransport(app=app_with_tmp), base_url="http://test") as client:
+        r = await client.get("/review-queue")
+    assert r.status_code == 200
+    assert r.json() == []
+
+
+@pytest.mark.asyncio
+async def test_resume_404_for_unknown_thread(app_with_tmp):
+    async with AsyncClient(transport=ASGITransport(app=app_with_tmp), base_url="http://test") as client:
+        r = await client.post("/resume/nonexistent", json={"hint": "try harder"})
+    assert r.status_code == 404
 
 
 @pytest.mark.asyncio
