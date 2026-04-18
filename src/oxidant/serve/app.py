@@ -31,7 +31,7 @@ _review_queue: list[dict] = []  # accumulated across all runs in this process
 
 
 class StartRunRequest(BaseModel):
-    manifest_path: str
+    db_path: str
     target_path: str
     snippets_dir: str = "snippets"
     review_mode: str = "auto"
@@ -60,10 +60,11 @@ def create_app(db_path: str, gui_dist: str | None = None, config_path: str | Non
         import json as _json
 
         thread_id = req.thread_id or str(uuid.uuid4())
-        config_path = Path(req.manifest_path).parent / "oxidant.config.json"
         cfg: dict[str, Any] = {}
-        if config_path.exists():
-            cfg = _json.loads(config_path.read_text())
+        if config_path:
+            cfg_file = Path(config_path)
+            if cfg_file.exists():
+                cfg = _json.loads(cfg_file.read_text())
 
         # review_mode from request overrides config
         cfg["review_mode"] = req.review_mode
@@ -73,10 +74,11 @@ def create_app(db_path: str, gui_dist: str | None = None, config_path: str | Non
 
         from oxidant.graph.state import OxidantState
         initial_state = OxidantState(
-            manifest_path=str(Path(req.manifest_path).resolve()),
+            db_path=str(Path(req.db_path).resolve()),
             target_path=str(Path(req.target_path).resolve()),
             snippets_dir=str(snippets.resolve()),
             config=cfg,
+            worker_id=0,
             current_node_id=None,
             current_prompt=None,
             current_snippet=None,
@@ -162,10 +164,9 @@ def create_app(db_path: str, gui_dist: str | None = None, config_path: str | Non
             return JSONResponse({})
         # Resolve paths relative to the config file's directory
         cfg_dir = cfg_path.parent
-        manifest = cfg.get("manifest_path", "conversion_manifest.json")
         target = cfg.get("target_repo", "")
         return JSONResponse({
-            "manifest_path": str((cfg_dir / manifest).resolve()),
+            "db_path": str((cfg_dir / "oxidant.db").resolve()),
             "target_path": str((cfg_dir / target).resolve()) if target else "",
             "snippets_dir": str((cfg_dir / cfg.get("snippets_dir", "snippets")).resolve()),
         })
@@ -174,6 +175,137 @@ def create_app(db_path: str, gui_dist: str | None = None, config_path: str | Non
     async def get_review_queue() -> JSONResponse:
         """Return nodes that have been queued for human review across all runs."""
         return JSONResponse(_review_queue)
+
+    def _get_manifest_db() -> Path | None:
+        """Resolve the manifest DB path from the config file."""
+        cfg_path = Path(config_path) if config_path else Path("oxidant.config.json")
+        if not cfg_path.exists():
+            return None
+        return (cfg_path.parent / "oxidant.db").resolve()
+
+    @app.get("/api/stats")
+    async def get_stats() -> JSONResponse:
+        """Aggregate node counts by status."""
+        db = _get_manifest_db()
+        if db is None or not db.exists():
+            return JSONResponse({"error": "oxidant.db not found"}, status_code=404)
+        import sqlite3
+        con = sqlite3.connect(str(db))
+        rows = con.execute(
+            "SELECT status, COUNT(*) FROM nodes GROUP BY status"
+        ).fetchall()
+        con.close()
+        counts: dict[str, int] = {r[0]: r[1] for r in rows}
+        total = sum(counts.values())
+        return JSONResponse({
+            "total": total,
+            "converted": counts.get("converted", 0),
+            "not_started": counts.get("not_started", 0),
+            "in_progress": counts.get("in_progress", 0),
+            "human_review": counts.get("human_review", 0),
+            "failed": counts.get("failed", 0),
+        })
+
+    @app.get("/api/modules")
+    async def get_modules() -> JSONResponse:
+        """Per-module completion breakdown."""
+        db = _get_manifest_db()
+        if db is None or not db.exists():
+            return JSONResponse({"error": "oxidant.db not found"}, status_code=404)
+        import sqlite3
+        con = sqlite3.connect(str(db))
+        rows = con.execute(
+            "SELECT source_file, status, COUNT(*) FROM nodes GROUP BY source_file, status"
+        ).fetchall()
+        con.close()
+
+        # Aggregate per module
+        modules: dict[str, dict[str, int]] = {}
+        for source_file, status, count in rows:
+            m = modules.setdefault(source_file, {
+                "module": source_file, "total": 0,
+                "converted": 0, "human_review": 0, "in_progress": 0, "not_started": 0,
+            })
+            m["total"] += count
+            if status in m:
+                m[status] += count
+
+        result = []
+        for m in sorted(modules.values(), key=lambda x: x["module"]):
+            total = m["total"]
+            pct = round(100 * m["converted"] / total) if total else 0
+            result.append({**m, "pct_complete": pct})
+        return JSONResponse(result)
+
+    @app.get("/api/errors")
+    async def get_errors() -> JSONResponse:
+        """Top recurring error patterns across human_review nodes."""
+        db = _get_manifest_db()
+        if db is None or not db.exists():
+            return JSONResponse({"error": "oxidant.db not found"}, status_code=404)
+        import re
+        import sqlite3
+        con = sqlite3.connect(str(db))
+        rows = con.execute(
+            "SELECT node_id, last_error FROM nodes WHERE status = 'human_review' AND last_error IS NOT NULL"
+        ).fetchall()
+        con.close()
+
+        # Strip node-specific parts to group similar errors
+        _STRIP_RE = re.compile(
+            r"\b(0x[0-9a-f]+|\d+\.\d+|\d+|`[^`]{1,60}`|\"[^\"]{1,60}\")\b",
+            re.IGNORECASE,
+        )
+
+        pattern_map: dict[str, list[str]] = {}
+        for node_id, error in rows:
+            key = _STRIP_RE.sub("_", error or "").strip()[:200]
+            pattern_map.setdefault(key, []).append(node_id)
+
+        result = sorted(
+            [{"pattern": p, "count": len(ids), "node_ids": ids[:10]}
+             for p, ids in pattern_map.items()],
+            key=lambda x: -x["count"],
+        )
+        return JSONResponse(result[:50])
+
+    @app.get("/api/nodes")
+    async def get_nodes(
+        status: str | None = None,
+        module: str | None = None,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> JSONResponse:
+        """Paginated node list with optional status and module filters."""
+        db = _get_manifest_db()
+        if db is None or not db.exists():
+            return JSONResponse({"error": "oxidant.db not found"}, status_code=404)
+        import sqlite3
+        con = sqlite3.connect(str(db))
+        con.row_factory = sqlite3.Row
+        where_parts = []
+        params: list[object] = []
+        if status:
+            where_parts.append("status = ?")
+            params.append(status)
+        if module:
+            where_parts.append("source_file LIKE ?")
+            params.append(f"%{module}%")
+        where = f"WHERE {' AND '.join(where_parts)}" if where_parts else ""
+        count_row = con.execute(f"SELECT COUNT(*) FROM nodes {where}", params).fetchone()
+        total = count_row[0] if count_row else 0
+        rows = con.execute(
+            f"SELECT node_id, source_file, node_kind, status, tier, attempt_count, last_error "
+            f"FROM nodes {where} ORDER BY topological_order LIMIT ? OFFSET ?",
+            [*params, limit, offset],
+        ).fetchall()
+        con.close()
+        return JSONResponse({
+            "total": total,
+            "limit": limit,
+            "offset": offset,
+            "nodes": [dict(r) for r in rows],
+        })
 
     @app.get("/status/{thread_id}")
     async def get_status(thread_id: str) -> JSONResponse:

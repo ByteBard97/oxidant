@@ -127,10 +127,77 @@ def classify_tiers(
         typer.echo(f"  {tier or 'None':8s}  {count}")
 
 
+@app.command("import-manifest")
+def import_manifest(
+    manifest: Path = typer.Argument(..., help="Path to conversion_manifest.json"),
+    db: Path = typer.Option("oxidant.db", "--db", help="Output SQLite DB path."),
+) -> None:
+    """Import a JSON conversion manifest into SQLite.
+
+    One-time migration: reads conversion_manifest.json, creates oxidant.db,
+    and bulk-inserts all nodes. Phase A keeps writing JSON; run this once to
+    seed the DB before starting Phase B.
+    """
+    import json as _json
+    from oxidant.models.db import NodeRecord, ManifestMeta
+    from oxidant.models.manifest import ConversionNode, _get_engine
+    from sqlmodel import Session, SQLModel
+
+    if not manifest.exists():
+        typer.echo(f"Error: {manifest} not found.", err=True)
+        raise typer.Exit(1)
+
+    typer.echo(f"Reading {manifest}...")
+    data = _json.loads(manifest.read_text())
+    nodes_raw = data.get("nodes", {})
+
+    engine = _get_engine(db)
+    SQLModel.metadata.create_all(engine)
+
+    with Session(engine) as session:
+        # Upsert manifest meta
+        meta = session.get(ManifestMeta, 1)
+        if meta is None:
+            meta = ManifestMeta(
+                id=1,
+                version=data.get("version", "1.0"),
+                source_repo=data.get("source_repo", ""),
+                generated_at=data.get("generated_at", ""),
+            )
+        else:
+            meta.version = data.get("version", meta.version)
+            meta.source_repo = data.get("source_repo", meta.source_repo)
+            meta.generated_at = data.get("generated_at", meta.generated_at)
+        session.add(meta)
+
+        # Upsert all nodes
+        inserted = updated = 0
+        for node_id, raw in nodes_raw.items():
+            raw["node_id"] = raw.get("node_id") or node_id
+            node = ConversionNode.model_validate(raw)
+            row = session.get(NodeRecord, node_id)
+            if row is None:
+                session.add(NodeRecord.from_conversion_node(node))
+                inserted += 1
+            else:
+                # Preserve Phase B progress (status, snippet_path, attempt_count)
+                # but refresh everything else from JSON
+                new_row = NodeRecord.from_conversion_node(node)
+                new_row.status = row.status
+                new_row.snippet_path = row.snippet_path
+                new_row.attempt_count = row.attempt_count
+                new_row.last_error = row.last_error
+                session.add(new_row)
+                updated += 1
+        session.commit()
+
+    typer.echo(f"Done. {db}: {inserted} inserted, {updated} updated ({len(nodes_raw)} total).")
+
+
 @app.command("phase-b")
 def phase_b(
     config: Path = typer.Option("oxidant.config.json", "--config", "-c"),
-    manifest: Path = typer.Option("conversion_manifest.json", "--manifest"),
+    db: Path = typer.Option("oxidant.db", "--db", help="Path to oxidant SQLite manifest DB."),
     snippets_dir: Path = typer.Option("snippets", "--snippets-dir"),
     dry_run: bool = typer.Option(
         False, "--dry-run",
@@ -143,22 +210,29 @@ def phase_b(
 ) -> None:
     """Run Phase B: translate all nodes in topological order via Claude Code.
 
-    Requires a compiled skeleton from ``oxidant phase-a``.
+    Requires a compiled skeleton from ``oxidant phase-a`` and an oxidant.db
+    seeded by ``oxidant import-manifest``.
     Structural nodes (class/interface/enum/type_alias) are auto-converted first.
     Exhausted nodes are written to ``review_queue.json``.
     """
     import json as _json
 
     from oxidant.assembly.assemble import check_and_assemble
-    from oxidant.graph.graph import translation_graph
     from oxidant.graph.nodes import build_context, pick_next_node
     from oxidant.graph.state import OxidantState
     from oxidant.models.manifest import Manifest as _Manifest
 
-    cfg = _json.loads(config.read_text())
-    manifest_obj = _Manifest.load(manifest)
+    if not db.exists():
+        typer.echo(
+            f"Error: {db} not found. Run `oxidant import-manifest conversion_manifest.json` first.",
+            err=True,
+        )
+        raise typer.Exit(1)
 
-    count = manifest_obj.auto_convert_structural_nodes(manifest)
+    cfg = _json.loads(config.read_text())
+    manifest_obj = _Manifest.load(db)
+
+    count = manifest_obj.auto_convert_structural_nodes(db)
     if count:
         typer.echo(f"Auto-converted {count} structural nodes.")
 
@@ -166,10 +240,11 @@ def phase_b(
     target_path = Path(cfg["target_repo"])
 
     initial_state = OxidantState(
-        manifest_path=str(manifest.resolve()),
+        db_path=str(db.resolve()),
         target_path=str(target_path.resolve()),
         snippets_dir=str(snippets_dir.resolve()),
         config=cfg,
+        worker_id=0,
         current_node_id=None,
         current_prompt=None,
         current_snippet=None,
@@ -202,16 +277,41 @@ def phase_b(
         typer.echo(prompt[:3000])
         return
 
-    final_state = translation_graph.invoke(initial_state)
+    parallelism = cfg.get("parallelism", 1)
 
-    review_queue = final_state.get("review_queue", [])
+    if parallelism > 1:
+        import asyncio
+        from oxidant.graph.graph import build_graph
+        from oxidant.graph.nodes import setup_worker_clones
+
+        typer.echo(f"Parallel mode: {parallelism} workers")
+        setup_worker_clones(target_path, parallelism)
+
+        async def run_parallel() -> list[dict]:
+            graphs = [build_graph() for _ in range(parallelism)]
+            coros = [
+                g.ainvoke({**initial_state, "worker_id": i})
+                for i, g in enumerate(graphs)
+            ]
+            return list(await asyncio.gather(*coros))
+
+        results = asyncio.run(run_parallel())
+        # Merge review queues from all workers
+        review_queue: list[dict] = []
+        for r in results:
+            review_queue.extend(r.get("review_queue", []))
+    else:
+        from oxidant.graph.graph import translation_graph
+        final_state = translation_graph.invoke(initial_state)
+        review_queue = final_state.get("review_queue", [])
+
     if review_queue:
         import json
         rq_path = Path("review_queue.json")
         rq_path.write_text(json.dumps(review_queue, indent=2))
         typer.echo(f"\n{len(review_queue)} nodes queued for human review → {rq_path}")
 
-    manifest_final = _Manifest.load(manifest)
+    manifest_final = _Manifest.load(db)
     assembled = check_and_assemble(manifest_final, target_path)
     if assembled:
         typer.echo(f"Assembled {len(assembled)} module(s).")

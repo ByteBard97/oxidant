@@ -17,10 +17,10 @@ export function useRunActions() {
     error.value = ''
     try {
       const res = await api.startRun({
-        manifest_path: store.manifestPath,
-        target_path:   store.targetPath,
-        review_mode:   store.reviewMode,
-        thread_id:     store.status === 'paused' ? store.threadId : null,
+        db_path:     store.dbPath,
+        target_path: store.targetPath,
+        review_mode: store.reviewMode,
+        thread_id:   store.status === 'paused' ? store.threadId : null,
       })
       store.setThreadId(res.thread_id)
       connectSSE(res.thread_id)
