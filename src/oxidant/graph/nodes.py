@@ -53,11 +53,12 @@ def _db(state: OxidantState) -> Path:
 def pick_next_node(state: OxidantState) -> dict:
     """Atomically claim the next eligible node, or signal done.
 
-    Uses a SQLite transaction to SELECT + mark IN_PROGRESS in one step so
-    parallel workers never claim the same node.
+    Uses a single SQLite transaction (claim_next_eligible) to SELECT + mark
+    IN_PROGRESS so concurrent workers never claim the same node.
 
-    Also resets any orphaned IN_PROGRESS nodes (from a previous crashed run)
-    back to NOT_STARTED automatically.
+    Orphan recovery (resetting stuck IN_PROGRESS nodes from a crashed run) only
+    runs in single-worker mode — in parallel mode those nodes belong to live
+    workers and must not be touched.
     """
     max_nodes = state.get("max_nodes")
     nodes_this_run = state.get("nodes_this_run", 0)
@@ -66,48 +67,35 @@ def pick_next_node(state: OxidantState) -> dict:
         return {"current_node_id": None, "done": True}
 
     manifest = Manifest.load(_db(state))
+    parallelism = state.get("config", {}).get("parallelism", 1)
 
-    # Auto-recover: reset orphaned IN_PROGRESS nodes from crashed runs.
-    # Each worker only resets nodes it didn't pick itself.
-    stuck = [
-        nid for nid, n in manifest.nodes.items()
-        if n.status == NodeStatus.IN_PROGRESS
-        and nid != state.get("current_node_id")
-    ]
-    if stuck:
-        logger.warning("Resetting %d orphaned in_progress nodes: %s", len(stuck), stuck[:3])
-        for nid in stuck:
-            manifest.update_node(_db(state), nid, status=NodeStatus.NOT_STARTED)
-        manifest = Manifest.load(_db(state))
+    # Orphan recovery: only in single-worker mode. In parallel runs, IN_PROGRESS
+    # nodes belong to live workers — resetting them would cause duplicate work.
+    if parallelism <= 1:
+        stuck = [
+            nid for nid, n in manifest.nodes.items()
+            if n.status == NodeStatus.IN_PROGRESS
+            and nid != state.get("current_node_id")
+        ]
+        if stuck:
+            logger.warning("Resetting %d orphaned in_progress nodes: %s", len(stuck), stuck[:3])
+            for nid in stuck:
+                manifest.update_node(_db(state), nid, status=NodeStatus.NOT_STARTED)
 
-    eligible = manifest.eligible_nodes()
+    # Atomic SELECT + UPDATE in one transaction — safe for concurrent workers
+    node = manifest.claim_next_eligible()
 
-    if not eligible:
+    if node is None:
         logger.info("All nodes converted. Phase B complete.")
         return {"current_node_id": None, "done": True}
-
-    node = min(eligible, key=lambda n: n.topological_order or 0)
-
-    # Log cycle breaks
-    manifest_ids = set(manifest.nodes.keys())
-    converted_ids = {nid for nid, n in manifest.nodes.items() if n.status == NodeStatus.CONVERTED}
-    unconverted_deps = [
-        dep for dep in node.type_dependencies + node.call_dependencies
-        if dep in manifest_ids and dep not in converted_ids
-    ]
-    if unconverted_deps:
-        logger.warning(
-            "Cycle break: processing %s with %d unconverted deps: %s",
-            node.node_id, len(unconverted_deps), unconverted_deps[:3],
-        )
-
-    # Atomic claim: mark IN_PROGRESS
-    manifest.update_node(_db(state), node.node_id, status=NodeStatus.IN_PROGRESS)
 
     # config.start_tier overrides per-node tier so we can default everything to haiku
     start_tier = state.get("config", {}).get("start_tier")
     tier = start_tier or (node.tier.value if node.tier else TranslationTier.HAIKU.value)
-    logger.info("Processing %s (tier=%s, bfs_level=%s)", node.node_id, tier, node.bfs_level)
+    logger.info(
+        "Worker %d: processing %s (tier=%s, bfs_level=%s)",
+        state.get("worker_id", 0), node.node_id, tier, node.bfs_level,
+    )
 
     return {
         "current_node_id": node.node_id,

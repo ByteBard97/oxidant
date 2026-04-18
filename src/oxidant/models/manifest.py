@@ -110,6 +110,10 @@ def _get_engine(db_path: Path):
                 connect_args={"check_same_thread": False},
             )
             SQLModel.metadata.create_all(engine)
+            # WAL mode: allows concurrent readers alongside a single writer
+            with engine.connect() as conn:
+                conn.execute(__import__("sqlalchemy").text("PRAGMA journal_mode=WAL"))
+                conn.commit()
             _engine_cache[key] = engine
         return _engine_cache[key]
 
@@ -187,6 +191,56 @@ class Manifest:
                 setattr(row, k, v)
             session.add(row)
             session.commit()
+
+    def claim_next_eligible(self) -> ConversionNode | None:
+        """Atomically claim the next eligible node using BEGIN IMMEDIATE.
+
+        BEGIN IMMEDIATE acquires the write lock before reading, so two concurrent
+        workers can never both see the same NOT_STARTED node and both claim it.
+        Falls back to least-blocked nodes if no strictly-eligible ones exist.
+        """
+        import json as _json
+        import sqlite3
+        from oxidant.models.db import NodeRecord
+
+        db_str = str(self._db_path.resolve())
+        con = sqlite3.connect(db_str, timeout=30, check_same_thread=False)
+        con.row_factory = sqlite3.Row
+        try:
+            con.execute("BEGIN IMMEDIATE")
+
+            all_rows = con.execute("SELECT node_id, status, type_dependencies, call_dependencies, topological_order FROM nodes").fetchall()
+            manifest_ids = {r["node_id"] for r in all_rows}
+            converted = {r["node_id"] for r in all_rows if r["status"] == NodeStatus.CONVERTED.value}
+
+            def _dep_count(row: sqlite3.Row) -> int:
+                deps = _json.loads(row["type_dependencies"]) + _json.loads(row["call_dependencies"])
+                return sum(1 for d in deps if d in manifest_ids and d not in converted)
+
+            not_started = [r for r in all_rows if r["status"] == NodeStatus.NOT_STARTED.value]
+            strict = [r for r in not_started if _dep_count(r) == 0]
+            candidates = strict if strict else sorted(not_started, key=_dep_count)
+
+            if not candidates:
+                con.rollback()
+                return None
+
+            best = min(candidates, key=lambda r: r["topological_order"] or 0)
+            con.execute(
+                "UPDATE nodes SET status = ? WHERE node_id = ?",
+                (NodeStatus.IN_PROGRESS.value, best["node_id"]),
+            )
+            con.commit()
+        except Exception:
+            con.rollback()
+            raise
+        finally:
+            con.close()
+
+        # Fetch the full row via SQLAlchemy for to_conversion_node()
+        with Session(self._engine) as session:
+            row = session.get(NodeRecord, best["node_id"])
+            return row.to_conversion_node() if row else None
 
     def eligible_nodes(self) -> list[ConversionNode]:
         """NOT_STARTED nodes whose every in-manifest dependency is CONVERTED.
