@@ -18,6 +18,7 @@
     "sonnet": "claude-sonnet-4-6",
     "opus": "claude-opus-4-6"
   },
+  "start_tier": "haiku",
   "max_attempts": { "haiku": 3, "sonnet": 4, "opus": 5 },
   "parallelism": 4,
   "subscription_auth": true,

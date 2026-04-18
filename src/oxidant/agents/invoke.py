@@ -87,4 +87,33 @@ def invoke_claude(
             f"claude JSON missing 'result' key: {list(data.keys())}"
         )
 
-    return str(data["result"])
+    return _sanitize_snippet(str(data["result"]))
+
+
+def _sanitize_snippet(text: str) -> str:
+    """Strip markdown fences and non-ASCII characters that break cargo check.
+
+    Models occasionally wrap the response in ```rust ... ``` fences or include
+    unicode em-dashes and curly quotes that are invalid Rust tokens.
+    """
+    # Strip markdown code fences (```rust ... ``` or ``` ... ```)
+    fenced = text.strip()
+    if fenced.startswith("```"):
+        lines = fenced.split("\n")
+        # Drop first line (```rust or ```) and last line (```)
+        inner = lines[1:]
+        if inner and inner[-1].strip() == "```":
+            inner = inner[:-1]
+        text = "\n".join(inner)
+
+    # Replace common unicode punctuation that breaks the Rust lexer
+    text = (
+        text
+        .replace("\u2014", "--")   # em-dash → --
+        .replace("\u2013", "-")    # en-dash → -
+        .replace("\u2018", "'")    # left single quote
+        .replace("\u2019", "'")    # right single quote / apostrophe
+        .replace("\u201c", '"')    # left double quote
+        .replace("\u201d", '"')    # right double quote
+    )
+    return text

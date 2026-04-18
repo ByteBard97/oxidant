@@ -7,6 +7,7 @@ review_queue to double-accumulate existing entries.
 from __future__ import annotations
 
 import logging
+import re
 from pathlib import Path
 
 from oxidant.agents.context import build_prompt
@@ -57,7 +58,9 @@ def pick_next_node(state: OxidantState) -> dict:
         Path(state["manifest_path"]), node.node_id, status=NodeStatus.IN_PROGRESS
     )
 
-    tier = node.tier.value if node.tier else TranslationTier.HAIKU.value
+    # config.start_tier overrides per-node tier — lets us default everything to haiku
+    start_tier = state.get("config", {}).get("start_tier")
+    tier = start_tier or (node.tier.value if node.tier else TranslationTier.HAIKU.value)
     logger.info(
         "Processing %s (tier=%s, bfs_level=%s)", node.node_id, tier, node.bfs_level
     )
@@ -95,8 +98,24 @@ def build_context(state: OxidantState) -> dict:
     return {"current_prompt": prompt, "supervisor_hint": None}
 
 
+_EMPTY_BODY_RE = re.compile(r"^\s*\w[\w\s<>,*()?:]*\(\s*\)\s*\{[\s]*\}\s*$", re.DOTALL)
+
+
 def invoke_agent(state: OxidantState) -> dict:
-    """Call the Claude Code subprocess and capture the Rust snippet body."""
+    """Call the Claude Code subprocess and capture the Rust snippet body.
+
+    Short-circuits for trivially empty TS functions (e.g. ``function noop() {}``)
+    to avoid wasting an API call — the Rust body is also empty.
+    """
+    node_id = state.get("current_node_id", "")
+    manifest = Manifest.load(Path(state["manifest_path"]))
+    node = manifest.nodes.get(node_id)
+
+    # Auto-convert empty-body functions without calling the model
+    if node and _EMPTY_BODY_RE.match(node.source_text.strip()):
+        logger.info("Auto-converting empty-body function %s", node_id)
+        return {"current_snippet": "// empty body — noop", "last_error": None}
+
     tier = state.get("current_tier") or TranslationTier.HAIKU.value
     model = state.get("config", {}).get("model_tiers", {}).get(tier)
     try:
