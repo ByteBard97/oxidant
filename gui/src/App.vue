@@ -100,6 +100,15 @@
               <span v-if="store.stats.needsReview > 0" class="ml-auto text-primary-container font-bold">{{ store.stats.needsReview }}</span>
             </a>
           </Tooltip>
+          <Tooltip content="Live DB stats — module progress, error patterns, conversion totals" position="right">
+            <a data-testid="nav-stats" class="relative text-zinc-500 py-3 px-4 flex items-center gap-3 hover:bg-zinc-800 transition-all cursor-pointer"
+               :class="activeTab === 'stats' && 'bg-secondary/10 text-secondary'"
+               @click="activeTab = 'stats'">
+              <div v-if="activeTab === 'stats'" class="rust-seam absolute right-0 inset-y-0 w-[4px] bg-secondary" aria-hidden="true" />
+              <span class="material-symbols-outlined text-[18px]">bar_chart</span>
+              [STATS]
+            </a>
+          </Tooltip>
         </div>
 
         <!-- Bottom: run controls + telemetry -->
@@ -119,6 +128,7 @@
           <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
             <RunConfigPanel   v-if="activeTab === 'run'" />
             <ReviewQueuePanel v-else-if="activeTab === 'review'" />
+            <StatsPanel       v-else-if="activeTab === 'stats'" />
             <LiveNodeFeed     v-else />
           </div>
 
@@ -184,13 +194,14 @@ import LiveNodeFeed from './components/LiveNodeFeed.vue'
 import RunConfigPanel from './components/RunConfigPanel.vue'
 import ReviewQueuePanel from './components/ReviewQueuePanel.vue'
 import ReviewPanel from './components/ReviewPanel.vue'
+import StatsPanel from './components/StatsPanel.vue'
 import ConfirmModal from './components/ConfirmModal.vue'
 import MemoryModal from './components/MemoryModal.vue'
 import SensorsModal from './components/SensorsModal.vue'
 import TerminalPanel from './components/TerminalPanel.vue'
 
 const store = useRunStore()
-const activeTab = ref<'run' | 'logs' | 'review'>('logs')
+const activeTab = ref<'run' | 'logs' | 'review' | 'stats'>('logs')
 const { opacity: neonOpacity } = useNeonFlicker()
 
 // Review panel — horizontal resize + open/close toggle

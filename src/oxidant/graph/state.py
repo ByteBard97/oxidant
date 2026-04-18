@@ -7,10 +7,11 @@ from typing import Annotated, Optional, TypedDict
 
 class OxidantState(TypedDict):
     # ── Paths and config (set at init, never mutated) ─────────────────────────
-    manifest_path: str          # absolute path to conversion_manifest.json
+    db_path: str                # absolute path to oxidant.db (SQLite)
     target_path: str            # absolute path to skeleton project (corpora/msagl-rs)
     snippets_dir: str           # absolute path to snippets output directory
     config: dict                # parsed oxidant.config.json
+    worker_id: int              # worker slot index (0-based); selects skeleton clone
 
     # ── Per-node processing (reset by pick_next_node each iteration) ──────────
     current_node_id: Optional[str]

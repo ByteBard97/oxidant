@@ -51,12 +51,12 @@ export const useRunStore = defineStore('run', () => {
   const threadId = ref<string | null>(null)
   const status = ref<RunStatus>('idle')
   const reviewMode = ref<'auto' | 'interactive' | 'supervised'>('auto')
-  const manifestPath = ref('')
+  const dbPath = ref('')
   const targetPath = ref('')
 
   // Fetch defaults from server config on first load
   api.getDefaults().then(d => {
-    if (!manifestPath.value && d.manifest_path) manifestPath.value = d.manifest_path
+    if (!dbPath.value && d.db_path) dbPath.value = d.db_path
     if (!targetPath.value && d.target_path) targetPath.value = d.target_path
   }).catch(() => { /* server may not be running yet */ })
   const activeNodes = reactive<Record<string, NodeProgress>>({})
@@ -164,7 +164,7 @@ export const useRunStore = defineStore('run', () => {
   }
 
   return {
-    threadId, status, reviewMode, manifestPath, targetPath,
+    threadId, status, reviewMode, dbPath, targetPath,
     activeNodes, pendingReview, recentEvents, stats,
     setThreadId, setStatus, applyEvent, applyNodeStart, applyNodeComplete,
     applyNodeEscalate, applyInterrupt, applyRunComplete, clearReview, reset,

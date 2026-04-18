@@ -8,12 +8,12 @@
       </div>
 
       <div class="flex flex-col gap-1">
-        <label class="text-[10px] text-zinc-500 uppercase tracking-widest">Manifest Path</label>
-        <Tooltip content="Path to conversion_manifest.json — lists all TS nodes to translate" position="right">
+        <label class="text-[10px] text-zinc-500 uppercase tracking-widest">DB Path</label>
+        <Tooltip content="Path to oxidant.db — SQLite manifest database (run import-manifest to create)" position="right">
           <input
-            v-model="store.manifestPath"
+            v-model="store.dbPath"
             class="w-full bg-surface-container-lowest border-l-2 border-transparent focus:border-primary outline-none text-sm font-mono text-zinc-200 px-3 py-2.5 placeholder-zinc-700 transition-colors"
-            placeholder="/path/to/conversion_manifest.json"
+            placeholder="/path/to/oxidant.db"
           />
         </Tooltip>
       </div>

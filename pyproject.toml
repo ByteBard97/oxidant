@@ -18,6 +18,7 @@ dependencies = [
     "uvicorn[standard]>=0.29",
     "sse-starlette>=1.6",
     "langgraph-checkpoint-sqlite>=0.2",
+    "sqlmodel>=0.0.21",
 ]
 
 [project.optional-dependencies]

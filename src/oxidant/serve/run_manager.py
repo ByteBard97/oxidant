@@ -69,6 +69,7 @@ class RunManager:
     ) -> None:
         """Start or resume a run. If a checkpoint exists for thread_id, the graph
         resumes from the last checkpoint (initial_state is used only for fresh runs).
+        Parallel workers are spun up when config["parallelism"] > 1.
         """
         if thread_id in self._runs and self._runs[thread_id].status == "running":
             raise ValueError(f"Run {thread_id} is already running")
@@ -76,22 +77,42 @@ class RunManager:
         run = RunState(thread_id=thread_id, status="running")
         self._runs[thread_id] = run
 
+        parallelism = initial_state.get("config", {}).get("parallelism", 1)
         graph = self._get_graph()
-        config = {"configurable": {"thread_id": thread_id}}
+
+        async def _stream_worker(worker_id: int, worker_state: dict[str, Any]) -> None:
+            """Stream one worker's graph to the shared event queue."""
+            from oxidant.serve.events import event_from_node_update
+            config = {"configurable": {"thread_id": f"{thread_id}_w{worker_id}"}}
+            async for chunk in graph.astream(worker_state, config=config, stream_mode="updates"):
+                for node_name, update in chunk.items():
+                    for json_str in event_from_node_update(node_name, update):
+                        await run.event_queue.put(json_str)
 
         async def _stream():
-            from oxidant.serve.events import event_from_node_update, RunCompleteEvent
+            from oxidant.serve.events import RunCompleteEvent
+            from pathlib import Path as _Path
+            from oxidant.graph.nodes import setup_worker_clones
             try:
-                async for chunk in graph.astream(initial_state, config=config, stream_mode="updates"):
-                    for node_name, update in chunk.items():
-                        for json_str in event_from_node_update(node_name, update):
-                            await run.event_queue.put(json_str)
+                target = _Path(initial_state["target_path"])
+                if parallelism > 1:
+                    logger.info("Starting %d parallel workers for run %s", parallelism, thread_id)
+                    setup_worker_clones(target, parallelism)
+                    worker_states = [{**initial_state, "worker_id": i} for i in range(parallelism)]
+                    await asyncio.gather(*[_stream_worker(i, ws) for i, ws in enumerate(worker_states)])
+                else:
+                    config = {"configurable": {"thread_id": thread_id}}
+                    async for chunk in graph.astream(initial_state, config=config, stream_mode="updates"):
+                        for node_name, update in chunk.items():
+                            from oxidant.serve.events import event_from_node_update
+                            for json_str in event_from_node_update(node_name, update):
+                                await run.event_queue.put(json_str)
+
                 run.status = "complete"
-                # Emit authoritative final counts from manifest before closing stream
+                # Emit authoritative final counts from manifest
                 try:
                     from oxidant.models.manifest import Manifest, NodeStatus
-                    from pathlib import Path as _Path
-                    manifest = Manifest.load(_Path(initial_state["manifest_path"]))
+                    manifest = Manifest.load(_Path(initial_state["db_path"]))
                     converted = sum(1 for n in manifest.nodes.values() if n.status == NodeStatus.CONVERTED)
                     needs_review = sum(1 for n in manifest.nodes.values() if n.status == NodeStatus.HUMAN_REVIEW)
                     await run.event_queue.put(RunCompleteEvent(converted=converted, needs_review=needs_review).to_json())
@@ -99,7 +120,6 @@ class RunManager:
                     logger.warning("Could not emit RunCompleteEvent: %s", exc)
                 await run.event_queue.put(None)  # sentinel: stream done
             except asyncio.CancelledError:
-                # Task cancelled by pause() or abort() — status already set by caller
                 await run.event_queue.put(None)
                 raise
             except Exception as exc:
