@@ -83,10 +83,10 @@
       "bfs_level": 0,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "    Checking msagl-rs v0.1.0 (/Users/ceres/Desktop/SignalCanvas/oxidant/corpora/msagl-rs)\nsrc/basic_graph_on_edges_spec.rs:7:12: warning: type `myedge` should have an upper camel case name: help: convert the identifier to upper camel case: `Myedge`\nsrc/basic_graph_spec.rs:7:12: warning: type `myedge` should have an upper camel case name: help: convert the identifier to upper camel case: `Myedge`\nsrc/color.rs:13:16: error[E0560]: struct `Color` has no field named `a`: `Color` does not have this field\nsrc/color.rs:13:19: error[E0560]: struct `Color` has no field named `r`: `Color` does not have this field\nsrc/color.rs:13:22: error[E0560]: struct `Color` has no field named `g`: `Color` does not have this field\nsrc/color.rs:13:25: error[E0560]: struct `Color` has no field named `b`: `Color` does not have this field\nwarning: `msagl-rs` (lib) generated 2 warnings\nerror: could not compile `msagl-rs` (lib) due to 4 previous errors; 2 warnings emitted\n"
     },
     "modules__drawing__src__color__Color__mkWithKeyword": {
       "node_id": "modules__drawing__src__color__Color__mkWithKeyword",
@@ -215,8 +215,8 @@
       "bfs_level": 0,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
-      "snippet_path": null,
+      "status": "converted",
+      "snippet_path": "/Users/ceres/Desktop/SignalCanvas/oxidant/snippets/color/modules__drawing__src__color__Color__Xex.rs",
       "attempt_count": 0,
       "last_error": null
     },
@@ -1274,10 +1274,10 @@
       "bfs_level": 0,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "    Checking msagl-rs v0.1.0 (/Users/ceres/Desktop/SignalCanvas/oxidant/corpora/msagl-rs)\nsrc/basic_graph_on_edges_spec.rs:7:12: warning: type `myedge` should have an upper camel case name: help: convert the identifier to upper camel case: `Myedge`\nsrc/basic_graph_spec.rs:7:12: warning: type `myedge` should have an upper camel case name: help: convert the identifier to upper camel case: `Myedge`\nsrc/dotparser.rs:13:16: error[E0560]: struct `DotParser` has no field named `ast`: `DotParser` does not have this field\nwarning: `msagl-rs` (lib) generated 2 warnings\nerror: could not compile `msagl-rs` (lib) due to 1 previous error; 2 warnings emitted\n"
     },
     "modules__parser__src__dotparser__DotParser__parseEdge": {
       "node_id": "modules__parser__src__dotparser__DotParser__parseEdge",
@@ -1912,8 +1912,8 @@
       "bfs_level": 0,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
-      "snippet_path": null,
+      "status": "converted",
+      "snippet_path": "/Users/ceres/Desktop/SignalCanvas/oxidant/snippets/dotparser/modules__parser__src__dotparser__parseFloatTuple.rs",
       "attempt_count": 0,
       "last_error": null
     },
@@ -2102,8 +2102,8 @@
       "bfs_level": 0,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
-      "snippet_path": null,
+      "status": "converted",
+      "snippet_path": "/Users/ceres/Desktop/SignalCanvas/oxidant/snippets/dotparser/modules__parser__src__dotparser__parseFloatQuatriple.rs",
       "attempt_count": 0,
       "last_error": null
     },
@@ -3275,10 +3275,10 @@
       "bfs_level": 0,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "    Checking msagl-rs v0.1.0 (/Users/ceres/Desktop/SignalCanvas/oxidant/corpora/msagl-rs)\nsrc/text_measurer.rs:17:63: error: unknown start of token: `\nsrc/text_measurer.rs:17:66: error: unknown start of token: `\nsrc/text_measurer.rs:17:68: error: unknown start of token: `\nsrc/text_measurer.rs:17:125: error: unknown start of token: \\u{2014}\nsrc/text_measurer.rs:17:127: error: prefix `Rust` is unknown: unknown prefix\nsrc/text_measurer.rs:17:199: error: unknown start of token: `\nsrc/text_measurer.rs:17:216: error: unknown start of token: `\nsrc/text_measurer.rs:17:226: error: unknown start of token: `\nsrc/text_measurer.rs:17:231: error: unknown start of token: `\nsrc/text_measurer.rs:17:236: error: unknown start of token: `\nsrc/text_measurer.rs:17:240: error: unknown start of token: `\nsrc/text_measurer.rs:17:13: error: expected one of `!`, `.`, `::`, `;`, `?`, `{`, `}`, or an operator, found `previous`: expected one of 8 possible tokens\nsrc/basic_graph_on_edges_spec.rs:7:12: warning: type `myedge` should have an upper camel case name: help: convert the identifier to upper camel case: `Myedge`\nsrc/basic_graph_spec.rs:7:12: warning: type `myedge` should have an upper camel case name: help: convert the identifier to upper camel case: `Myedge`\nwarning: `msagl-rs` (lib) generated 2 warnings\nerror: could not compile `msagl-rs` (lib) due to 12 previous errors; 2 warnings emitted\n"
     },
     "modules__renderer_common__src__text_measurer__TextMeasurer__measure": {
       "node_id": "modules__renderer_common__src__text_measurer__TextMeasurer__measure",
@@ -3335,8 +3335,8 @@
       "bfs_level": 0,
       "tier": "opus",
       "tier_reason": "heuristic",
-      "status": "not_started",
-      "snippet_path": null,
+      "status": "converted",
+      "snippet_path": "/Users/ceres/Desktop/SignalCanvas/oxidant/snippets/utils/modules__renderer_common__src__utils__deepEqual.rs",
       "attempt_count": 0,
       "last_error": null
     },
@@ -3548,10 +3548,10 @@
       "bfs_level": 0,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "    Checking msagl-rs v0.1.0 (/Users/ceres/Desktop/SignalCanvas/oxidant/corpora/msagl-rs)\nsrc/basic_graph_on_edges_spec.rs:7:12: warning: type `myedge` should have an upper camel case name: help: convert the identifier to upper camel case: `Myedge`\nsrc/basic_graph_spec.rs:7:12: warning: type `myedge` should have an upper camel case name: help: convert the identifier to upper camel case: `Myedge`\nsrc/event_source.rs:33:34: error[E0609]: no field `_listeners` on type `&mut EventSource`: unknown field\nsrc/event_source.rs:33:73: error[E0282]: type annotations needed\nsrc/event_source.rs:34:25: error[E0609]: no field `_once_listeners` on type `&mut EventSource`: unknown field\nsrc/event_source.rs:34:69: error[E0282]: type annotations needed\nwarning: `msagl-rs` (lib) generated 2 warnings\nerror: could not compile `msagl-rs` (lib) due to 4 previous errors; 2 warnings emitted\n"
     },
     "modules__renderer_svg__src__event_source__addEventListener": {
       "node_id": "modules__renderer_svg__src__event_source__addEventListener",
@@ -3581,8 +3581,8 @@
       "bfs_level": 0,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
-      "snippet_path": null,
+      "status": "converted",
+      "snippet_path": "/Users/ceres/Desktop/SignalCanvas/oxidant/snippets/event_source/modules__renderer_svg__src__event_source__addEventListener.rs",
       "attempt_count": 0,
       "last_error": null
     },
@@ -3614,8 +3614,8 @@
       "bfs_level": 0,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
-      "snippet_path": null,
+      "status": "converted",
+      "snippet_path": "/Users/ceres/Desktop/SignalCanvas/oxidant/snippets/event_source/modules__renderer_svg__src__event_source__removeEventListener.rs",
       "attempt_count": 0,
       "last_error": null
     },
@@ -3758,10 +3758,10 @@
       "bfs_level": 0,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "    Checking msagl-rs v0.1.0 (/Users/ceres/Desktop/SignalCanvas/oxidant/corpora/msagl-rs)\nsrc/basic_graph_on_edges_spec.rs:7:12: warning: type `myedge` should have an upper camel case name: help: convert the identifier to upper camel case: `Myedge`\nsrc/basic_graph_spec.rs:7:12: warning: type `myedge` should have an upper camel case name: help: convert the identifier to upper camel case: `Myedge`\nsrc/renderer_svg.rs:17:14: error[E0609]: no field `key_down_listener` on type `&mut RendererSvg`: unknown field\nwarning: `msagl-rs` (lib) generated 2 warnings\nerror: could not compile `msagl-rs` (lib) due to 1 previous error; 2 warnings emitted\n"
     },
     "modules__renderer_svg__src__rendererSvg__RendererSvg__entitiesIter": {
       "node_id": "modules__renderer_svg__src__rendererSvg__RendererSvg__entitiesIter",
@@ -3812,10 +3812,10 @@
       "bfs_level": 0,
       "tier": "haiku",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "    Checking msagl-rs v0.1.0 (/Users/ceres/Desktop/SignalCanvas/oxidant/corpora/msagl-rs)\nsrc/renderer_svg.rs:25:17: error: prefix `can` is unknown: unknown prefix\nsrc/renderer_svg.rs:25:49: error: prefix `I` is unknown: unknown prefix\nsrc/renderer_svg.rs:25:118: error: unknown start of token: `\nsrc/renderer_svg.rs:25:142: error: unknown start of token: `\nsrc/renderer_svg.rs:25:151: error: unknown start of token: `\nsrc/renderer_svg.rs:25:163: error: unknown start of token: `\nsrc/renderer_svg.rs:25:15: error: expected one of `!`, `.`, `::`, `;`, `?`, `{`, `}`, or an operator, found `I`: expected one of 8 possible tokens\nsrc/basic_graph_on_edges_spec.rs:7:12: warning: type `myedge` should have an upper camel case name: help: convert the identifier to upper camel case: `Myedge`\nsrc/basic_graph_spec.rs:7:12: warning: type `myedge` should have an upper camel case name: help: convert the identifier to upper camel case: `Myedge`\nwarning: `msagl-rs` (lib) generated 2 warnings\nerror: could not compile `msagl-rs` (lib) due to 7 previous errors; 2 warnings emitted\n"
     },
     "modules__renderer_svg__src__rendererSvg__RendererSvg__getHitSlack": {
       "node_id": "modules__renderer_svg__src__rendererSvg__RendererSvg__getHitSlack",
@@ -3838,10 +3838,10 @@
       "bfs_level": 0,
       "tier": "haiku",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "    Checking msagl-rs v0.1.0 (/Users/ceres/Desktop/SignalCanvas/oxidant/corpora/msagl-rs)\nsrc/basic_graph_on_edges_spec.rs:7:12: warning: type `myedge` should have an upper camel case name: help: convert the identifier to upper camel case: `Myedge`\nsrc/basic_graph_spec.rs:7:12: warning: type `myedge` should have an upper camel case name: help: convert the identifier to upper camel case: `Myedge`\nsrc/renderer_svg.rs:29:24: error[E0609]: no field `dpi` on type `&mut RendererSvg`: unknown field\nsrc/renderer_svg.rs:30:38: error[E0609]: no field `mouse_hit_distance` on type `&mut RendererSvg`: unknown field\nsrc/renderer_svg.rs:31:28: error[E0609]: no field `current_scale` on type `&mut RendererSvg`: unknown field\nwarning: `msagl-rs` (lib) generated 2 warnings\nerror: could not compile `msagl-rs` (lib) due to 3 previous errors; 2 warnings emitted\n"
     },
     "modules__renderer_svg__src__rendererSvg__RendererSvg__getSvgString": {
       "node_id": "modules__renderer_svg__src__rendererSvg__RendererSvg__getSvgString",
@@ -3890,10 +3890,10 @@
       "bfs_level": 0,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "    Checking msagl-rs v0.1.0 (/Users/ceres/Desktop/SignalCanvas/oxidant/corpora/msagl-rs)\nsrc/renderer_svg.rs:41:18: error[E0425]: cannot find function `graph_to_json` in this scope: not found in this scope\nsrc/basic_graph_on_edges_spec.rs:7:12: warning: type `myedge` should have an upper camel case name: help: convert the identifier to upper camel case: `Myedge`\nsrc/basic_graph_spec.rs:7:12: warning: type `myedge` should have an upper camel case name: help: convert the identifier to upper camel case: `Myedge`\nsrc/renderer_svg.rs:37:17: error[E0609]: no field `graph` on type `&mut RendererSvg`: unknown field\nsrc/renderer_svg.rs:40:18: error[E0609]: no field `graph` on type `&mut RendererSvg`: unknown field\nwarning: `msagl-rs` (lib) generated 2 warnings\nerror: could not compile `msagl-rs` (lib) due to 3 previous errors; 2 warnings emitted\n"
     },
     "modules__renderer_svg__src__rendererSvg__RendererSvg__processMouseMove": {
       "node_id": "modules__renderer_svg__src__rendererSvg__RendererSvg__processMouseMove",
@@ -4383,8 +4383,8 @@
       "bfs_level": 0,
       "tier": "haiku",
       "tier_reason": "heuristic",
-      "status": "not_started",
-      "snippet_path": null,
+      "status": "converted",
+      "snippet_path": "/Users/ceres/Desktop/SignalCanvas/oxidant/snippets/renderer_svg/modules__renderer_svg__src__rendererSvg__RendererSvg__invalidateAll.rs",
       "attempt_count": 0,
       "last_error": null
     },
@@ -4412,9 +4412,9 @@
       "bfs_level": 0,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
-      "snippet_path": null,
-      "attempt_count": 0,
+      "status": "converted",
+      "snippet_path": "/Users/ceres/Desktop/SignalCanvas/oxidant/snippets/renderer_svg/modules__renderer_svg__src__rendererSvg__RendererSvg__PopupMenus.rs",
+      "attempt_count": 1,
       "last_error": null
     },
     "modules__renderer_svg__src__rendererSvg__RendererSvg__addEdge": {
@@ -4740,8 +4740,8 @@
       "bfs_level": 0,
       "tier": "haiku",
       "tier_reason": "heuristic",
-      "status": "not_started",
-      "snippet_path": null,
+      "status": "converted",
+      "snippet_path": "/Users/ceres/Desktop/SignalCanvas/oxidant/snippets/renderer_svg/modules__renderer_svg__src__rendererSvg__RendererSvg__RemoveSourcePortEdgeRouting.rs",
       "attempt_count": 0,
       "last_error": null
     },
@@ -4764,9 +4764,9 @@
       "bfs_level": 0,
       "tier": "haiku",
       "tier_reason": "heuristic",
-      "status": "not_started",
-      "snippet_path": null,
-      "attempt_count": 0,
+      "status": "converted",
+      "snippet_path": "/Users/ceres/Desktop/SignalCanvas/oxidant/snippets/renderer_svg/modules__renderer_svg__src__rendererSvg__RendererSvg__RemoveTargetPortEdgeRouting.rs",
+      "attempt_count": 1,
       "last_error": null
     },
     "modules__renderer_svg__src__rendererSvg__RendererSvg__drawRubberEdge": {
@@ -5257,10 +5257,10 @@
       "bfs_level": 0,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "    Checking msagl-rs v0.1.0 (/Users/ceres/Desktop/SignalCanvas/oxidant/corpora/msagl-rs)\nsrc/basic_graph_on_edges_spec.rs:7:12: warning: type `myedge` should have an upper camel case name: help: convert the identifier to upper camel case: `Myedge`\nsrc/basic_graph_spec.rs:7:12: warning: type `myedge` should have an upper camel case name: help: convert the identifier to upper camel case: `Myedge`\nsrc/svg_creator.rs:66:5: error[E0560]: struct `SvgCreator` has no field named `container`: `SvgCreator` does not have this field\nwarning: `msagl-rs` (lib) generated 2 warnings\nerror: could not compile `msagl-rs` (lib) due to 1 previous error; 2 warnings emitted\n"
     },
     "modules__renderer_svg__src__svgCreator__SvgCreator__getShowRect": {
       "node_id": "modules__renderer_svg__src__svgCreator__SvgCreator__getShowRect",
@@ -5284,10 +5284,10 @@
       "bfs_level": 0,
       "tier": "haiku",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "    Checking msagl-rs v0.1.0 (/Users/ceres/Desktop/SignalCanvas/oxidant/corpora/msagl-rs)\nsrc/svg_creator.rs:69:167: error: unknown start of token: \\u{2014}\nsrc/svg_creator.rs:69:169: error: prefix `I` is unknown: unknown prefix\nsrc/svg_creator.rs:71:1: error: unknown start of token: `\nsrc/svg_creator.rs:79:1: error: unknown start of token: `\nsrc/svg_creator.rs:69:15: error: expected one of `!`, `.`, `::`, `;`, `?`, `{`, `}`, or an operator, found `on`: expected one of 8 possible tokens\nsrc/basic_graph_on_edges_spec.rs:7:12: warning: type `myedge` should have an upper camel case name: help: convert the identifier to upper camel case: `Myedge`\nsrc/basic_graph_spec.rs:7:12: warning: type `myedge` should have an upper camel case name: help: convert the identifier to upper camel case: `Myedge`\nwarning: `msagl-rs` (lib) generated 2 warnings\nerror: could not compile `msagl-rs` (lib) due to 5 previous errors; 2 warnings emitted\n"
     },
     "modules__renderer_svg__src__svgCreator__SvgCreator__removeRubberEdge": {
       "node_id": "modules__renderer_svg__src__svgCreator__SvgCreator__removeRubberEdge",
@@ -5313,10 +5313,10 @@
       "bfs_level": 0,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "    Checking msagl-rs v0.1.0 (/Users/ceres/Desktop/SignalCanvas/oxidant/corpora/msagl-rs)\nsrc/svg_creator.rs:73:27: error: unknown start of token: `\nsrc/svg_creator.rs:73:39: error: unknown start of token: `\nsrc/svg_creator.rs:73:47: error: unknown start of token: \\u{2014}\nsrc/svg_creator.rs:73:54: error: unknown start of token: `\nsrc/svg_creator.rs:73:67: error: unknown start of token: `\nsrc/svg_creator.rs:73:13: error: expected one of `!`, `.`, `::`, `;`, `?`, `{`, `}`, or an operator, found keyword `struct`: expected one of 8 possible tokens\nsrc/basic_graph_on_edges_spec.rs:7:12: warning: type `myedge` should have an upper camel case name: help: convert the identifier to upper camel case: `Myedge`\nsrc/basic_graph_spec.rs:7:12: warning: type `myedge` should have an upper camel case name: help: convert the identifier to upper camel case: `Myedge`\nwarning: `msagl-rs` (lib) generated 2 warnings\nerror: could not compile `msagl-rs` (lib) due to 6 previous errors; 2 warnings emitted\n"
     },
     "modules__renderer_svg__src__svgCreator__SvgCreator__drawRubberEdge": {
       "node_id": "modules__renderer_svg__src__svgCreator__SvgCreator__drawRubberEdge",
@@ -5478,9 +5478,9 @@
       "bfs_level": 0,
       "tier": "haiku",
       "tier_reason": "heuristic",
-      "status": "not_started",
-      "snippet_path": null,
-      "attempt_count": 0,
+      "status": "converted",
+      "snippet_path": "/Users/ceres/Desktop/SignalCanvas/oxidant/snippets/svg_creator/modules__renderer_svg__src__svgCreator__SvgCreator__stopNodeInsertion.rs",
+      "attempt_count": 2,
       "last_error": null
     },
     "modules__renderer_svg__src__svgCreator__SvgCreator__stopEdgeInsertion": {
@@ -5504,10 +5504,10 @@
       "bfs_level": 0,
       "tier": "haiku",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "    Checking msagl-rs v0.1.0 (/Users/ceres/Desktop/SignalCanvas/oxidant/corpora/msagl-rs)\nsrc/svg_creator.rs:97:29: error: unknown start of token: `\nsrc/svg_creator.rs:97:46: error: unknown start of token: `\nsrc/svg_creator.rs:97:48: error: unknown start of token: \\u{2014}\nsrc/svg_creator.rs:97:53: error: unknown start of token: `\nsrc/svg_creator.rs:97:78: error: unknown start of token: `\nsrc/svg_creator.rs:99:40: error: prefix `doesn` is unknown: unknown prefix\nsrc/svg_creator.rs:97:13: error: expected one of `!`, `.`, `::`, `;`, `?`, `{`, `}`, or an operator, found keyword `struct`: expected one of 8 possible tokens\nsrc/basic_graph_on_edges_spec.rs:7:12: warning: type `myedge` should have an upper camel case name: help: convert the identifier to upper camel case: `Myedge`\nsrc/basic_graph_spec.rs:7:12: warning: type `myedge` should have an upper camel case name: help: convert the identifier to upper camel case: `Myedge`\nsrc/svg_creator.rs:115:13: error[E0609]: no field `svg` on type `&mut SvgCreator`: unknown field\nsrc/svg_creator.rs:118:10: error[E0609]: no field `svg` on type `&mut SvgCreator`: unknown field\nwarning: `msagl-rs` (lib) generated 2 warnings\nerror: could not compile `msagl-rs` (lib) due to 9 previous errors; 2 warnings emitted\n"
     },
     "modules__renderer_svg__src__svgCreator__SvgCreator__prepareToNodeInsertion": {
       "node_id": "modules__renderer_svg__src__svgCreator__SvgCreator__prepareToNodeInsertion",
@@ -5603,10 +5603,10 @@
       "bfs_level": 0,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "todo! marker not found for modules__renderer_svg__src__svgCreator__SvgCreator__getSvgString in svg_creator.rs"
     },
     "modules__renderer_svg__src__svgCreator__SvgCreator__clearContainer": {
       "node_id": "modules__renderer_svg__src__svgCreator__SvgCreator__clearContainer",
@@ -7310,10 +7310,10 @@
       "bfs_level": 0,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "    Checking msagl-rs v0.1.0 (/Users/ceres/Desktop/SignalCanvas/oxidant/corpora/msagl-rs)\nsrc/basic_graph_on_edges_spec.rs:7:12: warning: type `myedge` should have an upper camel case name: help: convert the identifier to upper camel case: `Myedge`\nsrc/basic_graph_spec.rs:7:12: warning: type `myedge` should have an upper camel case name: help: convert the identifier to upper camel case: `Myedge`\nsrc/svg_creator.rs:111:13: error[E0609]: no field `svg` on type `&mut SvgCreator`: unknown field\nsrc/svg_creator.rs:114:10: error[E0609]: no field `svg` on type `&mut SvgCreator`: unknown field\nwarning: `msagl-rs` (lib) generated 2 warnings\nerror: could not compile `msagl-rs` (lib) due to 2 previous errors; 2 warnings emitted\n"
     },
     "modules__renderer_webgl__src__event_source__removeEventListener": {
       "node_id": "modules__renderer_webgl__src__event_source__removeEventListener",
@@ -7343,10 +7343,10 @@
       "bfs_level": 0,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "    Checking msagl-rs v0.1.0 (/Users/ceres/Desktop/SignalCanvas/oxidant/corpora/msagl-rs)\nsrc/basic_graph_on_edges_spec.rs:7:12: warning: type `myedge` should have an upper camel case name: help: convert the identifier to upper camel case: `Myedge`\nsrc/basic_graph_spec.rs:7:12: warning: type `myedge` should have an upper camel case name: help: convert the identifier to upper camel case: `Myedge`\nsrc/svg_creator.rs:111:13: error[E0609]: no field `svg` on type `&mut SvgCreator`: unknown field\nsrc/svg_creator.rs:114:10: error[E0609]: no field `svg` on type `&mut SvgCreator`: unknown field\nwarning: `msagl-rs` (lib) generated 2 warnings\nerror: could not compile `msagl-rs` (lib) due to 2 previous errors; 2 warnings emitted\n"
     },
     "modules__renderer_webgl__src__event_source__Event": {
       "node_id": "modules__renderer_webgl__src__event_source__Event",
@@ -7532,10 +7532,10 @@
       "bfs_level": 0,
       "tier": "sonnet",
       "tier_reason": "heuristic",
-      "status": "not_started",
+      "status": "human_review",
       "snippet_path": null,
-      "attempt_count": 0,
-      "last_error": null
+      "attempt_count": 4,
+      "last_error": "    Checking msagl-rs v0.1.0 (/Users/ceres/Desktop/SignalCanvas/oxidant/corpora/msagl-rs)\nsrc/renderer.rs:29:79: error: unknown start of token: `\nsrc/renderer.rs:29:88: error: unknown start of token: `\nsrc/renderer.rs:29:127: error: unknown start of token: `\nsrc/renderer.rs:29:138: error: unknown start of token: `\nsrc/renderer.rs:29:162: error: unknown start of token: `\nsrc/renderer.rs:29:179: error: unknown start of token: `\nsrc/renderer.rs:29:206: error: unknown start of token: `\nsrc/renderer.rs:29:216: error: unknown start of token: `\nsrc/renderer.rs:31:87: error: unknown start of token: `\nsrc/renderer.rs:31:96: error: unknown start of token: `\nsrc/renderer.rs:29:13: error: expected one of `!`, `.`, `::`, `;`, `?`, `{`, `}`, or an operator, found `svg_creator`: expected one of 8 possible tokens\nsrc/basic_graph_on_edges_spec.rs:7:12: warning: type `myedge` should have an upper camel case name: help: convert the identifier to upper camel case: `Myedge`\nsrc/basic_graph_spec.rs:7:12: warning: type `myedge` should have an upper camel case name: help: convert the identifier to upper camel case: `Myedge`\nsrc/svg_creator.rs:111:13: error[E0609]: no field `svg` on type `&mut SvgCreator`: unknown field\nsrc/svg_creator.rs:114:10: error[E0609]: no field `svg` on type `&mut SvgCreator`: unknown field\nwarning: `msagl-rs` (lib) generated 2 warnings\nerror: could not compile `msagl-rs` (lib) due to 13 previous errors; 2 warnings emitted\n"
     },
     "modules__renderer_webgl__src__renderer__Renderer__setGraph": {
       "node_id": "modules__renderer_webgl__src__renderer__Renderer__setGraph",
@@ -7810,8 +7810,8 @@
       "bfs_level": 0,
       "tier": "haiku",
       "tier_reason": "heuristic",
-      "status": "not_started",
-      "snippet_path": null,
+      "status": "converted",
+      "snippet_path": "/Users/ceres/Desktop/SignalCanvas/oxidant/snippets/renderer/modules__renderer_webgl__src__renderer__noop.rs",
       "attempt_count": 0,
       "last_error": null
     },
