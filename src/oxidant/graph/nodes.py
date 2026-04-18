@@ -23,7 +23,11 @@ _DEFAULT_MAX_ATTEMPTS = 3
 
 
 def pick_next_node(state: OxidantState) -> dict:
-    """Select the lowest-topological-order eligible node, or signal done."""
+    """Select the lowest-topological-order eligible node, or signal done.
+
+    Also resets any nodes stuck at IN_PROGRESS (from a previous crashed run)
+    back to NOT_STARTED so they are picked up again automatically.
+    """
     max_nodes = state.get("max_nodes")
     nodes_this_run = state.get("nodes_this_run", 0)
     if max_nodes is not None and nodes_this_run >= max_nodes:
@@ -31,6 +35,19 @@ def pick_next_node(state: OxidantState) -> dict:
         return {"current_node_id": None, "done": True}
 
     manifest = Manifest.load(Path(state["manifest_path"]))
+
+    # Auto-recover from crashed runs: reset orphaned IN_PROGRESS nodes
+    stuck = [
+        nid for nid, n in manifest.nodes.items()
+        if n.status == NodeStatus.IN_PROGRESS
+        and nid != state.get("current_node_id")  # not the one we're actively processing
+    ]
+    if stuck:
+        logger.warning("Resetting %d orphaned in_progress nodes: %s", len(stuck), stuck[:3])
+        for nid in stuck:
+            manifest.update_node(Path(state["manifest_path"]), nid, status=NodeStatus.NOT_STARTED)
+        manifest = Manifest.load(Path(state["manifest_path"]))
+
     eligible = manifest.eligible_nodes()
 
     if not eligible:
