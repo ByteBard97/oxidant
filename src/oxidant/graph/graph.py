@@ -65,6 +65,7 @@ def build_graph(checkpointer=None) -> object:
             "retry": "retry_node",
             "escalate": "escalate_node",
             "supervisor": "supervisor_node",
+            "queue_for_review": "queue_for_review",
         },
     )
     graph.add_edge("retry_node", "build_context")

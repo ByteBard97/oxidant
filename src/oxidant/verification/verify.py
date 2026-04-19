@@ -16,9 +16,10 @@ from pathlib import Path
 
 class VerifyStatus(str, Enum):
     PASS = "PASS"
-    STUB = "STUB"        # todo!/unimplemented! found in snippet
-    BRANCH = "BRANCH"    # branch parity check failed
-    CARGO = "CARGO"      # cargo check compilation failed
+    STUB = "STUB"           # todo!/unimplemented! found in snippet
+    BRANCH = "BRANCH"       # branch parity check failed
+    CARGO = "CARGO"         # cargo check compilation failed in target file
+    CASCADE = "CASCADE"     # cargo check failed in a *different* file (not the target)
 
 
 @dataclass
@@ -59,17 +60,57 @@ def _module_name(source_file: str) -> str:
     return _gen_module_name(source_file)
 
 
+def _is_cascade_failure(error_text: str, target_rs_filename: str) -> bool:
+    """Return True if the cargo check error is entirely in files OTHER than target.
+
+    Cargo's --message-format=short error lines look like:
+        src/foo.rs:12:5: error[E0308]: mismatched types
+    If every error line implicates a file that is NOT our target, the failure
+    is a cascade from a previously-converted snippet, not from our injection.
+    """
+    error_lines = [
+        line for line in error_text.splitlines()
+        if ": error" in line and line.strip().startswith("src/")
+    ]
+    if not error_lines:
+        return False
+    return all(target_rs_filename not in line for line in error_lines)
+
+
+def _smoke_check_skeleton(target_path: Path) -> bool:
+    """Run cargo check on the bare skeleton to confirm cleanup was clean."""
+    try:
+        proc = subprocess.run(
+            ["cargo", "check", "--message-format=short"],
+            cwd=target_path,
+            capture_output=True,
+            text=True,
+            timeout=_CARGO_TIMEOUT_SECONDS,
+        )
+        return proc.returncode == 0
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+
+
 def _inject_and_check_cargo(
     node_id: str,
     snippet: str,
     target_path: Path,
     source_file: str,
 ) -> VerifyResult | None:
-    """Inject snippet into skeleton, run cargo check, always restore original."""
+    """Inject snippet into skeleton, run cargo check, always restore original.
+
+    Returns:
+        None if cargo check passes (snippet is good).
+        VerifyResult(CARGO) if the error is in the target file (snippet is bad).
+        VerifyResult(CASCADE) if the error is in a different file (inconclusive —
+            a prior snippet is broken; this snippet should be retried later).
+    """
     module = _module_name(source_file)
     rs_path = target_path / "src" / f"{module}.rs"
+    rs_filename = f"src/{module}.rs"
 
-    marker = f'todo!("OXIDANT: not yet translated — {node_id}")'
+    marker = f'todo!("OXIDANT: not yet translated \u2014 {node_id}")'
     original_content = rs_path.read_text()
 
     if marker not in original_content:
@@ -79,6 +120,7 @@ def _inject_and_check_cargo(
         )
 
     rs_path.write_text(original_content.replace(marker, snippet, 1))
+    cargo_failed = False
     try:
         proc = subprocess.run(
             ["cargo", "check", "--message-format=short"],
@@ -89,12 +131,23 @@ def _inject_and_check_cargo(
         )
         if proc.returncode == 0:
             return None
+        cargo_failed = True
         error_text = proc.stderr[:2000] or proc.stdout[:2000]
+        if _is_cascade_failure(error_text, rs_filename):
+            return VerifyResult(VerifyStatus.CASCADE, error_text)
         return VerifyResult(VerifyStatus.CARGO, error_text)
     except (OSError, subprocess.TimeoutExpired) as exc:
+        cargo_failed = True
         return VerifyResult(VerifyStatus.CARGO, str(exc))
     finally:
         rs_path.write_text(original_content)
+        # Smoke-check restore only when cargo failed — confirms cleanup was clean
+        if cargo_failed and not _smoke_check_skeleton(target_path):
+            import logging
+            logging.getLogger(__name__).error(
+                "RESTORE FAILED: skeleton no longer compiles after restoring %s — "
+                "manual intervention required", rs_path
+            )
 
 
 def verify_snippet(

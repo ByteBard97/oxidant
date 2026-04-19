@@ -191,6 +191,13 @@ def import_manifest(
                 updated += 1
         session.commit()
 
+    # Force WAL checkpoint so all rows are in the main DB file immediately.
+    # Without this, data lives only in the WAL — a killed process zeroes the WAL
+    # and everything is lost on next open.
+    import sqlite3 as _sqlite3
+    with _sqlite3.connect(str(db.resolve())) as _con:
+        _con.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+
     typer.echo(f"Done. {db}: {inserted} inserted, {updated} updated ({len(nodes_raw)} total).")
 
 
@@ -222,12 +229,21 @@ def phase_b(
     from oxidant.graph.state import OxidantState
     from oxidant.models.manifest import Manifest as _Manifest
 
+    # Always use absolute path — subprocess cwd changes must never create a rogue DB
+    db = db.resolve()
+
     if not db.exists():
         typer.echo(
             f"Error: {db} not found. Run `oxidant import-manifest conversion_manifest.json` first.",
             err=True,
         )
         raise typer.Exit(1)
+
+    # Safety: backup DB before starting a run so we can recover from wipes
+    import shutil as _shutil
+    backup = db.with_suffix(".db.bak")
+    _shutil.copy2(str(db), str(backup))
+    typer.echo(f"DB backed up to {backup}")
 
     cfg = _json.loads(config.read_text())
     manifest_obj = _Manifest.load(db)

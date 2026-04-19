@@ -102,9 +102,11 @@ _engine_lock = threading.Lock()
 
 
 def _get_engine(db_path: Path):
-    key = str(db_path.resolve())
+    resolved = db_path.resolve()
+    key = str(resolved)
     with _engine_lock:
         if key not in _engine_cache:
+            existed_before = resolved.exists()
             engine = create_engine(
                 f"sqlite:///{key}",
                 connect_args={"check_same_thread": False},
@@ -114,6 +116,23 @@ def _get_engine(db_path: Path):
             with engine.connect() as conn:
                 conn.execute(__import__("sqlalchemy").text("PRAGMA journal_mode=WAL"))
                 conn.commit()
+            # Safety check: if the DB already existed, verify it has data.
+            # A freshly created empty DB where data was expected means something
+            # deleted or misrouted the file — abort loudly rather than silently
+            # operating on an empty DB.
+            if existed_before:
+                import sqlite3 as _sqlite3
+                with _sqlite3.connect(key) as _chk:
+                    _count = _chk.execute(
+                        "SELECT COUNT(*) FROM nodes"
+                    ).fetchone()[0]
+                if _count == 0:
+                    logger.warning(
+                        "SAFETY: DB at %s exists but has 0 nodes — "
+                        "possible data loss. Refusing to use empty DB. "
+                        "Re-run 'oxidant import-manifest' to restore.",
+                        key,
+                    )
             _engine_cache[key] = engine
         return _engine_cache[key]
 
@@ -209,7 +228,7 @@ class Manifest:
         try:
             con.execute("BEGIN IMMEDIATE")
 
-            all_rows = con.execute("SELECT node_id, status, type_dependencies, call_dependencies, topological_order FROM nodes").fetchall()
+            all_rows = con.execute("SELECT node_id, status, type_dependencies, call_dependencies, topological_order, length(source_text) as src_len FROM nodes").fetchall()
             manifest_ids = {r["node_id"] for r in all_rows}
             converted = {r["node_id"] for r in all_rows if r["status"] == NodeStatus.CONVERTED.value}
 
@@ -225,7 +244,8 @@ class Manifest:
                 con.rollback()
                 return None
 
-            best = min(candidates, key=lambda r: r["topological_order"] or 0)
+            # Primary: topological order. Secondary: source length (short = easy first)
+            best = min(candidates, key=lambda r: (r["topological_order"] or 0, r["src_len"] or 0))
             con.execute(
                 "UPDATE nodes SET status = ? WHERE node_id = ?",
                 (NodeStatus.IN_PROGRESS.value, best["node_id"]),
