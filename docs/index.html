@@ -256,6 +256,7 @@
       <a href="#pipeline">Pipeline</a>
       <a href="#manifest">Manifest</a>
       <a href="#phase-b">Translation Loop</a>
+      <a href="#hierarchy">Class Hierarchies</a>
       <a href="#idioms">Idiom Detection</a>
       <a href="#verification">Verification</a>
       <a href="https://github.com/ByteBard97/oxidant">GitHub</a>
@@ -436,6 +437,142 @@
       Every struct has its fields. Every function has a <code>todo!("OXIDANT: not yet translated — {node_id}")</code>
       body. The skeleton must pass <code>cargo build</code> before Phase B begins.
       The count of remaining <code>todo!()</code> macros is the primary progress metric.
+    </p>
+  </section>
+
+  <!-- ── Class hierarchy handling ── -->
+  <section id="hierarchy">
+    <h2>Class hierarchy handling</h2>
+    <p>
+      msagl-js has <strong>101 classes that use <code>extends</code></strong>, forming 22 distinct
+      parent-child hierarchies. The skeleton generator classifies each hierarchy before emitting
+      any Rust, because the correct Rust representation depends on <em>why</em> the hierarchy
+      exists — not just that it exists.
+    </p>
+    <p>
+      Classification is hardcoded in <code>KNOWN_HIERARCHIES</code> inside <code>analysis/hierarchy.py</code>,
+      validated against a manual Rust port of msagl-js at <code>Routers/msagl-rust</code>.
+      It is <strong>not</strong> a heuristic — every hierarchy was checked by hand.
+    </p>
+
+    <h3>Category A — Discriminated unions → <code>pub enum</code></h3>
+    <p>
+      These hierarchies have subclasses that add 0–3 unique fields each. TypeScript code
+      dispatches on them using <code>instanceof</code> checks. In Rust, these <strong>must</strong>
+      be enums — a flat struct has no runtime discriminant to match on.
+    </p>
+    <p>
+      <strong>Classified as enum:</strong>
+      <code>SweepEvent</code>, <code>VertexEvent</code>, <code>BasicVertexEvent</code>,
+      <code>BasicReflectionEvent</code>, <code>Layer</code>, <code>OptimalPacking</code>
+    </p>
+    <p>
+      The skeleton emits a single <code>pub enum</code> in the base class's <code>.rs</code> file.
+      Each child class's fields become named fields of a variant. Child class <code>.rs</code>
+      files emit no struct — they are folded into the parent enum.
+    </p>
+    <div class="two-col">
+      <div>
+        <h3>TypeScript (11 separate classes)</h3>
+        <pre><code>class SweepEvent { }
+class AxisCoordinateEvent extends SweepEvent {
+  site: Point;
+}
+class ConeClosureEvent extends SweepEvent {
+  coneToCLose: Cone;
+  site: Point;
+}
+class VertexEvent extends SweepEvent { }
+class OpenVertexEvent extends VertexEvent {
+  vertex: PolylinePoint;
+}</code></pre>
+      </div>
+      <div>
+        <h3>Rust skeleton (one enum)</h3>
+        <pre><code>pub enum SweepEvent {
+    AxisCoordinateEvent {
+        site: Rc&lt;RefCell&lt;crate::point::Point&gt;&gt;,
+    },
+    ConeClosureEvent {
+        cone_to_close: Rc&lt;RefCell&lt;crate::cone::Cone&gt;&gt;,
+        site: Rc&lt;RefCell&lt;crate::point::Point&gt;&gt;,
+    },
+    VertexEvent(crate::vertex_event::VertexEvent),
+    // ...
+}</code></pre>
+      </div>
+    </div>
+    <p>
+      Sub-hierarchies that are themselves enum bases (e.g. <code>VertexEvent</code> is a child of
+      <code>SweepEvent</code> but also has its own children) are emitted as their own
+      <code>pub enum</code> in their module and referenced as a tuple variant from the parent enum.
+    </p>
+    <p>
+      When method signatures in other modules reference a now-folded child type (e.g.
+      <code>PortObstacleEvent</code>), a <strong>type redirect table</strong>
+      (<code>_enum_child_redirect</code>) maps that name to the parent enum type
+      (<code>crate::sweep_event::SweepEvent</code>) so cross-module method signatures
+      still compile.
+    </p>
+
+    <h3>Category B — Behavior hierarchies → struct composition</h3>
+    <p>
+      These hierarchies have subclasses that are large independent classes sharing a base.
+      Each subclass gets its own <code>pub struct</code> with <code>pub base: ParentType</code>
+      as the first field. When agents convert methods that call <code>super.method()</code>,
+      they write <code>self.base.method()</code>.
+    </p>
+    <p>
+      <strong>Classified as struct:</strong>
+      <code>Algorithm</code> (24 subclasses), <code>Attribute</code> (4),
+      <code>SegmentBase</code>, <code>LineSweeperBase</code>, <code>GeomObject</code>,
+      <code>BasicGraphOnEdges</code>, <code>Entity</code>, <code>Port</code>,
+      <code>DrawingObject</code>, <code>SvgViewerObject</code>, <code>ObstacleSide</code>,
+      <code>BasicObstacleSide</code>, <code>ConeSide</code>, <code>VisibilityEdge</code>,
+      <code>KdNode</code>, <code>Packing</code>
+    </p>
+    <div class="two-col">
+      <div>
+        <h3>TypeScript</h3>
+        <pre><code>class SplineRouter extends Algorithm {
+  continueOnOverlaps: boolean;
+  obstacleCalculator: ShapeObstacleCalculator;
+
+  run() {
+    super.run();
+    // ...
+  }
+}</code></pre>
+      </div>
+      <div>
+        <h3>Rust skeleton</h3>
+        <pre><code>pub struct SplineRouter {
+    // base field always first, cross-module path
+    pub base: crate::algorithm::Algorithm,
+    pub continue_on_overlaps: bool,
+    pub obstacle_calculator: Rc&lt;RefCell&lt;
+        crate::shape_obstacle_calculator
+        ::ShapeObstacleCalculator&gt;&gt;,
+}
+
+// agent writes: self.base.run();</code></pre>
+      </div>
+    </div>
+
+    <h3>External parents</h3>
+    <p>
+      If a class extends a type that is not in the manifest corpus (e.g. browser built-ins
+      like <code>EventSource</code>), the skeleton emits a comment rather than a field:
+    </p>
+    <pre><code>pub struct MyClass {
+    // NOTE: extends EventSource (external — not in corpus)
+    pub some_field: String,
+}</code></pre>
+    <p>
+      Why this matters: agents have no memory between invocations. Without a hierarchy-aware
+      skeleton, every agent in a family like SweepEvent independently invents its own
+      representation — producing inconsistent, incompatible Rust. The scaffold locks in the
+      right structure before any agent touches the code.
     </p>
   </section>
 
