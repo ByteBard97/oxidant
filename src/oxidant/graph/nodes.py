@@ -150,13 +150,29 @@ def invoke_agent(state: OxidantState) -> dict:
     tier = state.get("current_tier") or TranslationTier.HAIKU.value
     model = state.get("config", {}).get("model_tiers", {}).get(tier)
 
-    # Worker N uses skeleton clone N for safe parallel cargo check
-    worker_id = state.get("worker_id", 0)
-    cwd = state["target_path"]
-    if worker_id > 0:
-        clone = Path(state["target_path"]) / f".clone_{worker_id}"
-        if clone.exists():
-            cwd = str(clone)
+    # Run the subprocess from the workspace root so the agent can read both
+    # the TypeScript corpus (corpora/msagljs) and the Rust skeleton (corpora/msagl-rs).
+    # The prompt tells the agent to cd to the skeleton dir for cargo check.
+    workspace = _db(state).parent
+    cwd = str(workspace)
+
+    attempt = state.get("attempt_count", 0)
+    prompt_log_dir = workspace / "_prompt_logs"
+    safe_node = node_id.replace("/", "_").replace(":", "_")
+    label = f"{safe_node}__{tier}_attempt{attempt}"
+
+    # Save the skeleton .rs file content before the agent runs.
+    # The agent edits the file directly (for cargo check), but the verify step
+    # needs the original file with the todo! marker so it can do its own injection.
+    # We restore the file after the agent call so verify always sees a clean slate.
+    from oxidant.analysis.generate_skeleton import _module_name
+    rs_backup: tuple[Path, str] | None = None
+    if node:
+        module = _module_name(node.source_file)
+        target = Path(state["target_path"])
+        rs_file = target / "src" / f"{module}.rs"
+        if rs_file.exists():
+            rs_backup = (rs_file, rs_file.read_text())
 
     try:
         response = invoke_claude(
@@ -164,11 +180,23 @@ def invoke_agent(state: OxidantState) -> dict:
             cwd=cwd,
             tier=tier,
             model=model,
+            prompt_log_dir=prompt_log_dir,
+            label=label,
         )
         return {"current_snippet": response, "last_error": None}
     except Exception as exc:  # noqa: BLE001
         logger.error("invoke_claude failed for %s: %s", node_id, exc)
+        err_log = prompt_log_dir / f"{safe_node}__{tier}_attempt{attempt}_error.txt"
+        try:
+            prompt_log_dir.mkdir(parents=True, exist_ok=True)
+            err_log.write_text(str(exc))
+        except Exception:  # noqa: BLE001
+            pass
         return {"current_snippet": None, "last_error": str(exc)}
+    finally:
+        # Always restore the skeleton file — agent may have edited it for cargo check
+        if rs_backup is not None:
+            rs_backup[0].write_text(rs_backup[1])
 
 
 def verify(state: OxidantState) -> dict:
@@ -204,11 +232,17 @@ def verify(state: OxidantState) -> dict:
     }
 
 
-def _escalate_tier(tier: str) -> str | None:
+def _escalate_tier(tier: str, config: dict | None = None) -> str | None:
+    """Return the next tier, or None if at the ceiling.
+
+    By default escalates haiku → sonnet only. Opus is never used automatically
+    — it must be explicitly enabled via config {"allow_opus": true}.
+    """
+    allow_opus = (config or {}).get("allow_opus", False)
     if tier == TranslationTier.HAIKU.value:
         return TranslationTier.SONNET.value
     if tier == TranslationTier.SONNET.value:
-        return TranslationTier.OPUS.value
+        return TranslationTier.OPUS.value if allow_opus else None
     return None
 
 
@@ -216,12 +250,33 @@ def route_after_verify(state: OxidantState) -> str:
     if state["verify_status"] == VerifyStatus.PASS:
         return "update_manifest"
 
+    # CASCADE means a different file in the project has a type error — this snippet
+    # is inconclusive, not necessarily wrong. Retry without counting against attempts.
+    if state["verify_status"] == VerifyStatus.CASCADE:
+        logger.warning(
+            "CASCADE failure for %s — unrelated file broken, retrying without penalty",
+            state.get("current_node_id"),
+        )
+        return "retry"
+
     tier = state.get("current_tier") or TranslationTier.HAIKU.value
     attempt = state.get("attempt_count", 0) + 1
-    max_attempts = _MAX_ATTEMPTS.get(tier, _DEFAULT_MAX_ATTEMPTS)
+    # config.max_attempts can be an int (cap all tiers) or dict (per-tier)
+    cfg_max = state.get("config", {}).get("max_attempts")
+    if isinstance(cfg_max, int):
+        max_attempts = cfg_max
+    elif isinstance(cfg_max, dict):
+        max_attempts = cfg_max.get(tier, _MAX_ATTEMPTS.get(tier, _DEFAULT_MAX_ATTEMPTS))
+    else:
+        max_attempts = _MAX_ATTEMPTS.get(tier, _DEFAULT_MAX_ATTEMPTS)
 
     if attempt >= max_attempts:
-        if _escalate_tier(tier) is None:
+        # no_escalate: skip escalation/supervisor and go straight to human_review
+        cfg = state.get("config", {})
+        no_escalate = cfg.get("no_escalate", False)
+        if no_escalate:
+            return "queue_for_review"
+        if _escalate_tier(tier, cfg) is None:
             return "supervisor"
         return "escalate"
     return "retry"
@@ -233,7 +288,8 @@ def retry_node(state: OxidantState) -> dict:
 
 def escalate_node(state: OxidantState) -> dict:
     tier = state.get("current_tier") or TranslationTier.HAIKU.value
-    next_tier = _escalate_tier(tier) or TranslationTier.OPUS.value
+    cfg = state.get("config", {})
+    next_tier = _escalate_tier(tier, cfg) or TranslationTier.SONNET.value
     logger.info("Escalating %s: %s → %s", state.get("current_node_id"), tier, next_tier)
     return {"current_tier": next_tier, "attempt_count": 0}
 

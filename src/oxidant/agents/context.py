@@ -11,38 +11,40 @@ from pathlib import Path
 from oxidant.models.manifest import ConversionNode, Manifest
 
 _PROMPT_TEMPLATE = """\
-You are translating a TypeScript function to Rust as part of converting the \
-msagl-js graph layout library.
+You are converting one TypeScript function to Rust as part of porting msagl-js.
 
-## Critical Rules
-- Output ONLY the Rust function body (the code between the outer braces). \
-No signatures, no markdown fences, no explanation.
+## Your job
+1. Read the TypeScript source file to understand the function and its context
+2. Read the Rust skeleton file to understand available types and fields
+3. Write the Rust function body and insert it into the skeleton using Edit
+4. Run cargo check to verify it compiles: use Bash with `cd {rs_skeleton_dir} && cargo check`
+5. Fix any errors and repeat until cargo check passes
+
+## Files
+- TypeScript source: {ts_source_path} (lines {line_start}--{line_end})
+- Rust skeleton: {rs_skeleton_path}
+- Cargo check directory: {rs_skeleton_dir}
+- Function to implement: `{node_id}`
+- The skeleton has a `todo!("OXIDANT: not yet translated \u2014 {node_id}")` marker \
+where your implementation goes
+
+## Rules
+- Implement ONLY the function body for `{node_id}` -- do not change anything else
+- OUTPUT PURE ASCII ONLY. No backticks, no em-dashes, no curly quotes, \
+no non-ASCII characters of any kind. They break compilation for every function in the file.
 - Do NOT use todo!(), unimplemented!(), or panic!()
-- Do NOT simplify, optimize, or restructure — translate semantically faithfully
-- Match every conditional branch in the TypeScript source exactly
+- Translate semantically faithfully -- match every branch in the TypeScript
 - Use only approved crates: {crates}
+- Do NOT simplify, optimize, or restructure
 
 ## Architectural Decisions
 {arch_decisions}
-
-## Node to Convert
-Kind: {node_kind}
-Node ID: {node_id}
-
-### TypeScript Source
-```typescript
-{source_text}
-```
-
-### Rust Function Signature (from skeleton — do not change)
-```rust
-{rust_signature}
-```
 {deps_section}\
 {idiom_section}\
 {supervisor_section}\
 {retry_section}\
-Respond with ONLY the Rust function body. No markdown, no explanation.\
+When cargo check passes, output the final function body text on its own \
+(no markdown fences, no explanation) so the orchestrator can record it.\
 """
 
 
@@ -166,13 +168,23 @@ def build_prompt(
             f"{supervisor_hint}\n"
         )
 
+    from oxidant.analysis.generate_skeleton import _module_name
+    module = _module_name(node.source_file)
+    # source_file is relative to the msagljs corpus root (e.g. "modules/drawing/src/color.ts")
+    source_repo = config.get("source_repo", "corpora/msagljs")
+    ts_source_path = (workspace / source_repo / node.source_file).resolve()
+    rs_skeleton_path = (target_path / "src" / f"{module}.rs").resolve()
+    rs_skeleton_dir = target_path.resolve()
+
     return _PROMPT_TEMPLATE.format(
         crates=crates,
         arch_decisions=arch_lines,
-        node_kind=node.node_kind.value,
         node_id=node.node_id,
-        source_text=node.source_text,
-        rust_signature=rust_sig,
+        ts_source_path=ts_source_path,
+        rs_skeleton_path=rs_skeleton_path,
+        rs_skeleton_dir=rs_skeleton_dir,
+        line_start=node.line_start,
+        line_end=node.line_end,
         deps_section=deps_section,
         idiom_section=idiom_section,
         supervisor_section=supervisor_section,
