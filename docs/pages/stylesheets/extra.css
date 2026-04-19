@@ -1,0 +1,584 @@
+/* ── Oxidant docs theme — matches the Vue app's HUD/terminal aesthetic ── */
+/* Design tokens from gui/tailwind.config.js + gui/src/main.css           */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ─────────────────────────────────────────────
+   Color overrides
+   ───────────────────────────────────────────── */
+[data-md-color-scheme="slate"] {
+  /* Backgrounds */
+  --md-default-bg-color:            #121416;
+  --md-default-bg-color--light:     #1a1c1e;
+  --md-default-bg-color--lighter:   #1e2022;
+  --md-default-bg-color--lightest:  #282a2c;
+
+  /* Text */
+  --md-default-fg-color:            #e2e2e5;
+  --md-default-fg-color--light:     #dfc0b7;
+  --md-default-fg-color--lighter:   #a68b82;
+  --md-default-fg-color--lightest:  #57423b;
+
+  /* Primary — amber/orange */
+  --md-primary-fg-color:            #ffb59d;
+  --md-primary-fg-color--light:     rgba(255, 181, 157, 0.12);
+  --md-primary-fg-color--dark:      #be4d25;
+  /* bg-color is used as icon/text color ON the primary surface — must be light */
+  --md-primary-bg-color:            #dfc0b7;
+  --md-primary-bg-color--light:     rgba(223, 192, 183, 0.45);
+
+  /* Accent — cyan/teal */
+  --md-accent-fg-color:             #94d2c7;
+  --md-accent-fg-color--transparent: rgba(148, 210, 199, 0.1);
+  --md-accent-bg-color:             #003731;
+
+  /* Code blocks */
+  --md-code-bg-color:               #0c0e10;
+  --md-code-fg-color:               #e2e2e5;
+
+  /* Links */
+  --md-typeset-a-color:             #94d2c7;
+
+  /* Footer */
+  --md-footer-bg-color:             #0c0e10;
+  --md-footer-bg-color--dark:       #0c0e10;
+  --md-footer-fg-color:             #a68b82;
+  --md-footer-fg-color--light:      #57423b;
+  --md-footer-fg-color--lighter:    #57423b;
+}
+
+/* ─────────────────────────────────────────────
+   No border radius — sharp corners everywhere
+   ───────────────────────────────────────────── */
+*, *::before, *::after {
+  border-radius: 0 !important;
+}
+
+/* ─────────────────────────────────────────────
+   Typography
+   ───────────────────────────────────────────── */
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* Headings — Space Grotesk, uppercase, wide tracking */
+.md-typeset h1,
+.md-typeset h2,
+.md-typeset h3,
+.md-typeset h4 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #e2e2e5;
+}
+
+.md-typeset h1 {
+  color: #ffb59d;
+  font-size: 1.6rem;
+  border-bottom: 1px dashed #57423b;
+  padding-bottom: 0.5rem;
+}
+
+.md-typeset h2 {
+  font-size: 1.1rem;
+  color: #e2e2e5;
+  border-bottom: 1px dashed #57423b;
+  padding-bottom: 0.3rem;
+  margin-top: 2rem;
+}
+
+.md-typeset h3 {
+  font-size: 0.85rem;
+  color: #94d2c7;
+  border-bottom: none;
+  margin-top: 1.5rem;
+}
+
+/* ─────────────────────────────────────────────
+   Header bar
+   ───────────────────────────────────────────── */
+.md-header {
+  background-color: #1a1c1e;
+  border-bottom: 1px dashed #57423b;
+  box-shadow: none;
+}
+
+.md-header__title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #ffb59d !important;
+}
+
+/* Header buttons (hamburger, search, repo link) */
+.md-header__button,
+.md-header__button.md-icon,
+.md-header [data-md-component="header-topic"] {
+  color: #a68b82 !important;
+}
+.md-header__button:hover,
+.md-header__button.md-icon:hover {
+  color: #ffb59d !important;
+}
+/* Repo stats (stars, forks) in header */
+.md-source__facts,
+.md-source__fact {
+  color: #a68b82 !important;
+}
+.md-source__repository {
+  color: #a68b82 !important;
+}
+
+/* Hide the colored primary bar that Material places behind the header */
+.md-header[data-md-state="shadow"] {
+  box-shadow: none;
+  border-bottom: 1px dashed #57423b;
+}
+
+/* ─────────────────────────────────────────────
+   Navigation tabs
+   ───────────────────────────────────────────── */
+.md-tabs {
+  background-color: #121416;
+  border-bottom: 1px dashed #57423b;
+}
+
+.md-tabs__link {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #a68b82 !important;
+  opacity: 1 !important;
+}
+
+.md-tabs__link:hover,
+.md-tabs__link--active {
+  color: #ffb59d !important;
+}
+
+.md-tabs__link--active::after {
+  background-color: #be4d25;
+}
+
+/* ─────────────────────────────────────────────
+   Sidebar / left nav
+   ───────────────────────────────────────────── */
+.md-sidebar {
+  background-color: #1a1c1e;
+  border-right: 1px dashed #57423b;
+}
+
+.md-nav__title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #57423b;
+  padding: 0.6rem 0.6rem 0.4rem;
+  background: transparent;
+  border-bottom: 1px dashed #57423b;
+}
+
+.md-nav__item .md-nav__link {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #a68b82;
+}
+
+.md-nav__item .md-nav__link:hover {
+  color: #e2e2e5;
+}
+
+.md-nav__item .md-nav__link--active {
+  color: #94d2c7;
+  border-left: 2px solid #be4d25;
+  padding-left: calc(0.6rem - 2px);
+}
+
+/* Section label in nested nav */
+.md-nav--secondary .md-nav__title {
+  color: #57423b;
+  font-size: 0.6rem;
+}
+
+/* ─────────────────────────────────────────────
+   Content area
+   ───────────────────────────────────────────── */
+.md-content {
+  background-color: #121416;
+}
+
+.md-main {
+  background-color: #121416;
+}
+
+/* Body text */
+.md-typeset {
+  color: #dfc0b7;
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+.md-typeset p {
+  color: #a68b82;
+}
+
+.md-typeset strong {
+  color: #e2e2e5;
+  font-weight: 600;
+}
+
+/* Links */
+.md-typeset a {
+  color: #94d2c7;
+  text-decoration: none;
+}
+
+.md-typeset a:hover {
+  color: #ffb59d;
+  text-decoration: underline;
+}
+
+/* ─────────────────────────────────────────────
+   Code blocks
+   ───────────────────────────────────────────── */
+.md-typeset code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8em;
+  background-color: #1a1c1e;
+  color: #94d2c7;
+  border: 1px dashed #57423b;
+  padding: 0.1em 0.4em;
+}
+
+.md-typeset pre {
+  background-color: #0c0e10;
+  border: 1px dashed #57423b;
+  border-left: 3px solid #be4d25;
+}
+
+.md-typeset pre code {
+  background: transparent;
+  border: none;
+  color: #e2e2e5;
+  padding: 0;
+}
+
+/* Copy button */
+.md-code__button {
+  color: #57423b;
+}
+
+.md-code__button:hover {
+  color: #94d2c7;
+}
+
+/* Highlight color for selected code */
+.md-typeset pre code .hll {
+  background-color: rgba(190, 77, 37, 0.15);
+}
+
+/* ─────────────────────────────────────────────
+   Tables
+   ───────────────────────────────────────────── */
+.md-typeset table:not([class]) {
+  border: 1px dashed #57423b;
+  font-size: 0.8rem;
+}
+
+.md-typeset table:not([class]) th {
+  background-color: #1a1c1e;
+  color: #e2e2e5;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-bottom: 1px dashed #57423b;
+}
+
+.md-typeset table:not([class]) td {
+  border-bottom: 1px dashed #2d2f31;
+  color: #a68b82;
+}
+
+.md-typeset table:not([class]) tr:hover td {
+  background-color: rgba(255, 181, 157, 0.04);
+}
+
+.md-typeset table:not([class]) td code {
+  background-color: #0c0e10;
+  color: #94d2c7;
+  border-color: #57423b;
+}
+
+/* ─────────────────────────────────────────────
+   Admonition blocks (notes, warnings, etc.)
+   ───────────────────────────────────────────── */
+.md-typeset .admonition,
+.md-typeset details {
+  background-color: #1a1c1e;
+  border: 1px dashed #57423b;
+  border-left: 3px solid #be4d25;
+  box-shadow: none;
+}
+
+.md-typeset .admonition-title,
+.md-typeset summary {
+  background-color: #1e2022;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #ffb59d;
+}
+
+.md-typeset .note > .admonition-title {
+  color: #94d2c7;
+}
+
+.md-typeset .note {
+  border-left-color: #045047;
+}
+
+.md-typeset .warning > .admonition-title {
+  color: #ffb59d;
+}
+
+.md-typeset .tip > .admonition-title {
+  color: #94d2c7;
+}
+
+/* ─────────────────────────────────────────────
+   Tabbed content (=== "Tab name")
+   ───────────────────────────────────────────── */
+.md-typeset .tabbed-labels > label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #a68b82;
+}
+
+.md-typeset .tabbed-labels > label:hover {
+  color: #e2e2e5;
+}
+
+.md-typeset .tabbed-labels > input:checked + label {
+  color: #94d2c7;
+  border-bottom-color: #be4d25;
+}
+
+.md-typeset .tabbed-content {
+  border: 1px dashed #57423b;
+  border-top: none;
+}
+
+/* ─────────────────────────────────────────────
+   Search
+   ───────────────────────────────────────────── */
+.md-search__input {
+  background-color: #1e2022;
+  color: #e2e2e5;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  border: 1px dashed #57423b;
+}
+
+.md-search__input::placeholder {
+  color: #57423b;
+}
+
+.md-search__output {
+  background-color: #1a1c1e;
+  border: 1px dashed #57423b;
+}
+
+.md-search-result__article {
+  background-color: #1a1c1e;
+}
+
+.md-search-result__article:hover {
+  background-color: #1e2022;
+}
+
+/* ─────────────────────────────────────────────
+   Footer
+   ───────────────────────────────────────────── */
+.md-footer {
+  background-color: #0c0e10;
+  border-top: 1px dashed #57423b;
+}
+
+.md-footer-meta {
+  background-color: #0c0e10;
+}
+
+.md-footer__link {
+  color: #57423b;
+}
+
+.md-footer__link:hover {
+  color: #a68b82;
+}
+
+/* ─────────────────────────────────────────────
+   Diagram zoom — clickable Mermaid lightbox
+   ───────────────────────────────────────────── */
+
+/* Inline diagram: hover state */
+.mermaid {
+  position: relative;
+}
+
+.mermaid svg {
+  cursor: zoom-in;
+  transition: opacity 0.15s;
+  display: block;
+  max-width: 100%;
+}
+
+.mermaid svg:hover {
+  opacity: 0.85;
+}
+
+/* Expand badge */
+.dz-badge {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  background: #1e2022;
+  border: 1px dashed #57423b;
+  color: #a68b82;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  padding: 0.2rem 0.5rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s;
+  pointer-events: none;
+}
+
+.mermaid:hover .dz-badge {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.dz-badge:hover {
+  color: #ffb59d;
+  border-color: #be4d25;
+}
+
+/* Full-screen overlay */
+#dz-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(12, 14, 16, 0.92);
+  z-index: 10000;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+#dz-overlay.active {
+  display: flex;
+}
+
+/* Modal box */
+#dz-modal {
+  background: #1a1c1e;
+  border: 1px dashed #57423b;
+  border-left: 3px solid #be4d25;
+  display: flex;
+  flex-direction: column;
+  width: min(95vw, 1400px);
+  max-height: 92vh;
+  overflow: hidden;
+}
+
+/* Toolbar */
+#dz-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px dashed #57423b;
+  background: #121416;
+  flex-shrink: 0;
+}
+
+#dz-hint {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  color: #57423b;
+  text-transform: uppercase;
+}
+
+#dz-close {
+  background: transparent;
+  border: 1px dashed #57423b;
+  color: #a68b82;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  padding: 0.25rem 0.6rem;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+#dz-close:hover {
+  color: #ffb59d;
+  border-color: #be4d25;
+}
+
+/* Scrollable diagram area */
+#dz-content {
+  overflow: hidden;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  cursor: grab;
+}
+
+#dz-content:active {
+  cursor: grabbing;
+}
+
+#dz-content svg {
+  max-width: none;
+  height: auto;
+  transform-origin: center center;
+  transition: none;
+}
+
+/* ─────────────────────────────────────────────
+   Scrollbar
+   ───────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0c0e10;
+  border-left: 1px dashed #57423b;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #282a2c;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #37393b;
+}
