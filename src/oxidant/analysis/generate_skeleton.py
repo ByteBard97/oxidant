@@ -152,6 +152,17 @@ def _to_snake(name: str) -> str:
     return s.lower()
 
 
+def _to_pascal_case(name: str) -> str:
+    """Convert any identifier to PascalCase (required for Rust enum variants)."""
+    if not name:
+        return name
+    # Already PascalCase (starts uppercase, has no underscores) — leave it.
+    if name[0].isupper() and "_" not in name:
+        return name
+    parts = re.split(r"[_\s]+", name)
+    return "".join(p.capitalize() for p in parts if p)
+
+
 _RUST_KEYWORDS: frozenset[str] = frozenset({
     "as", "break", "const", "continue", "crate", "else", "enum", "extern",
     "false", "fn", "for", "if", "impl", "in", "let", "loop", "match", "mod",
@@ -702,7 +713,8 @@ def generate_skeleton(manifest_path: Path, target_path: Path) -> None:
                 lines += [derive, f"pub enum {name} {{"]
             if variants:
                 for vname, discrim in variants:
-                    safe_vname = _escape_keyword(vname)
+                    # Rust requires PascalCase for enum variants
+                    safe_vname = _escape_keyword(_to_pascal_case(vname))
                     lines.append(f"    {safe_vname} = {discrim}," if discrim is not None else f"    {safe_vname},")
             else:
                 lines.append("    _Placeholder, // OXIDANT: enum variants not yet translated")
@@ -873,27 +885,9 @@ def generate_skeleton(manifest_path: Path, target_path: Path) -> None:
                 return t(ts)
 
             # Emit struct definition
-            lines += ["#[derive(Debug, Clone)]", f"pub struct {sname}{tp_suffix} {{"]
-
-            # Struct-composition inheritance: add pub base field for known
-            # struct-hierarchy children (e.g. SplineRouter → Algorithm).
-            if child_info and child_info[1] == "struct":
-                parent_name = child_info[0]
-                parent_sf = hierarchy_map.source_file_of(parent_name)
-                if parent_sf:
-                    parent_mod = _module_name(parent_sf)
-                    if parent_mod != mod_name:
-                        lines.append(
-                            f"    pub base: crate::{parent_mod}::{parent_name},"
-                        )
-                    else:
-                        lines.append(f"    pub base: {parent_name},")
-            # External parent not in the corpus — informational comment only
-            elif parent_cls and parent_cls not in hierarchy_map.by_name:
-                lines.append(
-                    f"    // NOTE: extends {parent_cls} (external — not in corpus)"
-                )
-
+            # Compute resolved field types first so we can detect dyn Fn before
+            # emitting the #[derive] — dyn Fn doesn't implement Debug or Clone.
+            resolved_fields: list[tuple[str, str]] = []  # (snake_name, rust_type)
             if inst_fields:
                 for fname, ftype, fopt, fdefault in inst_fields:
                     rust_t = (
@@ -903,9 +897,60 @@ def generate_skeleton(manifest_path: Path, target_path: Path) -> None:
                     )
                     if fopt and not rust_t.startswith("Option<"):
                         rust_t = f"Option<{rust_t}>"
-                    lines.append(f"    pub {_escape_keyword(_to_snake(fname))}: {rust_t},")
+                    resolved_fields.append((_escape_keyword(_to_snake(fname)), rust_t))
+
+            has_dyn_fn = any("dyn Fn" in rt for _, rt in resolved_fields)
+            # dyn Fn fields can't derive Debug or Clone — manual impls emitted below
+            derive = "" if has_dyn_fn else "#[derive(Debug, Clone)]"
+            needs_phantom = bool(generic_params)  # will check usage below
+
+            if derive:
+                lines.append(derive)
+            lines.append(f"pub struct {sname}{tp_suffix} {{")
+
+            # Struct-composition inheritance: add pub base field for known
+            # struct-hierarchy children (e.g. SplineRouter → Algorithm).
+            if child_info and child_info[1] == "struct":
+                parent_name = child_info[0]
+                parent_sf = hierarchy_map.source_file_of(parent_name)
+                if parent_sf:
+                    parent_mod = _module_name(parent_sf)
+                    # If the parent class itself has generic params, supply
+                    # serde_json::Value for each (concrete placeholder for skeleton).
+                    parent_node = hierarchy_map.node_for(parent_name)
+                    parent_generics = []
+                    if parent_node:
+                        pg_m = re.search(r"\bclass\s+\w+\s*<([^>]+)>", parent_node.source_text[:500])
+                        if pg_m:
+                            for pg in pg_m.group(1).split(","):
+                                pname = pg.strip().split()[0].strip()
+                                if pname and re.fullmatch(r"[A-Z][A-Za-z0-9]*", pname):
+                                    parent_generics.append("serde_json::Value")
+                    pg_suffix = f"<{', '.join(parent_generics)}>" if parent_generics else ""
+                    if parent_mod != mod_name:
+                        lines.append(
+                            f"    pub base: crate::{parent_mod}::{parent_name}{pg_suffix},"
+                        )
+                    else:
+                        lines.append(f"    pub base: {parent_name}{pg_suffix},")
+            # External parent not in the corpus — informational comment only
+            elif parent_cls and parent_cls not in hierarchy_map.by_name:
+                lines.append(
+                    f"    // NOTE: extends {parent_cls} (external — not in corpus)"
+                )
+
+            if resolved_fields:
+                for field_name, rust_t in resolved_fields:
+                    lines.append(f"    pub {field_name}: {rust_t},")
+                # Emit PhantomData markers for any generic param not used in fields
+                used_in_fields = " ".join(rt for _, rt in resolved_fields)
+                for gp in generic_params:
+                    if gp not in used_in_fields:
+                        lines.append(f"    _phantom_{gp.lower()}: std::marker::PhantomData<{gp}>,")
             else:
                 lines.append("    _placeholder: (), // OXIDANT: fields not yet translated")
+                for gp in generic_params:
+                    lines.append(f"    _phantom_{gp.lower()}: std::marker::PhantomData<{gp}>,")
             lines += ["}", "", f"impl{tp_bounds} {sname}{tp_suffix} {{"]
 
             # Emit static constants at top of impl block
@@ -959,6 +1004,25 @@ def generate_skeleton(manifest_path: Path, target_path: Path) -> None:
                 ]
 
             lines += ["}", ""]
+
+            # Manual Debug / Clone impls for structs that contain dyn Fn fields.
+            # dyn Fn doesn't implement Debug or Clone, so we can't derive them.
+            # These stubs satisfy the trait bounds for cargo check.
+            if has_dyn_fn:
+                lines += [
+                    f"impl{tp_bounds} std::fmt::Debug for {sname}{tp_suffix} {{",
+                    "    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {",
+                    f'        f.debug_struct("{sname}").finish_non_exhaustive()',
+                    "    }",
+                    "}",
+                    "",
+                    f"impl{tp_bounds} Clone for {sname}{tp_suffix} {{",
+                    "    fn clone(&self) -> Self {",
+                    '        panic!("OXIDANT: cannot clone struct containing closures")',
+                    "    }",
+                    "}",
+                    "",
+                ]
 
         # Free functions — deduplicate overloads with numeric suffix
         seen_fns: dict[str, int] = {}
