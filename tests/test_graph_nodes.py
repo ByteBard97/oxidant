@@ -19,9 +19,8 @@ def _make_node(node_id: str, kind=NodeKind.FREE_FUNCTION, **kw) -> ConversionNod
 
 
 def _write_manifest(path: Path, nodes: dict) -> Manifest:
-    m = Manifest(source_repo="test", generated_at="2026-04-15", nodes=nodes)
-    m.save(path)
-    return m
+    """Create a file-backed manifest at path with the given nodes."""
+    return Manifest(path, source_repo="test", generated_at="2026-04-15", nodes=nodes)
 
 
 def test_oxidant_state_has_supervisor_fields():
@@ -50,12 +49,13 @@ def test_oxidant_state_has_supervisor_fields():
     assert state["interrupt_payload"] is None
 
 
-def _base_state(manifest_path: str, target_path: str = "/nonexistent", **kw) -> OxidantState:
+def _base_state(db_path: str, target_path: str = "/nonexistent", **kw) -> OxidantState:
     defaults: dict = {
-        "manifest_path": manifest_path,
+        "db_path": db_path,
         "target_path": target_path,
         "snippets_dir": "/tmp/snippets",
         "config": {"crate_inventory": [], "architectural_decisions": {}, "model_tiers": {}},
+        "worker_id": 0,
         "current_node_id": None,
         "current_prompt": None,
         "current_snippet": None,
@@ -65,6 +65,8 @@ def _base_state(manifest_path: str, target_path: str = "/nonexistent", **kw) -> 
         "verify_status": None,
         "review_queue": [],
         "done": False,
+        "max_nodes": None,
+        "nodes_this_run": 0,
         "supervisor_hint": None,
         "interrupt_payload": None,
         "review_mode": "auto",
@@ -109,6 +111,38 @@ def test_pick_next_node_prefers_lower_topological_order(tmp_path):
     assert update["current_node_id"] == "m__a"
 
 
+def test_pick_next_node_skips_above_complexity_max(tmp_path):
+    """complexity_max in config filters out nodes with higher cyclomatic_complexity."""
+    from oxidant.graph.nodes import pick_next_node
+    path = tmp_path / "manifest.db"
+    _write_manifest(path, {
+        "m__hard": _make_node("m__hard", cyclomatic_complexity=10),
+        "m__easy": _make_node("m__easy", cyclomatic_complexity=2),
+    })
+    state = _base_state(str(path), config={
+        "crate_inventory": [], "architectural_decisions": {}, "model_tiers": {},
+        "complexity_max": 3,
+    })
+    update = pick_next_node(state)
+    assert update["current_node_id"] == "m__easy"
+
+
+def test_pick_next_node_done_when_all_above_complexity_max(tmp_path):
+    """When all remaining nodes exceed complexity_max, signal done."""
+    from oxidant.graph.nodes import pick_next_node
+    path = tmp_path / "manifest.db"
+    _write_manifest(path, {
+        "m__hard": _make_node("m__hard", cyclomatic_complexity=15),
+    })
+    state = _base_state(str(path), config={
+        "crate_inventory": [], "architectural_decisions": {}, "model_tiers": {},
+        "complexity_max": 3,
+    })
+    update = pick_next_node(state)
+    assert update["done"] is True
+    assert update["current_node_id"] is None
+
+
 # ── retry_node and escalate_node ─────────────────────────────────────────────
 
 def test_retry_node_increments_attempt_count():
@@ -128,7 +162,10 @@ def test_escalate_node_haiku_to_sonnet():
 
 def test_escalate_node_sonnet_to_opus():
     from oxidant.graph.nodes import escalate_node
-    state = _base_state("/dev/null", current_tier="sonnet", attempt_count=4)
+    # allow_opus must be True — default config caps escalation at sonnet
+    state = _base_state("/dev/null", current_tier="sonnet", attempt_count=4,
+                        config={"crate_inventory": [], "architectural_decisions": {},
+                                "model_tiers": {}, "allow_opus": True})
     update = escalate_node(state)
     assert update["current_tier"] == "opus"
     assert update["attempt_count"] == 0
@@ -199,14 +236,14 @@ def test_supervisor_node_returns_hint(tmp_path):
     from oxidant.models.manifest import ConversionNode, Manifest, NodeKind, TranslationTier
     from unittest.mock import patch
 
+    db_path = tmp_path / "m.db"
     node = ConversionNode(
         node_id="n1", source_file="f.ts", line_start=1, line_end=3,
         source_text="class Foo {}", node_kind=NodeKind.CLASS, tier=TranslationTier.OPUS,
     )
-    manifest = Manifest(source_repo="t", generated_at="2026-01-01", nodes={"n1": node})
-    (tmp_path / "m.json").write_text(manifest.model_dump_json(indent=2))
+    Manifest(db_path, source_repo="t", generated_at="2026-01-01", nodes={"n1": node})
 
-    state = _base_state(str(tmp_path / "m.json"), target_path=str(tmp_path))
+    state = _base_state(str(db_path), target_path=str(tmp_path))
     state["current_node_id"] = "n1"
     state["last_error"] = "type mismatch: expected &Node, got NodeId"
     state["review_mode"] = "auto"
@@ -226,14 +263,14 @@ def test_supervisor_node_returns_none_hint_when_invoke_fails(tmp_path):
     from oxidant.models.manifest import ConversionNode, Manifest, NodeKind, TranslationTier
     from unittest.mock import patch
 
+    db_path = tmp_path / "m.db"
     node = ConversionNode(
         node_id="n1", source_file="f.ts", line_start=1, line_end=3,
         source_text="class Foo {}", node_kind=NodeKind.CLASS, tier=TranslationTier.OPUS,
     )
-    manifest = Manifest(source_repo="t", generated_at="2026-01-01", nodes={"n1": node})
-    (tmp_path / "m.json").write_text(manifest.model_dump_json(indent=2))
+    Manifest(db_path, source_repo="t", generated_at="2026-01-01", nodes={"n1": node})
 
-    state = _base_state(str(tmp_path / "m.json"), target_path=str(tmp_path))
+    state = _base_state(str(db_path), target_path=str(tmp_path))
     state["current_node_id"] = "n1"
 
     with patch("oxidant.graph.nodes.invoke_claude", side_effect=RuntimeError("timeout")):
@@ -267,3 +304,64 @@ def test_build_graph_has_supervisor_node():
     from oxidant.graph.graph import build_graph
     g = build_graph()
     assert "supervisor_node" in g.nodes
+
+
+# ── update_manifest summary parsing ──────────────────────────────────────────
+
+def test_update_manifest_stores_summary_when_delimiter_present(tmp_path):
+    """Agent response with ---SUMMARY--- stores snippet and summary separately."""
+    from oxidant.graph.nodes import update_manifest
+
+    db_path = tmp_path / "m.db"
+    _write_manifest(db_path, {"m__foo": _make_node("m__foo", status=NodeStatus.IN_PROGRESS)})
+
+    snippets_dir = tmp_path / "snippets"
+    state = _base_state(
+        str(db_path),
+        target_path=str(tmp_path),
+        snippets_dir=str(snippets_dir),
+        current_node_id="m__foo",
+        current_tier="haiku",
+        attempt_count=0,
+        current_snippet="fn foo() -> i32 { 42 }\n---SUMMARY---\nComputes 42. Always returns the answer.",
+    )
+
+    update_manifest(state)
+
+    manifest = Manifest.load(db_path)
+    node = manifest.get_node("m__foo")
+    assert node.status == NodeStatus.CONVERTED
+    assert node.summary_text == "Computes 42. Always returns the answer."
+
+    # Snippet file must not contain the delimiter or summary
+    snippet_path = Path(node.snippet_path)
+    content = snippet_path.read_text()
+    assert "---SUMMARY---" not in content
+    assert "fn foo() -> i32 { 42 }" in content
+
+
+def test_update_manifest_no_summary_when_no_delimiter(tmp_path):
+    """Agent response without ---SUMMARY--- stores full text as snippet, summary_text=None."""
+    from oxidant.graph.nodes import update_manifest
+
+    db_path = tmp_path / "m.db"
+    _write_manifest(db_path, {"m__foo": _make_node("m__foo", status=NodeStatus.IN_PROGRESS)})
+
+    snippets_dir = tmp_path / "snippets"
+    state = _base_state(
+        str(db_path),
+        target_path=str(tmp_path),
+        snippets_dir=str(snippets_dir),
+        current_node_id="m__foo",
+        current_tier="haiku",
+        attempt_count=0,
+        current_snippet="fn foo() -> i32 { 42 }",
+    )
+
+    update_manifest(state)
+
+    manifest = Manifest.load(db_path)
+    node = manifest.get_node("m__foo")
+    assert node.summary_text is None
+    snippet_path = Path(node.snippet_path)
+    assert "fn foo() -> i32 { 42 }" in snippet_path.read_text()

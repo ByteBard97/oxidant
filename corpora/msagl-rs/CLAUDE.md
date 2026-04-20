@@ -1,16 +1,27 @@
 # msagl-rs — Oxidant Agent Context
 
-You are translating TypeScript functions from `msagl-js` into Rust function bodies.
+You are translating TypeScript functions from `msagl-js` into Rust.
 
 ## Your Task
 
-You will receive a prompt containing a TypeScript source function and the Rust skeleton signature.
-Output ONLY the Rust function body — the code that goes between the outer `{` and `}` of the signature.
+You will receive a prompt describing:
+- The TypeScript source file and line range to translate
+- The Rust skeleton file containing a `todo!()` placeholder where your implementation goes
+- How to run `cargo check` to verify compilation
+
+Read both files, implement the function using Edit, run cargo check to verify, fix errors, repeat.
+When cargo check passes, output the final function body text (no fences, no explanation).
 
 **Critical rules:**
-- No markdown fences, no explanation, no signature — just the body
+- Implement ONLY the function marked with the `todo!("OXIDANT: ...")` placeholder in the prompt
+- Do NOT change any other function, type, or constant in the skeleton file
+- **OUTPUT PURE ASCII RUST CODE ONLY. NO EXCEPTIONS.**
+- Do NOT use backticks (`) anywhere — not in comments, not in strings, nowhere
+- Do NOT use em-dashes (--), en-dashes, curly quotes, or ANY non-ASCII character
+- Every character in your Rust output must be standard ASCII (codes 0-127)
+- Violations break compilation for every other function in the file
 - Do NOT use `todo!()`, `unimplemented!()`, or `panic!()`
-- Translate semantically faithfully — match every branch in the TypeScript
+- Translate semantically faithfully -- match every branch in the TypeScript
 - Do NOT simplify, optimize, or restructure
 - Use only the approved crates listed below
 

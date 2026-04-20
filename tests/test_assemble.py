@@ -25,7 +25,7 @@ def test_assemble_module_writes_rs_file(tmp_path):
     src_dir = tmp_path / "src"
     src_dir.mkdir()
     (src_dir / "m.rs").write_text(
-        '#![allow(dead_code)]\npub fn foo() {\n    todo!("OXIDANT: m__foo")\n}\n'
+        '#![allow(dead_code)]\npub fn foo() {\n    todo!("OXIDANT: not yet translated \u2014 m__foo")\n}\n'
     )
 
     nodes = [
@@ -36,7 +36,7 @@ def test_assemble_module_writes_rs_file(tmp_path):
     assert result is True
     content = (src_dir / "m.rs").read_text()
     assert "42" in content
-    assert "m__foo" in content
+    assert "todo!" not in content  # marker was replaced
 
 
 def test_assemble_module_returns_false_when_not_all_converted(tmp_path):

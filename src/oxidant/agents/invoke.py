@@ -24,6 +24,13 @@ _TIMEOUT_BY_TIER: dict[str, int] = {
 _DEFAULT_TIMEOUT = 600
 _MAX_PROMPT_LOG_CHARS = 200
 
+# Local model timeouts are longer — inference is slower and cargo check still runs
+_LOCAL_TIMEOUT_BY_TIER: dict[str, int] = {
+    "haiku": 600,
+    "sonnet": 900,
+    "opus": 1200,
+}
+
 
 def invoke_claude(
     prompt: str,
@@ -129,6 +136,86 @@ def invoke_claude(
         )
 
     raw_response = str(data["result"])
+    if prompt_log_dir and label:
+        log_dir = Path(prompt_log_dir)
+        safe_label = label.replace("/", "_").replace(":", "_")
+        (log_dir / f"{safe_label}_response.txt").write_text(raw_response)
+
+    return _sanitize_snippet(raw_response)
+
+
+def invoke_pi(
+    prompt: str,
+    cwd: str | Path,
+    tier: str = "haiku",
+    model: str = "qwen2.5-coder:32b",
+    prompt_log_dir: Path | None = None,
+    label: str = "",
+) -> str:
+    """Call the pi coding agent CLI with a local Ollama model and return the response.
+
+    Pi is a minimal agentic harness (github.com/badlogic/pi-mono) that provides
+    Read/Edit/Bash tools for any OpenAI-compatible backend. Use this instead of
+    invoke_claude() to run against a local model without spending API quota.
+
+    Args:
+        prompt: The full conversion prompt.
+        cwd: Working directory for the subprocess (workspace root).
+        tier: Translation tier — controls the timeout.
+        model: Ollama model tag (e.g. "qwen2.5-coder:32b").
+        prompt_log_dir: If set, write prompt and response to files here.
+        label: File name prefix for prompt logs.
+
+    Returns:
+        The assistant's final response text (sanitized).
+
+    Raises:
+        RuntimeError: pi exits non-zero or returns empty output.
+        subprocess.TimeoutExpired: Call exceeds the tier-specific timeout.
+    """
+    timeout = _LOCAL_TIMEOUT_BY_TIER.get(tier, _DEFAULT_TIMEOUT)
+
+    if prompt_log_dir and label:
+        log_dir = Path(prompt_log_dir)
+        log_dir.mkdir(parents=True, exist_ok=True)
+        safe_label = label.replace("/", "_").replace(":", "_")
+        (log_dir / f"{safe_label}_prompt.txt").write_text(prompt)
+
+    cmd = [
+        "pi",
+        "--print",
+        "--model", f"ollama/{model}",
+        prompt,
+    ]
+
+    logger.debug("invoke_pi model=%s tier=%s prompt[:200]=%r", model, tier, prompt[:_MAX_PROMPT_LOG_CHARS])
+
+    proc = subprocess.Popen(
+        cmd,
+        cwd=str(cwd),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        start_new_session=True,
+    )
+    try:
+        stdout, stderr = proc.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        try:
+            os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+        proc.wait()
+        raise
+
+    if proc.returncode != 0:
+        detail = stderr.strip() or stdout.strip()
+        raise RuntimeError(f"pi exited {proc.returncode}: {detail[:600]}")
+
+    if not stdout.strip():
+        raise RuntimeError("pi returned empty output")
+
+    raw_response = stdout.strip()
     if prompt_log_dir and label:
         log_dir = Path(prompt_log_dir)
         safe_label = label.replace("/", "_").replace(":", "_")

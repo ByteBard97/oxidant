@@ -19,8 +19,8 @@ def _node(node_id: str, complexity: int = 1, idioms: list[str] | None = None) ->
     )
 
 
-def _manifest(nodes: dict) -> Manifest:
-    return Manifest(source_repo=".", generated_at="2026-04-15", nodes=nodes)
+def _manifest(db_path: Path, nodes: dict) -> Manifest:
+    return Manifest(db_path, source_repo=".", generated_at="2026-04-15", nodes=nodes)
 
 
 @patch("anthropic.Anthropic")
@@ -28,9 +28,8 @@ def test_simple_node_classified_haiku(mock_cls, tmp_path):
     mock_cls.return_value.messages.create.return_value = MagicMock(
         content=[MagicMock(text='{"tier": "haiku", "reason": "simple getter"}')]
     )
-    m = _manifest({"x__foo": _node("x__foo", complexity=1)})
-    p = tmp_path / "manifest.json"
-    m.save(p)
+    p = tmp_path / "manifest.db"
+    _manifest(p, {"x__foo": _node("x__foo", complexity=1)})
     classify_manifest(p, model="claude-haiku-4-5-20251001")
     assert Manifest.load(p).nodes["x__foo"].tier == TranslationTier.HAIKU
 
@@ -40,10 +39,9 @@ def test_complex_node_classified_opus(mock_cls, tmp_path):
     mock_cls.return_value.messages.create.return_value = MagicMock(
         content=[MagicMock(text='{"tier": "opus", "reason": "cyclic references"}')]
     )
-    m = _manifest({"x__hard": _node("x__hard", complexity=20,
+    p = tmp_path / "manifest.db"
+    _manifest(p, {"x__hard": _node("x__hard", complexity=20,
                                     idioms=["class_inheritance", "mutable_shared_state", "closure_capture"])})
-    p = tmp_path / "manifest.json"
-    m.save(p)
     classify_manifest(p, model="claude-haiku-4-5-20251001")
     result = Manifest.load(p).nodes["x__hard"]
     assert result.tier == TranslationTier.OPUS
@@ -55,9 +53,8 @@ def test_invalid_json_falls_back_to_sonnet(mock_cls, tmp_path):
     mock_cls.return_value.messages.create.return_value = MagicMock(
         content=[MagicMock(text="not json")]
     )
-    m = _manifest({"x__foo": _node("x__foo")})
-    p = tmp_path / "manifest.json"
-    m.save(p)
+    p = tmp_path / "manifest.db"
+    _manifest(p, {"x__foo": _node("x__foo")})
     classify_manifest(p, model="claude-haiku-4-5-20251001")
     assert Manifest.load(p).nodes["x__foo"].tier == TranslationTier.SONNET
 
@@ -76,47 +73,38 @@ def _node_kind(node_id: str, kind: NodeKind, complexity: int = 1,
 
 
 def test_heuristic_enum_is_haiku(tmp_path):
-    node = _node_kind("x__Foo", NodeKind.ENUM)
-    m = _manifest({"x__Foo": node})
-    p = tmp_path / "manifest.json"
-    m.save(p)
+    p = tmp_path / "manifest.db"
+    _manifest(p, {"x__Foo": _node_kind("x__Foo", NodeKind.ENUM)})
     classify_manifest_heuristic(p)
     assert Manifest.load(p).nodes["x__Foo"].tier == TranslationTier.HAIKU
 
 
 def test_heuristic_no_idioms_complexity1_is_haiku(tmp_path):
-    node = _node("x__simple", complexity=1, idioms=[])
-    m = _manifest({"x__simple": node})
-    p = tmp_path / "manifest.json"
-    m.save(p)
+    p = tmp_path / "manifest.db"
+    _manifest(p, {"x__simple": _node("x__simple", complexity=1, idioms=[])})
     classify_manifest_heuristic(p)
     assert Manifest.load(p).nodes["x__simple"].tier == TranslationTier.HAIKU
 
 
 def test_heuristic_high_complexity_is_opus(tmp_path):
-    node = _node("x__hard", complexity=12, idioms=[])
-    m = _manifest({"x__hard": node})
-    p = tmp_path / "manifest.json"
-    m.save(p)
+    p = tmp_path / "manifest.db"
+    _manifest(p, {"x__hard": _node("x__hard", complexity=12, idioms=[])})
     classify_manifest_heuristic(p)
     assert Manifest.load(p).nodes["x__hard"].tier == TranslationTier.OPUS
 
 
 def test_heuristic_with_idioms_is_sonnet(tmp_path):
-    node = _node("x__mid", complexity=3, idioms=["mutable_shared_state"])
-    m = _manifest({"x__mid": node})
-    p = tmp_path / "manifest.json"
-    m.save(p)
+    p = tmp_path / "manifest.db"
+    _manifest(p, {"x__mid": _node("x__mid", complexity=3, idioms=["mutable_shared_state"])})
     classify_manifest_heuristic(p)
     assert Manifest.load(p).nodes["x__mid"].tier == TranslationTier.SONNET
 
 
 def test_heuristic_skips_already_tiered(tmp_path):
+    p = tmp_path / "manifest.db"
     node = _node("x__done", complexity=1, idioms=[])
     node = node.model_copy(update={"tier": TranslationTier.OPUS, "tier_reason": "manual"})
-    m = _manifest({"x__done": node})
-    p = tmp_path / "manifest.json"
-    m.save(p)
+    _manifest(p, {"x__done": node})
     classify_manifest_heuristic(p)
     # should remain OPUS, not overwritten to HAIKU
     assert Manifest.load(p).nodes["x__done"].tier == TranslationTier.OPUS
