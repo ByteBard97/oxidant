@@ -443,5 +443,41 @@ def translate(
     raise typer.Exit(1)
 
 
+@app.command("reset-stuck")
+def reset_stuck(
+    db: Path = typer.Option("oxidant.db", "--db", help="Path to oxidant SQLite manifest DB."),
+) -> None:
+    """Reset all IN_PROGRESS nodes to NOT_STARTED.
+
+    Run this before starting a new batch to clean up orphaned nodes left by a
+    previous crash or reboot. Safe to run even if no nodes are stuck.
+    """
+    from oxidant.models.manifest import Manifest, NodeStatus
+
+    db = db.resolve()
+    if not db.exists():
+        typer.echo(f"Error: {db} not found.", err=True)
+        raise typer.Exit(1)
+
+    manifest = Manifest.load(db)
+    stuck = [
+        nid for nid, n in manifest.nodes.items()
+        if n.status == NodeStatus.IN_PROGRESS
+    ]
+
+    if not stuck:
+        typer.echo("No stuck nodes found — nothing to reset.")
+        return
+
+    for nid in stuck:
+        manifest.update_node(db, nid, status=NodeStatus.NOT_STARTED)
+
+    typer.echo(f"Reset {len(stuck)} IN_PROGRESS node(s) to NOT_STARTED:")
+    for nid in stuck[:10]:
+        typer.echo(f"  {nid}")
+    if len(stuck) > 10:
+        typer.echo(f"  ... and {len(stuck) - 10} more")
+
+
 if __name__ == "__main__":
     app()

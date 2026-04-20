@@ -68,13 +68,10 @@ def classify_manifest_heuristic(manifest_path: Path) -> None:
             node.cyclomatic_complexity,
             node.idioms_needed,
         )
-        manifest.nodes[node_id] = node.model_copy(
-            update={"tier": tier, "tier_reason": "heuristic"}
-        )
+        manifest.update_node(manifest_path, node_id, tier=tier, tier_reason="heuristic")
         changed += 1
         logger.debug("%-60s → %s (heuristic)", node_id, tier.value)
 
-    manifest.save(manifest_path)
     logger.info("classify_manifest_heuristic: assigned tiers to %d nodes.", changed)
 
 
@@ -132,7 +129,5 @@ def classify_manifest(manifest_path: Path, model: str) -> None:
             logger.warning("classify failed for %s (%s) — defaulting to sonnet", node_id, exc)
             tier, reason = TranslationTier.SONNET, f"parse error: {exc}"
 
-        manifest.nodes[node_id] = node.model_copy(update={"tier": tier, "tier_reason": reason})
+        manifest.update_node(manifest_path, node_id, tier=tier, tier_reason=reason)
         logger.info("%-60s → %s", node_id, tier.value)
-
-    manifest.save(manifest_path)

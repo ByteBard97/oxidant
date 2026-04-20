@@ -11,7 +11,7 @@ import re
 from pathlib import Path
 
 from oxidant.agents.context import build_prompt
-from oxidant.agents.invoke import invoke_claude
+from oxidant.agents.invoke import invoke_claude, invoke_pi
 from oxidant.graph.state import OxidantState
 from oxidant.models.manifest import Manifest, NodeStatus, TranslationTier
 from oxidant.verification.verify import VerifyStatus, verify_snippet
@@ -66,6 +66,7 @@ def pick_next_node(state: OxidantState) -> dict:
         logger.info("Reached --max-nodes limit (%d). Stopping.", max_nodes)
         return {"current_node_id": None, "done": True}
 
+    complexity_max = state.get("config", {}).get("complexity_max")
     manifest = Manifest.load(_db(state))
     parallelism = state.get("config", {}).get("parallelism", 1)
 
@@ -83,7 +84,7 @@ def pick_next_node(state: OxidantState) -> dict:
                 manifest.update_node(_db(state), nid, status=NodeStatus.NOT_STARTED)
 
     # Atomic SELECT + UPDATE in one transaction — safe for concurrent workers
-    node = manifest.claim_next_eligible()
+    node = manifest.claim_next_eligible(complexity_max=complexity_max)
 
     if node is None:
         logger.info("All nodes converted. Phase B complete.")
@@ -175,14 +176,26 @@ def invoke_agent(state: OxidantState) -> dict:
             rs_backup = (rs_file, rs_file.read_text())
 
     try:
-        response = invoke_claude(
-            prompt=state["current_prompt"],
-            cwd=cwd,
-            tier=tier,
-            model=model,
-            prompt_log_dir=prompt_log_dir,
-            label=label,
-        )
+        backend = state.get("config", {}).get("backend", "claude")
+        if backend == "local":
+            local_model = state.get("config", {}).get("local_model", "qwen2.5-coder:32b")
+            response = invoke_pi(
+                prompt=state["current_prompt"],
+                cwd=cwd,
+                tier=tier,
+                model=local_model,
+                prompt_log_dir=prompt_log_dir,
+                label=label,
+            )
+        else:
+            response = invoke_claude(
+                prompt=state["current_prompt"],
+                cwd=cwd,
+                tier=tier,
+                model=model,
+                prompt_log_dir=prompt_log_dir,
+                label=label,
+            )
         return {"current_snippet": response, "last_error": None}
     except Exception as exc:  # noqa: BLE001
         logger.error("invoke_claude failed for %s: %s", node_id, exc)
@@ -294,10 +307,28 @@ def escalate_node(state: OxidantState) -> dict:
     return {"current_tier": next_tier, "attempt_count": 0}
 
 
+_SUMMARY_DELIMITER = "---SUMMARY---"
+
+
 def update_manifest(state: OxidantState) -> dict:
-    """Save the Rust snippet to disk and mark the node CONVERTED in the DB."""
+    """Save the Rust snippet to disk and mark the node CONVERTED in the DB.
+
+    If the agent response contains ``---SUMMARY---``, the text before it is
+    saved as the snippet body and the text after as a 1-2 sentence summary.
+    The summary is stored in ``summary_text`` on the NodeRecord so callers
+    can use it as dense context instead of loading and truncating the snippet.
+    """
     node_id = state["current_node_id"]
-    snippet = state.get("current_snippet") or ""
+    raw_response = state.get("current_snippet") or ""
+
+    # Split agent response on the summary delimiter
+    if _SUMMARY_DELIMITER in raw_response:
+        parts = raw_response.split(_SUMMARY_DELIMITER, 1)
+        snippet = parts[0].strip()
+        summary = parts[1].strip()
+    else:
+        snippet = raw_response
+        summary = None
 
     manifest = Manifest.load(_db(state))
     node = manifest.get_node(node_id) or manifest.nodes[node_id]
@@ -318,6 +349,7 @@ def update_manifest(state: OxidantState) -> dict:
         status=NodeStatus.CONVERTED,
         snippet_path=str(snippet_path),
         attempt_count=attempt_count,
+        summary_text=summary,
     )
     logger.info("CONVERTED: %s → %s", node_id, snippet_path)
     return {

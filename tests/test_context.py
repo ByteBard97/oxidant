@@ -24,7 +24,7 @@ def _make_node(node_id: str, kind: NodeKind = NodeKind.FREE_FUNCTION, **kw) -> C
 
 
 def _make_manifest(nodes: dict) -> Manifest:
-    return Manifest(source_repo="test", generated_at="2026-04-15", nodes=nodes)
+    return Manifest(nodes=nodes, source_repo="test", generated_at="2026-04-15")
 
 
 def test_build_prompt_contains_source():

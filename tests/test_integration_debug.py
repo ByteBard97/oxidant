@@ -128,48 +128,40 @@ def test_intersect_with_manifest_returns_empty_when_no_manifest(tmp_path):
     assert result == []
 
 
-def test_intersect_with_manifest_finds_converted_file(tmp_path):
-    manifest = {
-        "version": "1.0",
-        "source_repo": "../msagljs",
-        "generated_at": "2026-04-16T00:00:00",
-        "nodes": {
-            "Foo::bar": {
-                "node_id": "Foo::bar",
-                "source_file": "foo.ts",
-                "line_start": 1, "line_end": 10,
-                "source_text": "function bar() {}",
-                "node_kind": "method",
-                "status": "converted",
-            }
-        }
-    }
-    manifest_path = tmp_path / "conversion_manifest.json"
-    manifest_path.write_text(json.dumps(manifest))
+def _make_sqlite_manifest(db_path: Path, nodes_data: list[dict]) -> None:
+    """Create a SQLite manifest at db_path with the given node dicts."""
+    from oxidant.models.manifest import Manifest, ConversionNode, NodeKind, NodeStatus
 
+    nodes = {}
+    for nd in nodes_data:
+        nodes[nd["node_id"]] = ConversionNode(
+            node_id=nd["node_id"],
+            source_file=nd.get("source_file", "x.ts"),
+            line_start=nd.get("line_start", 1),
+            line_end=nd.get("line_end", 10),
+            source_text=nd.get("source_text", ""),
+            node_kind=NodeKind(nd.get("node_kind", "method")),
+            status=NodeStatus(nd.get("status", "not_started")),
+        )
+    Manifest(db_path, source_repo="../msagljs", generated_at="2026-04-16", nodes=nodes)
+
+
+def test_intersect_with_manifest_finds_converted_file(tmp_path):
+    manifest_path = tmp_path / "manifest.db"
+    _make_sqlite_manifest(manifest_path, [{
+        "node_id": "Foo::bar", "source_file": "foo.ts", "node_kind": "method",
+        "status": "converted",
+    }])
     result = _intersect_with_manifest(["src/foo.rs", "src/other.rs"], manifest_path)
     assert result == ["src/foo.rs"]
 
 
 def test_intersect_with_manifest_ignores_non_converted(tmp_path):
-    manifest = {
-        "version": "1.0",
-        "source_repo": "../msagljs",
-        "generated_at": "2026-04-16T00:00:00",
-        "nodes": {
-            "Foo::bar": {
-                "node_id": "Foo::bar",
-                "source_file": "foo.ts",
-                "line_start": 1, "line_end": 10,
-                "source_text": "function bar() {}",
-                "node_kind": "method",
-                "status": "not_started",
-            }
-        }
-    }
-    manifest_path = tmp_path / "conversion_manifest.json"
-    manifest_path.write_text(json.dumps(manifest))
-
+    manifest_path = tmp_path / "manifest.db"
+    _make_sqlite_manifest(manifest_path, [{
+        "node_id": "Foo::bar", "source_file": "foo.ts", "node_kind": "method",
+        "status": "not_started",
+    }])
     result = _intersect_with_manifest(["src/foo.rs"], manifest_path)
     assert result == []
 
@@ -230,23 +222,11 @@ def test_run_phase_d_failure_identifies_files(tmp_path):
 
 def test_run_phase_d_intersects_manifest_when_provided(tmp_path):
     """When a manifest is provided, files_needing_retranslation is populated."""
-    manifest = {
-        "version": "1.0",
-        "source_repo": "../msagljs",
-        "generated_at": "2026-04-16T00:00:00",
-        "nodes": {
-            "Graph::layout": {
-                "node_id": "Graph::layout",
-                "source_file": "graph.ts",
-                "line_start": 1, "line_end": 50,
-                "source_text": "function layout() {}",
-                "node_kind": "method",
-                "status": "converted",
-            }
-        }
-    }
-    manifest_path = tmp_path / "conversion_manifest.json"
-    manifest_path.write_text(json.dumps(manifest))
+    manifest_path = tmp_path / "manifest.db"
+    _make_sqlite_manifest(manifest_path, [{
+        "node_id": "Graph::layout", "source_file": "graph.ts", "node_kind": "method",
+        "status": "converted",
+    }])
 
     error_line = json.dumps({
         "reason": "compiler-message",

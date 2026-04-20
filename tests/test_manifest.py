@@ -28,6 +28,11 @@ def test_node_roundtrip():
     assert node2.node_id == node.node_id
 
 
+def _make_manifest(nodes: dict) -> Manifest:
+    """Create an in-memory manifest for testing."""
+    return Manifest(nodes=nodes, source_repo=".", generated_at="2026-04-15")
+
+
 def test_manifest_eligible_nodes_respects_deps():
     nodes = {
         "mod__A": ConversionNode(
@@ -43,13 +48,15 @@ def test_manifest_eligible_nodes_respects_deps():
             type_dependencies=[], call_dependencies=["mod__A"], callers=[],
         ),
     }
-    manifest = Manifest(source_repo=".", generated_at="2026-04-15", nodes=nodes)
+    manifest = _make_manifest(nodes)
     eligible = manifest.eligible_nodes()
     assert len(eligible) == 1
     assert eligible[0].node_id == "mod__A"
 
 
-def test_manifest_json_persistence(tmp_path):
+def test_manifest_persistence(tmp_path):
+    """Nodes written to a file-backed manifest are readable after Manifest.load()."""
+    db_path = tmp_path / "test.db"
     nodes = {
         "mod__foo": ConversionNode(
             node_id="mod__foo", source_file="a.ts", line_start=1, line_end=3,
@@ -58,10 +65,8 @@ def test_manifest_json_persistence(tmp_path):
             type_dependencies=[], call_dependencies=[], callers=[],
         )
     }
-    manifest = Manifest(source_repo=".", generated_at="2026-04-15", nodes=nodes)
-    path = tmp_path / "manifest.json"
-    manifest.save(path)
-    loaded = Manifest.load(path)
+    Manifest(db_path, source_repo=".", generated_at="2026-04-15", nodes=nodes)
+    loaded = Manifest.load(db_path)
     assert loaded.nodes["mod__foo"].source_text == "function foo() {}"
 
 
@@ -87,7 +92,7 @@ def test_topological_sort_chain():
             type_dependencies=["m__B"], call_dependencies=[], callers=[],
         ),
     }
-    manifest = Manifest(source_repo=".", generated_at="2026-04-15", nodes=nodes)
+    manifest = _make_manifest(nodes)
     manifest.compute_topology()
     assert manifest.nodes["m__A"].topological_order == 0
     assert manifest.nodes["m__B"].topological_order == 1
@@ -119,14 +124,15 @@ def test_topological_sort_parallel_nodes():
             type_dependencies=["m__A", "m__B"], call_dependencies=[], callers=[],
         ),
     }
-    manifest = Manifest(source_repo=".", generated_at="2026-04-15", nodes=nodes)
+    manifest = _make_manifest(nodes)
     manifest.compute_topology()
     assert manifest.nodes["m__A"].bfs_level == 0
     assert manifest.nodes["m__B"].bfs_level == 0
     assert manifest.nodes["m__C"].bfs_level == 1
 
 
-def test_topological_sort_raises_on_cycle():
+def test_topological_sort_cycle_gets_fallback_order():
+    """Cycles don't raise — both nodes get distinct fallback topological orders."""
     nodes = {
         "m__A": ConversionNode(
             node_id="m__A", source_file="x.ts", line_start=1, line_end=2,
@@ -141,6 +147,9 @@ def test_topological_sort_raises_on_cycle():
             type_dependencies=["m__A"], call_dependencies=[], callers=[],
         ),
     }
-    manifest = Manifest(source_repo=".", generated_at="2026-04-15", nodes=nodes)
-    with pytest.raises(ValueError, match="cycle"):
-        manifest.compute_topology()
+    manifest = _make_manifest(nodes)
+    manifest.compute_topology()  # must not raise
+    result = manifest.nodes
+    assert result["m__A"].topological_order is not None
+    assert result["m__B"].topological_order is not None
+    assert result["m__A"].topological_order != result["m__B"].topological_order

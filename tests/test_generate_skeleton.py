@@ -34,7 +34,7 @@ def test_map_set_type():
 
 # ── Integration: generated skeleton must compile ──────────────────────────────
 
-def _make_manifest() -> Manifest:
+def _make_manifest(db_path: Path) -> Manifest:
     nodes = {
         "simple__Point": ConversionNode(
             node_id="simple__Point", source_file="simple.ts",
@@ -78,13 +78,12 @@ def _make_manifest() -> Manifest:
             tier=TranslationTier.HAIKU,
         ),
     }
-    return Manifest(source_repo="tests/fixtures", generated_at="2026-04-15", nodes=nodes)
+    return Manifest(db_path, source_repo="tests/fixtures", generated_at="2026-04-15", nodes=nodes)
 
 
 def test_cargo_build_passes(tmp_path):
-    manifest = _make_manifest()
-    mpath = tmp_path / "manifest.json"
-    manifest.save(mpath)
+    mpath = tmp_path / "manifest.db"
+    _make_manifest(mpath)
     target = tmp_path / "msagl-rs"
     generate_skeleton(mpath, target)
     r = subprocess.run(["cargo", "build"], cwd=target, capture_output=True, text=True)
@@ -92,9 +91,8 @@ def test_cargo_build_passes(tmp_path):
 
 
 def test_todo_markers_present(tmp_path):
-    manifest = _make_manifest()
-    mpath = tmp_path / "manifest.json"
-    manifest.save(mpath)
+    mpath = tmp_path / "manifest.db"
+    _make_manifest(mpath)
     target = tmp_path / "msagl-rs"
     generate_skeleton(mpath, target)
     all_rs = "\n".join(f.read_text() for f in target.rglob("*.rs"))

@@ -93,6 +93,37 @@ class ConversionNode(BaseModel):
     snippet_path: Optional[str] = None
     attempt_count: int = 0
     last_error: Optional[str] = None
+    summary_text: Optional[str] = None  # 1-2 sentence description written by the converting agent
+
+
+# ── Schema migrations ──────────────────────────────────────────────────────────
+
+def _migrate_schema(engine) -> None:
+    """Apply additive schema migrations to an existing DB.
+
+    Each migration is idempotent — it checks whether the column/index already
+    exists before running ALTER TABLE. Add new migrations here as columns are
+    added to NodeRecord; never remove old ones.
+    """
+    import sqlite3 as _sqlite3
+    import sqlalchemy as _sa
+
+    with engine.connect() as conn:
+        # Fetch existing columns in the nodes table
+        result = conn.execute(_sa.text("PRAGMA table_info(nodes)"))
+        existing = {row[1] for row in result}  # row[1] = column name
+
+        migrations = [
+            # (column_name, ALTER TABLE statement)
+            ("summary_text", "ALTER TABLE nodes ADD COLUMN summary_text TEXT"),
+        ]
+
+        for col, sql in migrations:
+            if col not in existing:
+                conn.execute(_sa.text(sql))
+                logger.info("Schema migration: added column %r to nodes table", col)
+
+        conn.commit()
 
 
 # ── Engine cache — one engine per db_path, shared across Manifest instances ────
@@ -106,6 +137,7 @@ def _get_engine(db_path: Path):
     key = str(resolved)
     with _engine_lock:
         if key not in _engine_cache:
+            from oxidant.models.db import NodeRecord  # noqa: F401 — registers table schema
             existed_before = resolved.exists()
             engine = create_engine(
                 f"sqlite:///{key}",
@@ -116,6 +148,8 @@ def _get_engine(db_path: Path):
             with engine.connect() as conn:
                 conn.execute(__import__("sqlalchemy").text("PRAGMA journal_mode=WAL"))
                 conn.commit()
+            # Schema migrations — add columns introduced after initial DB creation
+            _migrate_schema(engine)
             # Safety check: if the DB already existed, verify it has data.
             # A freshly created empty DB where data was expected means something
             # deleted or misrouted the file — abort loudly rather than silently
@@ -141,14 +175,82 @@ def _get_engine(db_path: Path):
 
 
 class Manifest:
-    """SQLite-backed manifest. Same public interface as the old JSON version."""
+    """SQLite-backed manifest. Same public interface as the old JSON version.
 
-    def __init__(self, db_path: Path, source_repo: str = "", generated_at: str = "", version: str = "1.0") -> None:
-        self._db_path = db_path
+    Constructor accepts two call patterns:
+    1. Manifest(db_path)  — open/create the SQLite file at db_path
+    2. Manifest(source_repo=..., nodes={...})  — in-memory DB for testing
+       Omit db_path (or pass None) and supply nodes= to get an ephemeral manifest.
+    """
+
+    def __init__(
+        self,
+        db_path: "Path | None" = None,
+        source_repo: str = "",
+        generated_at: str = "",
+        version: str = "1.0",
+        nodes: "dict | None" = None,
+    ) -> None:
         self.source_repo = source_repo
         self.generated_at = generated_at
         self.version = version
-        self._engine = _get_engine(db_path)
+
+        if db_path is None:
+            # In-memory mode for tests — use StaticPool so every connection
+            # sees the same database (required for SQLAlchemy in-memory SQLite).
+            from sqlalchemy.pool import StaticPool
+            from oxidant.models.db import NodeRecord  # noqa: F401 — registers table schema
+            engine = create_engine(
+                "sqlite://",
+                connect_args={"check_same_thread": False},
+                poolclass=StaticPool,
+            )
+            SQLModel.metadata.create_all(engine)
+            self._db_path = Path(":memory:")
+            self._engine = engine
+            # Populate from nodes dict
+            if nodes:
+                self._bulk_insert_nodes(engine, nodes)
+        else:
+            self._db_path = db_path
+            self._engine = _get_engine(db_path)
+            if nodes:
+                self._bulk_insert_nodes(self._engine, nodes)
+
+    def _bulk_insert_nodes(self, engine: object, nodes: dict) -> None:
+        """Insert a dict of ConversionNode objects into the DB."""
+        from oxidant.models.db import NodeRecord
+        import json as _json
+
+        with Session(engine) as session:
+            for node in nodes.values():
+                row = NodeRecord(
+                    node_id=node.node_id,
+                    source_file=node.source_file,
+                    line_start=node.line_start,
+                    line_end=node.line_end,
+                    source_text=node.source_text,
+                    node_kind=node.node_kind.value,
+                    parameter_types=_json.dumps(node.parameter_types),
+                    return_type=node.return_type,
+                    type_dependencies=_json.dumps(node.type_dependencies),
+                    call_dependencies=_json.dumps(node.call_dependencies),
+                    callers=_json.dumps(node.callers),
+                    parent_class=node.parent_class,
+                    cyclomatic_complexity=node.cyclomatic_complexity,
+                    idioms_needed=_json.dumps(node.idioms_needed),
+                    topological_order=node.topological_order,
+                    bfs_level=node.bfs_level,
+                    tier=node.tier.value if node.tier else None,
+                    tier_reason=node.tier_reason,
+                    status=node.status.value,
+                    snippet_path=node.snippet_path,
+                    attempt_count=node.attempt_count,
+                    last_error=node.last_error,
+                    summary_text=node.summary_text,
+                )
+                session.add(row)
+            session.commit()
 
     # ── Public interface (identical to old JSON Manifest) ──────────────────
 
@@ -211,12 +313,16 @@ class Manifest:
             session.add(row)
             session.commit()
 
-    def claim_next_eligible(self) -> ConversionNode | None:
+    def claim_next_eligible(self, complexity_max: int | None = None) -> ConversionNode | None:
         """Atomically claim the next eligible node using BEGIN IMMEDIATE.
 
         BEGIN IMMEDIATE acquires the write lock before reading, so two concurrent
         workers can never both see the same NOT_STARTED node and both claim it.
         Falls back to least-blocked nodes if no strictly-eligible ones exist.
+
+        Args:
+            complexity_max: If set, skip nodes with cyclomatic_complexity above this
+                threshold. Useful for local model runs that handle only simple nodes.
         """
         import json as _json
         import sqlite3
@@ -228,7 +334,7 @@ class Manifest:
         try:
             con.execute("BEGIN IMMEDIATE")
 
-            all_rows = con.execute("SELECT node_id, status, type_dependencies, call_dependencies, topological_order, length(source_text) as src_len FROM nodes").fetchall()
+            all_rows = con.execute("SELECT node_id, status, type_dependencies, call_dependencies, topological_order, cyclomatic_complexity, length(source_text) as src_len FROM nodes").fetchall()
             manifest_ids = {r["node_id"] for r in all_rows}
             converted = {r["node_id"] for r in all_rows if r["status"] == NodeStatus.CONVERTED.value}
 
@@ -237,6 +343,8 @@ class Manifest:
                 return sum(1 for d in deps if d in manifest_ids and d not in converted)
 
             not_started = [r for r in all_rows if r["status"] == NodeStatus.NOT_STARTED.value]
+            if complexity_max is not None:
+                not_started = [r for r in not_started if (r["cyclomatic_complexity"] or 1) <= complexity_max]
             strict = [r for r in not_started if _dep_count(r) == 0]
             candidates = strict if strict else sorted(not_started, key=_dep_count)
 
