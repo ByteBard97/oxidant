@@ -12,7 +12,11 @@ import json
 from pathlib import Path
 
 
-def _detect_idioms(source_text: str, param_types: dict) -> list[str]:
+def _detect_idioms(
+    source_text: str,
+    param_types: dict,
+    return_type: str | None = None,
+) -> list[str]:
     """Return list of idiom tags for a single node's source text."""
     try:
         tree = ast.parse(source_text)
@@ -36,11 +40,14 @@ def _detect_idioms(source_text: str, param_types: dict) -> list[str]:
                 if isinstance(op, (ast.Is, ast.IsNot)) and isinstance(comp, ast.Constant) and comp.value is None:
                     idioms.add("none_check")
 
-    for t in list(param_types.values()) + [source_text]:
-        if t and ("Optional[" in t or "| None" in t or "None |" in t):
+    # Check only annotation strings (params + return type), NOT the full source_text
+    # body — scanning source_text would produce false positives from comments/docstrings.
+    annotation_strs = [t for t in param_types.values() if t] + ([return_type] if return_type else [])
+    for t in annotation_strs:
+        if "Optional[" in t or "| None" in t or "None |" in t:
             idioms.add("optional_type")
 
-    if "-> tuple[" in source_text or "-> Tuple[" in source_text:
+    if return_type and ("tuple[" in return_type or "Tuple[" in return_type):
         idioms.add("multiple_return")
 
     return sorted(idioms)
@@ -58,7 +65,11 @@ def main() -> None:
     tagged = 0
     for node in nodes.values():
         existing = set(node.get("idioms_needed", []))
-        detected = _detect_idioms(node.get("source_text", ""), node.get("parameter_types", {}))
+        detected = _detect_idioms(
+            node.get("source_text", ""),
+            node.get("parameter_types", {}),
+            return_type=node.get("return_type"),
+        )
         node["idioms_needed"] = sorted(existing | set(detected))
         if detected:
             tagged += 1
