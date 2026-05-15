@@ -214,6 +214,11 @@ def invoke_agent(state: OxidantState) -> dict:
 
 def verify(state: OxidantState) -> dict:
     """Run the three verification checks (stub / branch parity / cargo check)."""
+    from oxidant.verification.verify import _BRANCH_RE_PY, _BRANCH_RE_TS
+
+    source_language = state.get("config", {}).get("source_language", "typescript")
+    branch_re = _BRANCH_RE_PY if source_language == "python" else _BRANCH_RE_TS
+
     manifest = Manifest.load(_db(state))
     node = manifest.get_node(state["current_node_id"]) or manifest.nodes[state["current_node_id"]]
     snippet = state.get("current_snippet")
@@ -224,7 +229,6 @@ def verify(state: OxidantState) -> dict:
             "last_error": state.get("last_error") or "Agent invocation failed (no snippet returned)",
         }
 
-    # Worker N verifies against its own skeleton clone
     worker_id = state.get("worker_id", 0)
     target = Path(state["target_path"])
     if worker_id > 0:
@@ -238,6 +242,7 @@ def verify(state: OxidantState) -> dict:
         ts_source=node.source_text,
         target_path=target,
         source_file=node.source_file,
+        source_branch_re=branch_re,
     )
     return {
         "verify_status": result.status.value,

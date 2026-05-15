@@ -150,3 +150,41 @@ def test_verify_snippet_restores_skeleton_even_on_exception(tmp_path):
 
     assert result.status == VerifyStatus.CARGO
     assert rs_file.read_text() == original
+
+
+def test_branch_parity_python_regex_triggers_on_python_branches():
+    """Python regex should count elif/try/except. A Rust snippet with only 1
+    branch should fail parity when Python source has 6+ branch points."""
+    from oxidant.verification.verify import _check_branch_parity, _BRANCH_RE_PY, VerifyStatus
+    # 6 branch points: if, elif, elif, else, try, except
+    py_source = (
+        "if a:\n    x()\n"
+        "elif b:\n    y()\n"
+        "elif c:\n    z()\n"
+        "else:\n    w()\n"
+        "try:\n    f()\n"
+        "except ValueError:\n    pass\n"
+    )
+    rs_snippet = "if a { x() }"  # 1 Rust branch — well below 60% of 6
+    result = _check_branch_parity(py_source, rs_snippet, source_branch_re=_BRANCH_RE_PY)
+    assert result is not None
+    assert result.status == VerifyStatus.BRANCH
+
+
+def test_branch_parity_ts_regex_default_unchanged():
+    """Calling without source_branch_re preserves TypeScript behaviour."""
+    from oxidant.verification.verify import _check_branch_parity, VerifyStatus
+    ts = "if a { } else if b { } else { } for (x of y) { } while (z) { }"
+    rs = "42"
+    result = _check_branch_parity(ts, rs)
+    assert result is not None
+    assert result.status == VerifyStatus.BRANCH
+
+
+def test_branch_parity_python_regex_passes_simple():
+    """A simple Python function with 1 branch should pass (below threshold)."""
+    from oxidant.verification.verify import _check_branch_parity, _BRANCH_RE_PY
+    py_source = "if x:\n    return x\nreturn 0\n"
+    rs_snippet = "if x { return x; } 0"
+    result = _check_branch_parity(py_source, rs_snippet, source_branch_re=_BRANCH_RE_PY)
+    assert result is None  # only 1 branch in source — below the min threshold

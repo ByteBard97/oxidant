@@ -30,10 +30,13 @@ class VerifyResult:
 
 _STUB_RE = re.compile(r'\btodo!\s*\(|\bunimplemented!\s*\(')
 _BRANCH_RE_TS = re.compile(r'\bif\b|\belse\b|\bswitch\b|\bcase\b|\bfor\b|\bwhile\b|\?\s')
+_BRANCH_RE_PY = re.compile(
+    r'\bif\b|\belif\b|\belse\b|\bfor\b|\bwhile\b|\btry\b|\bexcept\b|\bwith\b|\bmatch\b'
+)
 _BRANCH_RE_RS = re.compile(r'\bif\b|\belse\b|\bmatch\b|\bfor\b|\bwhile\b|\bloop\b')
 
-_BRANCH_MIN_TS_COUNT = 3          # only check parity when TS has >= this many branches
-_BRANCH_RATIO_FLOOR = 0.60        # Rust must have >= 60% as many branches as TS
+_BRANCH_MIN_SRC_COUNT = 3         # only check parity when source has >= this many branches
+_BRANCH_RATIO_FLOOR = 0.60        # Rust must have >= 60% as many branches as source
 _CARGO_TIMEOUT_SECONDS = 120
 
 
@@ -43,13 +46,18 @@ def _check_stubs(snippet: str) -> VerifyResult | None:
     return None
 
 
-def _check_branch_parity(ts_source: str, rs_snippet: str) -> VerifyResult | None:
-    ts_count = len(_BRANCH_RE_TS.findall(ts_source))
+def _check_branch_parity(
+    source_text: str,
+    rs_snippet: str,
+    source_branch_re: re.Pattern | None = None,
+) -> VerifyResult | None:
+    branch_re = source_branch_re if source_branch_re is not None else _BRANCH_RE_TS
+    src_count = len(branch_re.findall(source_text))
     rs_count = len(_BRANCH_RE_RS.findall(rs_snippet))
-    if ts_count >= _BRANCH_MIN_TS_COUNT and rs_count < ts_count * _BRANCH_RATIO_FLOOR:
+    if src_count >= _BRANCH_MIN_SRC_COUNT and rs_count < src_count * _BRANCH_RATIO_FLOOR:
         return VerifyResult(
             VerifyStatus.BRANCH,
-            f"Branch parity: TypeScript={ts_count} branches, Rust={rs_count} "
+            f"Branch parity: source={src_count} branches, Rust={rs_count} "
             f"(below {_BRANCH_RATIO_FLOOR:.0%} floor)",
         )
     return None
@@ -110,7 +118,7 @@ def _inject_and_check_cargo(
     rs_path = target_path / "src" / f"{module}.rs"
     rs_filename = f"src/{module}.rs"
 
-    marker = f'todo!("OXIDANT: not yet translated \u2014 {node_id}")'
+    marker = f'todo!("OXIDANT: not yet translated — {node_id}")'
     original_content = rs_path.read_text()
 
     if marker not in original_content:
@@ -156,6 +164,7 @@ def verify_snippet(
     ts_source: str,
     target_path: Path,
     source_file: str,
+    source_branch_re: re.Pattern | None = None,
 ) -> VerifyResult:
     """Run all three verification checks and return the first failure, or PASS.
 
@@ -165,10 +174,12 @@ def verify_snippet(
         ts_source: The original TypeScript source text (for branch parity).
         target_path: Root of the skeleton Rust project.
         source_file: The node's TypeScript source file path.
+        source_branch_re: Regex for counting branches in source_text. Defaults
+            to _BRANCH_RE_TS. Pass _BRANCH_RE_PY for Python source files.
     """
     if r := _check_stubs(snippet):
         return r
-    if r := _check_branch_parity(ts_source, snippet):
+    if r := _check_branch_parity(ts_source, snippet, source_branch_re=source_branch_re):
         return r
     if r := _inject_and_check_cargo(node_id, snippet, target_path, source_file):
         return r
