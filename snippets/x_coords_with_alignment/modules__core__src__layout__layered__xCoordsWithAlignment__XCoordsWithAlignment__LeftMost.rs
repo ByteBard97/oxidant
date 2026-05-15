@@ -1,0 +1,1 @@
+if self.lr { pos0.min(pos1) } else { pos0.max(pos1) }

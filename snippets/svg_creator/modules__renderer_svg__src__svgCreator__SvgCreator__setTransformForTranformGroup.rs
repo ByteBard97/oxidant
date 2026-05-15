@@ -1,0 +1,1 @@
+// The struct is a skeleton placeholder -- transform_group field not yet defined

@@ -1,0 +1,1 @@
+// Self struct has no container field yet in the skeleton

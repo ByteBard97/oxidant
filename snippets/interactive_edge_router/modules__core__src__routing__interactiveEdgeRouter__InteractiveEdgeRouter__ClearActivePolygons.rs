@@ -1,0 +1,1 @@
+self.active_polygons.clear();
