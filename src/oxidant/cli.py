@@ -33,7 +33,7 @@ def phase_a(
     cfg = json.loads(config.read_text())
     source_root = cfg["source_repo"]
     target_repo = Path(cfg["target_repo"])
-    model       = cfg["model_tiers"]["haiku"]
+    model       = cfg.get("model_tiers", {}).get("haiku")
 
     source_language = cfg.get("source_language", "typescript")
 

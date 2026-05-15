@@ -21,9 +21,15 @@ _SKIP_DIRS: frozenset[str] = frozenset({
 
 
 def _slug(path: str) -> str:
-    """Convert a file path to a safe identifier prefix: 'foo/bar_baz.py' → 'bar_baz'."""
-    stem = Path(path).stem
-    return re.sub(r"[^a-z0-9_]", "_", stem.lower())
+    """Convert a relative file path to a safe identifier prefix.
+
+    Includes the full path (not just stem) to avoid collisions between files
+    with the same name in different directories:
+      'a/utils.py'   → 'a__utils'
+      'svg/utils.py' → 'svg__utils'
+    """
+    no_ext = Path(path).with_suffix("").as_posix()
+    return re.sub(r"[^a-z0-9_]", "_", no_ext.replace("/", "__").lower())
 
 
 def _annotation_str(node: ast.expr | None) -> str | None:
@@ -72,7 +78,11 @@ def _extract_file(py_path: Path, source_root: Path) -> list[dict]:
     nodes: list[dict] = []
 
     def _source_segment(node: ast.AST) -> str:
-        start = getattr(node, "lineno", 1) - 1
+        # Use the first decorator's line when present so the translating agent
+        # sees the full decorated signature (e.g. @property, @classmethod).
+        dlist = getattr(node, "decorator_list", [])
+        start_line = dlist[0].lineno if dlist else getattr(node, "lineno", 1)
+        start = start_line - 1
         end = getattr(node, "end_lineno", start + 1)
         return "\n".join(lines[start:end])
 
@@ -97,10 +107,19 @@ def _extract_file(py_path: Path, source_root: Path) -> list[dict]:
 
     def _params(func: ast.FunctionDef | ast.AsyncFunctionDef) -> dict[str, str | None]:
         params: dict[str, str | None] = {}
+        _skip = {"self", "cls"}
+        # Positional-only args (def f(a, b, /, c))
+        for arg in func.args.posonlyargs:
+            if arg.arg not in _skip:
+                params[arg.arg] = _annotation_str(arg.annotation)
+        # Regular args
         for arg in func.args.args:
-            if arg.arg == "self":
-                continue
-            params[arg.arg] = _annotation_str(arg.annotation)
+            if arg.arg not in _skip:
+                params[arg.arg] = _annotation_str(arg.annotation)
+        # Keyword-only args (def f(*, d: int))
+        for arg in func.args.kwonlyargs:
+            if arg.arg not in _skip:
+                params[arg.arg] = _annotation_str(arg.annotation)
         if func.args.vararg:
             params[f"*{func.args.vararg.arg}"] = _annotation_str(func.args.vararg.annotation)
         if func.args.kwarg:
@@ -174,8 +193,19 @@ def main() -> None:
         for node in _extract_file(py_file, source_root):
             all_nodes[node["node_id"]] = node
 
-    # Resolve call_dependencies to actual node_ids
-    known_names: dict[str, str] = {nid.split("__")[-1]: nid for nid in all_nodes}
+    # Resolve call_dependencies to actual node_ids.
+    # Only resolve unambiguous names (exactly one node with that bare name).
+    # Same-named functions across different files are left unresolved rather
+    # than silently misdirected to whichever node happened to be inserted last.
+    from collections import defaultdict
+    name_to_nids: dict[str, list[str]] = defaultdict(list)
+    for nid in all_nodes:
+        name_to_nids[nid.split("__")[-1]].append(nid)
+    known_names: dict[str, str] = {
+        name: nids[0]
+        for name, nids in name_to_nids.items()
+        if len(nids) == 1
+    }
     for node in all_nodes.values():
         node["call_dependencies"] = [
             known_names[call]
