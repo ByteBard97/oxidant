@@ -55,3 +55,11 @@ gui/.myopex-current/
 # Screenshots
 *.png
 *.jpg
+
+# Runtime / local-only artifacts
+oxidant.db
+oxidant.db.bak
+claude-sessions/
+_prompt_logs/
+review_queue.json
+site/
