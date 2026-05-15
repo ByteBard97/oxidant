@@ -146,6 +146,59 @@ def map_ts_type(
     return "serde_json::Value"
 
 
+# ── Python → Rust type mapper ──────────────────────────────────────────────────
+
+_PYTHON_PRIMITIVES: dict[str, str] = {
+    "int": "i64", "float": "f64", "str": "String", "bool": "bool",
+    "bytes": "Vec<u8>", "None": "()", "Any": "serde_json::Value",
+    "object": "serde_json::Value", "complex": "serde_json::Value",
+}
+
+
+def map_python_type(py_type: str, known_classes: set[str] | None = None) -> str:
+    """Map a Python type annotation string to a Rust type string.
+
+    Note: composite type splitting (dict[K,V], tuple[T,U]) uses naive comma
+    splitting which breaks on doubly-nested generics like dict[tuple[int,int], str].
+    Check the target corpus for such annotations before extending this.
+    """
+    t = py_type.strip()
+    known = known_classes or set()
+
+    def recurse(inner: str) -> str:
+        return map_python_type(inner.strip(), known)
+
+    if t in _PYTHON_PRIMITIVES:
+        return _PYTHON_PRIMITIVES[t]
+
+    if m := re.fullmatch(r"(?:list|List)\[(.+)\]", t):
+        return f"Vec<{recurse(m.group(1))}>"
+
+    if m := re.fullmatch(r"(?:dict|Dict)\[(.+),\s*(.+)\]", t):
+        return f"std::collections::HashMap<{recurse(m.group(1))}, {recurse(m.group(2))}>"
+
+    if m := re.fullmatch(r"(?:set|Set)\[(.+)\]", t):
+        return f"std::collections::HashSet<{recurse(m.group(1))}>"
+
+    if m := re.fullmatch(r"Optional\[(.+)\]", t):
+        return f"Option<{recurse(m.group(1))}>"
+
+    # T | None  /  None | T
+    parts = [p.strip() for p in t.split("|")]
+    non_none = [p for p in parts if p != "None"]
+    if len(non_none) < len(parts) and len(non_none) == 1:
+        return f"Option<{recurse(non_none[0])}>"
+
+    if m := re.fullmatch(r"(?:tuple|Tuple)\[(.+)\]", t):
+        elems = [recurse(e.strip()) for e in m.group(1).split(",")]
+        return f"({', '.join(elems)})"
+
+    if t in known:
+        return f"Rc<RefCell<{t}>>"
+
+    return "serde_json::Value"
+
+
 def _to_snake(name: str) -> str:
     s = re.sub(r"([A-Z]+)([A-Z][a-z])", r"\1_\2", name)
     s = re.sub(r"([a-z\d])([A-Z])", r"\1_\2", s)
@@ -548,7 +601,7 @@ def _collect_class_fields(
     return fields
 
 
-def generate_skeleton(manifest_path: Path, target_path: Path) -> None:
+def generate_skeleton(manifest_path: Path, target_path: Path, config: dict | None = None) -> None:
     """Write a compilable Rust project to target_path."""
     manifest = Manifest.load(manifest_path)
     from oxidant.analysis.hierarchy import build_hierarchy_map, KNOWN_HIERARCHIES
@@ -657,22 +710,25 @@ def generate_skeleton(manifest_path: Path, target_path: Path) -> None:
     src.mkdir(exist_ok=True)
 
     # Cargo.toml
-    (target_path / "Cargo.toml").write_text(textwrap.dedent("""\
-        [package]
-        name = "msagl-rs"
-        version = "0.1.0"
-        edition = "2021"
+    cargo_toml = target_path / "Cargo.toml"
+    if not cargo_toml.exists():
+        crate_name = (config or {}).get("crate_name") or target_path.name
+        cargo_toml.write_text(textwrap.dedent(f"""\
+            [package]
+            name = "{crate_name}"
+            version = "0.1.0"
+            edition = "2021"
 
-        [dependencies]
-        slotmap      = "1"
-        petgraph     = "0.6"
-        nalgebra     = "0.33"
-        thiserror    = "2"
-        itertools    = "0.13"
-        ordered-float = "4"
-        serde        = { version = "1", features = ["derive"] }
-        serde_json   = "1"
-    """))
+            [dependencies]
+            slotmap      = "1"
+            petgraph     = "0.6"
+            nalgebra     = "0.33"
+            thiserror    = "2"
+            itertools    = "0.13"
+            ordered-float = "4"
+            serde        = {{ version = "1", features = ["derive"] }}
+            serde_json   = "1"
+        """))
 
     # lib.rs
     lib_lines = [
