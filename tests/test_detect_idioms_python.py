@@ -100,3 +100,37 @@ def test_no_false_positives_on_simple_fn(tmp_path):
         tmp_path,
     )
     assert _idioms(manifest, "add") == []
+
+
+def test_svgwrite_import_detected(tmp_path):
+    manifest = _extract_and_detect(
+        "import svgwrite\ndef render(dwg) -> None:\n    g = dwg.g(id='layer')\n    dwg.add(g)\n",
+        tmp_path,
+    )
+    assert "svgwrite_buffer" in _idioms(manifest, "render")
+
+
+def test_svgwrite_from_import_detected(tmp_path):
+    # import at module level won't appear in each function's source_text snippet,
+    # but attribute calls (dwg.add, dwg.g) in the body will trigger the detector.
+    manifest = _extract_and_detect(
+        "from svgwrite.container import Group\ndef render(dwg) -> None:\n    g = dwg.g(id='x')\n    dwg.add(g)\n",
+        tmp_path,
+    )
+    assert "svgwrite_buffer" in _idioms(manifest, "render")
+
+
+def test_svgwrite_method_call_detected(tmp_path):
+    manifest = _extract_and_detect(
+        "def render(dwg) -> None:\n    g = dwg.g(id='x')\n    dwg.add(g)\n",
+        tmp_path,
+    )
+    assert "svgwrite_buffer" in _idioms(manifest, "render")
+
+
+def test_svgwrite_not_on_plain_fn(tmp_path):
+    manifest = _extract_and_detect(
+        "def add(a: int, b: int) -> int:\n    return a + b\n",
+        tmp_path,
+    )
+    assert "svgwrite_buffer" not in _idioms(manifest, "add")

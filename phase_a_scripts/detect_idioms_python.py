@@ -40,6 +40,22 @@ def _detect_idioms(
                 if isinstance(op, (ast.Is, ast.IsNot)) and isinstance(comp, ast.Constant) and comp.value is None:
                     idioms.add("none_check")
 
+    # svgwrite DOM-style API — any function that builds SVG via svgwrite objects
+    # needs to be rewritten as a string-buffer function in Rust.
+    # Detect via: import of svgwrite, or attribute calls like dwg.add/dwg.g/dwg.rect.
+    _SVGWRITE_ATTRS = {"add", "g", "rect", "text", "line", "circle", "path", "use",
+                       "defs", "symbol", "image", "tostring", "saveas"}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            if any(alias.name == "svgwrite" or alias.name.startswith("svgwrite.") for alias in node.names):
+                idioms.add("svgwrite_buffer")
+        elif isinstance(node, ast.ImportFrom):
+            if node.module and (node.module == "svgwrite" or node.module.startswith("svgwrite.")):
+                idioms.add("svgwrite_buffer")
+        elif isinstance(node, ast.Attribute):
+            if node.attr in _SVGWRITE_ATTRS and isinstance(node.value, ast.Name):
+                idioms.add("svgwrite_buffer")
+
     # Check only annotation strings (params + return type), NOT the full source_text
     # body — scanning source_text would produce false positives from comments/docstrings.
     annotation_strs = [t for t in param_types.values() if t] + ([return_type] if return_type else [])
