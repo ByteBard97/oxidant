@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import logging
 import subprocess
+import sys
 from pathlib import Path
 
 import typer
@@ -30,28 +31,56 @@ def phase_a(
     Steps: A1 extract AST → A2 detect idioms → A3 topology → A4 classify tiers → A5 skeleton.
     """
     cfg = json.loads(config.read_text())
-    tsconfig    = cfg["tsconfig"]
     source_root = cfg["source_repo"]
     target_repo = Path(cfg["target_repo"])
     model       = cfg["model_tiers"]["haiku"]
 
-    # A1: AST extraction
-    typer.echo("A1: extracting AST...")
-    subprocess.run(
-        ["npx", "tsx", str(_SCRIPTS_DIR / "extract_ast.ts"),
-         "--tsconfig", tsconfig,
-         "--source-root", source_root,
-         "--out", str(manifest_out)],
-        check=True,
-    )
+    source_language = cfg.get("source_language", "typescript")
 
-    # A2: Idiom detection
-    typer.echo("A2: detecting idioms...")
-    subprocess.run(
-        ["npx", "tsx", str(_SCRIPTS_DIR / "detect_idioms.ts"),
-         "--manifest", str(manifest_out)],
-        check=True,
-    )
+    if source_language == "typescript":
+        tsconfig = cfg.get("tsconfig")
+        if not tsconfig:
+            typer.echo("Error: 'tsconfig' required in config for TypeScript source.", err=True)
+            raise typer.Exit(1)
+        # A1: AST extraction
+        typer.echo("A1: extracting AST (TypeScript)...")
+        subprocess.run(
+            ["npx", "tsx", str(_SCRIPTS_DIR / "extract_ast.ts"),
+             "--tsconfig", tsconfig,
+             "--source-root", source_root,
+             "--out", str(manifest_out)],
+            check=True,
+        )
+        # A2: Idiom detection
+        typer.echo("A2: detecting idioms (TypeScript)...")
+        subprocess.run(
+            ["npx", "tsx", str(_SCRIPTS_DIR / "detect_idioms.ts"),
+             "--manifest", str(manifest_out)],
+            check=True,
+        )
+    elif source_language == "python":
+        # A1: Python AST extraction
+        typer.echo("A1: extracting AST (Python)...")
+        subprocess.run(
+            [sys.executable, str(_SCRIPTS_DIR / "extract_ast_python.py"),
+             "--source-root", source_root,
+             "--out", str(manifest_out)],
+            check=True,
+        )
+        # A2: Python idiom detection
+        typer.echo("A2: detecting idioms (Python)...")
+        subprocess.run(
+            [sys.executable, str(_SCRIPTS_DIR / "detect_idioms_python.py"),
+             "--manifest", str(manifest_out)],
+            check=True,
+        )
+    else:
+        typer.echo(
+            f"Error: unsupported source_language '{source_language}'. "
+            f"Supported: typescript, python",
+            err=True,
+        )
+        raise typer.Exit(1)
 
     # A3: Topological sort
     typer.echo("A3: computing topological order...")
@@ -78,7 +107,7 @@ def phase_a(
     # A5: Skeleton generation
     typer.echo("A5: generating Rust skeleton...")
     from oxidant.analysis.generate_skeleton import generate_skeleton
-    generate_skeleton(manifest_out, target_repo)
+    generate_skeleton(manifest_out, target_repo, config=cfg)
 
     # Verify skeleton compiles
     typer.echo("Verifying skeleton compiles...")

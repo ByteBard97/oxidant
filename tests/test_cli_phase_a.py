@@ -47,3 +47,20 @@ def test_phase_a_smoke(tmp_path):
     rs_dir = tmp_path / "output-rs"
     assert (rs_dir / "Cargo.toml").exists(), "Cargo.toml not generated"
     assert (rs_dir / "src" / "lib.rs").exists(), "lib.rs not generated"
+
+
+def test_phase_a_rejects_unknown_language(tmp_path):
+    """phase-a should fail fast for unknown source_language."""
+    cfg = tmp_path / "oxidant.config.json"
+    cfg.write_text(json.dumps({
+        "source_language": "cobol",
+        "source_repo": str(tmp_path),
+        "target_repo": str(tmp_path),
+        "model_tiers": {"haiku": "x"},
+    }))
+    from typer.testing import CliRunner
+    from oxidant.cli import app
+    runner = CliRunner()
+    result = runner.invoke(app, ["phase-a", "--config", str(cfg)])
+    assert result.exit_code != 0
+    assert "cobol" in (result.output + str(result.exception or ""))
