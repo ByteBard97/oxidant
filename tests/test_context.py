@@ -154,3 +154,64 @@ def test_build_prompt_includes_supervisor_hint(tmp_path):
     )
     assert "Supervisor Hint" in prompt
     assert "arena allocation" in prompt
+
+
+def test_prompt_uses_python_language(tmp_path):
+    """build_prompt with source_language=python should not mention TypeScript."""
+    from oxidant.agents.context import build_prompt
+    from oxidant.models.manifest import ConversionNode, Manifest, NodeKind
+
+    db = tmp_path / "test.db"
+    manifest = Manifest.load(db)
+    node = ConversionNode(
+        node_id="sample__foo",
+        source_file="sample.py",
+        line_start=1, line_end=5,
+        source_text="def foo(): pass",
+        node_kind=NodeKind.FREE_FUNCTION,
+    )
+    manifest.nodes["sample__foo"] = node
+
+    prompt = build_prompt(
+        node=node,
+        manifest=manifest,
+        config={
+            "source_language": "python",
+            "source_repo": ".",
+            "crate_inventory": [],
+            "architectural_decisions": {},
+        },
+        target_path=tmp_path,
+        snippets_dir=tmp_path,
+        workspace=tmp_path,
+    )
+    assert "TypeScript" not in prompt, "Prompt still contains 'TypeScript'"
+    assert "Python" in prompt
+    assert "## Python Source" in prompt
+
+
+def test_prompt_defaults_to_typescript(tmp_path):
+    """build_prompt without source_language should still say TypeScript."""
+    from oxidant.agents.context import build_prompt
+    from oxidant.models.manifest import ConversionNode, Manifest, NodeKind
+
+    db = tmp_path / "test2.db"
+    manifest = Manifest.load(db)
+    node = ConversionNode(
+        node_id="sample__bar",
+        source_file="sample.ts",
+        line_start=1, line_end=3,
+        source_text="function bar() {}",
+        node_kind=NodeKind.FREE_FUNCTION,
+    )
+    manifest.nodes["sample__bar"] = node
+
+    prompt = build_prompt(
+        node=node,
+        manifest=manifest,
+        config={"source_repo": ".", "crate_inventory": [], "architectural_decisions": {}},
+        target_path=tmp_path,
+        snippets_dir=tmp_path,
+        workspace=tmp_path,
+    )
+    assert "TypeScript" in prompt

@@ -15,26 +15,36 @@ from pathlib import Path
 
 from oxidant.models.manifest import ConversionNode, Manifest
 
+_LANG_DISPLAY: dict[str, str] = {
+    "typescript": "TypeScript",
+    "python": "Python",
+}
+
+_IDIOM_DICT_PATHS: dict[str, str] = {
+    "typescript": "idiom_dictionary.md",
+    "python": "idiom_dictionary_python.md",
+}
+
 _PROMPT_TEMPLATE = """\
-You are converting one TypeScript function to Rust as part of porting msagl-js.
+You are converting one {source_language} function to Rust.
 
 ## Your job
-1. Read the TypeScript source file to understand the function and its context
+1. Read the {source_language} source file to understand the function and its context
 2. Read the Rust skeleton file to understand available types and fields
 3. Write the Rust function body and insert it into the skeleton using Edit
 4. Run cargo check to verify it compiles: use Bash with `cd {rs_skeleton_dir} && cargo check`
 5. Fix any errors and repeat until cargo check passes
 
 ## Files
-- TypeScript source: {ts_source_path} (lines {line_start}--{line_end})
+- {source_language} source: {ts_source_path} (lines {line_start}--{line_end})
 - Rust skeleton: {rs_skeleton_path}
 - Cargo check directory: {rs_skeleton_dir}
 - Function to implement: `{node_id}`
 - The skeleton has a `todo!("OXIDANT: not yet translated \u2014 {node_id}")` marker \
 where your implementation goes
 
-## TypeScript Source
-```typescript
+## {source_language} Source
+```{source_language_fence}
 {source_text}
 ```
 
@@ -43,7 +53,7 @@ where your implementation goes
 - OUTPUT PURE ASCII ONLY. No backticks, no em-dashes, no curly quotes, \
 no non-ASCII characters of any kind. They break compilation for every function in the file.
 - Do NOT use todo!(), unimplemented!(), or panic!()
-- Translate semantically faithfully -- match every branch in the TypeScript
+- Translate semantically faithfully -- match every branch in the {source_language} source
 - Use only approved crates: {crates}
 - Do NOT simplify, optimize, or restructure
 
@@ -278,9 +288,14 @@ def _load_unfurled_deps(
     return "\n\n".join(parts)
 
 
-def _load_idiom_entries(idioms: list[str], workspace: Path) -> str:
-    """Load relevant sections from idiom_dictionary.md for the node's idioms."""
-    dict_path = workspace / "idiom_dictionary.md"
+def _load_idiom_entries(
+    idioms: list[str],
+    workspace: Path,
+    source_language: str = "typescript",
+) -> str:
+    """Load relevant sections from the idiom dictionary for this language."""
+    dict_filename = _IDIOM_DICT_PATHS.get(source_language, "idiom_dictionary.md")
+    dict_path = workspace / dict_filename
     if not dict_path.exists() or not idioms:
         return ""
 
@@ -333,7 +348,11 @@ def build_prompt(
         else ""
     )
 
-    idiom_text = _load_idiom_entries(node.idioms_needed, workspace)
+    source_language_key = config.get("source_language", "typescript")
+    source_language_display = _LANG_DISPLAY.get(source_language_key, source_language_key.title())
+    source_language_fence = source_language_key  # used as code fence language tag
+
+    idiom_text = _load_idiom_entries(node.idioms_needed, workspace, source_language=source_language_key)
     idiom_section = f"\n## Idiom Translations\n{idiom_text}\n" if idiom_text else ""
 
     retry_section = ""
@@ -371,6 +390,8 @@ def build_prompt(
     rs_skeleton_dir = target_path.resolve()
 
     return _PROMPT_TEMPLATE.format(
+        source_language=source_language_display,
+        source_language_fence=source_language_fence,
         crates=crates,
         arch_decisions=arch_lines,
         node_id=node.node_id,
