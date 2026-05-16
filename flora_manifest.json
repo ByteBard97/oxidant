@@ -1,0 +1,1886 @@
+{
+  "version": "1.0",
+  "source_language": "python",
+  "source_repo": "/Users/ceres/Desktop/flora/flora-backend/src/gis/pipeline/svg",
+  "generated_at": "2026-05-15T23:26:18.849284+00:00",
+  "nodes": {
+    "drawing___load_balmat_font_base64": {
+      "node_id": "drawing___load_balmat_font_base64",
+      "source_file": "drawing.py",
+      "line_start": 46,
+      "line_end": 51,
+      "source_text": "def _load_balmat_font_base64() -> str:\n    \"\"\"Load BALMAT.otf as base64 for SVG embedding.\"\"\"\n    font_path = Path(__file__).parent.parent.parent / 'assets' / 'fonts' / 'BALMAT.otf'\n    if font_path.exists():\n        return base64.b64encode(font_path.read_bytes()).decode('ascii')\n    return ''",
+      "node_kind": "free_function",
+      "parameter_types": {},
+      "return_type": "str",
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 2,
+      "idioms_needed": []
+    },
+    "drawing__generate_svg_styles": {
+      "node_id": "drawing__generate_svg_styles",
+      "source_file": "drawing.py",
+      "line_start": 58,
+      "line_end": 114,
+      "source_text": "def generate_svg_styles(footer_height_px: float = REFERENCE_FOOTER_PX) -> str:\n    \"\"\"\n    Generate CSS styles for SVG elements with scaled font sizes.\n\n    Font sizes scale proportionally with footer height so that text\n    fills the title block appropriately on any paper size.\n\n    Fonts:\n    - BALMAT: Used for titles, labels, and headings in the footer\n    - Brandon Grotesque: Used for body text and values (loaded via Typekit)\n\n    Args:\n        footer_height_px: Footer height in pixels (default 108px = 1.5\")\n\n    Returns:\n        CSS string with scaled font sizes\n    \"\"\"\n    scale = footer_height_px / REFERENCE_FOOTER_PX\n\n    def sz(base: int) -> int:\n        \"\"\"Scale a font size and round to integer.\"\"\"\n        return max(6, round(base * scale))  # Minimum 6px for readability\n\n    # Embed BALMAT font face if available\n    font_face = ''\n    if _BALMAT_B64:\n        font_face = f\"\"\"\n    @font-face {{\n        font-family: 'Balmat';\n        src: url('data:font/otf;base64,{_BALMAT_B64}') format('opentype');\n        font-weight: normal;\n        font-style: normal;\n    }}\"\"\"\n\n    return f\"\"\"\n    @import url(\"https://use.typekit.net/vmk8wft.css\");\n    {font_face}\n    .parcel {{ fill: none; stroke: #2d5a3d; stroke-width: 2; stroke-dasharray: 8,4; }}\n    .building {{ fill: #cccccc; stroke: black; stroke-width: 1; opacity: 0.5; }}\n    .contour {{ fill: none; stroke: #bdc3c7; stroke-width: 0.5; vector-effect: non-scaling-stroke; }}\n    .contour-major {{ fill: none; stroke: #bdc3c7; stroke-width: 1.5; vector-effect: non-scaling-stroke; }}\n    .tree {{ fill: #27ae60; fill-opacity: 0.4; stroke: #1e8449; stroke-width: 1; }}\n    .soil {{ fill: #d4c4a8; fill-opacity: 0.3; stroke: #a0522d; stroke-width: 0.5; }}\n    .soil-well {{ fill: #d4c4a8; fill-opacity: 0.3; stroke: #a0522d; stroke-width: 0.5; }}\n    .soil-moderate {{ fill: #c9b896; fill-opacity: 0.3; stroke: #8b7355; stroke-width: 0.5; }}\n    .soil-poor {{ fill: #a8c4d4; fill-opacity: 0.4; stroke: #5f9ea0; stroke-width: 0.5; }}\n    .soil-verypoor {{ fill: #7bb3c9; fill-opacity: 0.4; stroke: #4682b4; stroke-width: 0.5; }}\n    .soil-hydric {{ fill: #6495ed; fill-opacity: 0.5; stroke: #4169e1; stroke-width: 1; }}\n    .label {{ font-family: 'brandon-grotesque', 'Brandon Grotesque', Arial, sans-serif; font-size: {sz(10)}px; fill: #2c3e50; text-anchor: middle; paint-order: stroke; }}\n    .footer-text {{ font-family: 'brandon-grotesque', 'Brandon Grotesque', Arial, sans-serif; font-size: {sz(10)}px; fill: #333; }}\n    .footer-title {{ font-family: 'Balmat', 'Brandon Grotesque', Arial, sans-serif; font-size: {sz(14)}px; font-weight: bold; fill: #000; }}\n    .footer-name {{ font-family: 'Balmat', 'Brandon Grotesque', Arial, sans-serif; font-size: {sz(16)}px; font-weight: 700; fill: #000; }}\n    .footer-tagline {{ font-family: 'Balmat', 'Brandon Grotesque', Arial, sans-serif; font-size: {sz(9)}px; fill: #333; letter-spacing: 0.5px; }}\n    .footer-label {{ font-family: 'Balmat', 'Brandon Grotesque', Arial, sans-serif; font-size: {sz(8)}px; fill: #666; text-transform: uppercase; letter-spacing: 0.5px; }}\n    .footer-value {{ font-family: 'brandon-grotesque', 'Brandon Grotesque', Arial, sans-serif; font-size: {sz(10)}px; fill: #000; font-weight: 500; }}\n    .footer-status {{ font-family: 'brandon-grotesque', 'Brandon Grotesque', Arial, sans-serif; font-size: {sz(9)}px; fill: #888; font-style: italic; }}\n\"\"\"",
+      "node_kind": "free_function",
+      "parameter_types": {
+        "footer_height_px": "float"
+      },
+      "return_type": "str",
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 2,
+      "idioms_needed": [
+        "format_string"
+      ]
+    },
+    "drawing__hsv_to_rgb": {
+      "node_id": "drawing__hsv_to_rgb",
+      "source_file": "drawing.py",
+      "line_start": 121,
+      "line_end": 134,
+      "source_text": "def hsv_to_rgb(h: float, s: float, v: float) -> Tuple[int, int, int]:\n    \"\"\"\n    Convert HSV color values to RGB.\n\n    Args:\n        h: Hue in degrees (0-360)\n        s: Saturation (0-1)\n        v: Value/brightness (0-1)\n\n    Returns:\n        Tuple of (r, g, b) with values in range 0-255\n    \"\"\"\n    r, g, b = colorsys.hsv_to_rgb(h / 360.0, s, v)\n    return (int(r * 255), int(g * 255), int(b * 255))",
+      "node_kind": "free_function",
+      "parameter_types": {
+        "h": "float",
+        "s": "float",
+        "v": "float"
+      },
+      "return_type": "Tuple[int, int, int]",
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 1,
+      "idioms_needed": [
+        "multiple_return"
+      ]
+    },
+    "drawing__apply_terrain_colormap": {
+      "node_id": "drawing__apply_terrain_colormap",
+      "source_file": "drawing.py",
+      "line_start": 137,
+      "line_end": 167,
+      "source_text": "def apply_terrain_colormap(normalized: float) -> Tuple[int, int, int]:\n    \"\"\"\n    Apply terrain colormap using HSV colorspace.\n\n    Creates a smooth gradient from cool to warm colors:\n    - Blue (240 degrees) = lowest altitude\n    - Green (120 degrees) = mid altitude\n    - Yellow (60 degrees) = mid-high altitude\n    - Red (0 degrees) = highest altitude\n\n    Args:\n        normalized: Value between 0 and 1 (0 = lowest, 1 = highest elevation)\n\n    Returns:\n        Tuple of (r, g, b) with values in range 0-255\n    \"\"\"\n    t = max(0.0, min(1.0, normalized))\n\n    # Map normalized value to hue:\n    # 0.0 (low) -> 240 degrees (blue)\n    # 0.5 (mid) -> 120 degrees (green) / 60 degrees (yellow)\n    # 1.0 (high) -> 0 degrees (red)\n    #\n    # We traverse from 240 degrees down to 0 degrees (through green/yellow)\n    hue = 240.0 * (1.0 - t)  # 240 at t=0, 0 at t=1\n\n    # Keep saturation and value high for vivid colors\n    saturation = 0.85\n    value = 0.95\n\n    return hsv_to_rgb(hue, saturation, value)",
+      "node_kind": "free_function",
+      "parameter_types": {
+        "normalized": "float"
+      },
+      "return_type": "Tuple[int, int, int]",
+      "type_dependencies": [],
+      "call_dependencies": [
+        "drawing__hsv_to_rgb"
+      ],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 1,
+      "idioms_needed": [
+        "multiple_return"
+      ]
+    },
+    "drawing__calculate_svg_dimensions": {
+      "node_id": "drawing__calculate_svg_dimensions",
+      "source_file": "drawing.py",
+      "line_start": 170,
+      "line_end": 282,
+      "source_text": "def calculate_svg_dimensions(\n    bounds: Tuple[float, float, float, float],\n    paper_size: str = 'Letter',\n    orientation: str = 'Auto',\n    margin: float = 0.5,\n    scale_override: str = 'Auto'\n) -> Tuple[int, int, float, float, float, float, int, int]:\n    \"\"\"\n    Calculate SVG pixel dimensions and scaling factors.\n\n    Converts real-world bounds (in feet, EPSG:2238) to SVG pixel coordinates\n    based on target paper size.\n\n    Args:\n        bounds: Tuple of (minx, miny, maxx, maxy) in feet (EPSG:2238)\n        paper_size: Target paper size ('Letter', 'A3', 'Arch D')\n        orientation: Page orientation ('Auto', 'Portrait', 'Landscape')\n        margin: Margin size in inches (default 0.5)\n        scale_override: Explicit scale like '1\"=20\\'' or 'Auto' for auto-fit\n\n    Returns:\n        Tuple of:\n            - width_px: Total SVG width in pixels\n            - height_px: Total SVG height in pixels\n            - scale_x: Pixels per foot (horizontal)\n            - scale_y: Pixels per foot (vertical)\n            - offset_x: X offset to center geometry\n            - offset_y: Y offset to center geometry\n            - footer_height_px: Reserved footer height in pixels\n            - margin_px: Margin size in pixels\n    \"\"\"\n    minx, miny, maxx, maxy = bounds\n\n    # Calculate real-world dimensions in feet\n    geo_width_ft = maxx - minx\n    geo_height_ft = maxy - miny\n\n    # Calculate aspect ratio of the site\n    site_aspect = geo_width_ft / geo_height_ft if geo_height_ft > 0 else 1.0\n\n    # Get paper dimensions in inches\n    paper_w_in, paper_h_in = PAPER_SIZES.get(paper_size, PAPER_SIZES['Letter'])\n\n    # Handle orientation\n    if orientation == 'Auto':\n        paper_aspect = paper_w_in / paper_h_in\n        # Switch to landscape if site is wide and paper is tall\n        if site_aspect > 1.1 and paper_aspect < 1:\n            paper_w_in, paper_h_in = paper_h_in, paper_w_in\n        # Switch to portrait if site is tall and paper is wide\n        elif site_aspect < 0.9 and paper_aspect > 1:\n            paper_w_in, paper_h_in = paper_h_in, paper_w_in\n    elif orientation == 'Landscape':\n        if paper_w_in < paper_h_in:\n            paper_w_in, paper_h_in = paper_h_in, paper_w_in\n    elif orientation == 'Portrait':\n        if paper_h_in < paper_w_in:\n            paper_w_in, paper_h_in = paper_h_in, paper_w_in\n\n    # Convert to pixels using standard DPI\n    width_px = int(paper_w_in * SVG_DPI)\n    height_px = int(paper_h_in * SVG_DPI)\n\n    # Reserve footer space (scales with page height, with minimum for tiny pages)\n    footer_height_in = paper_h_in * FOOTER_RATIO\n    footer_height_in = max(MIN_FOOTER_INCHES, footer_height_in)\n    footer_height_px = int(footer_height_in * SVG_DPI)\n\n    # Calculate drawable area (inside margins)\n    margin_px = int(margin * SVG_DPI)\n    drawable_w_px = width_px - (2 * margin_px)\n    drawable_h_px = height_px - (2 * margin_px) - footer_height_px\n\n    # Calculate scale (pixels per foot)\n    scale_x = drawable_w_px / geo_width_ft\n    scale_y = drawable_h_px / geo_height_ft\n\n    # Use the smaller scale to FIT content within drawable area\n    # This ensures the full content (including context buffer) is visible\n    scale = min(scale_x, scale_y)\n\n    # Standard engineering scales (feet per inch)\n    STANDARD_FT_PER_INCH = [10, 20, 30, 40, 50, 60, 80, 100, 200]\n\n    # Handle scale override\n    if scale_override and scale_override != 'Auto':\n        # Parse scale string like '1\"=20\\'' or '1\"=20''\n        import re\n        match = re.search(r'(\\d+)', scale_override)\n        if match:\n            requested_ft_per_inch = int(match.group(1))\n            scale = SVG_DPI / requested_ft_per_inch\n    else:\n        # Auto mode: snap to next standard engineering scale that fits\n        natural_ft_per_inch = SVG_DPI / scale\n        for std in STANDARD_FT_PER_INCH:\n            if std >= natural_ft_per_inch:\n                scale = SVG_DPI / std\n                break\n        # If content too large even for 1\"=200', keep natural scale\n\n    # Calculate offsets to center the geometry in drawable area\n    centered_w_ft = drawable_w_px / scale\n    centered_h_ft = drawable_h_px / scale\n\n    extra_w_ft = centered_w_ft - geo_width_ft\n    extra_h_ft = centered_h_ft - geo_height_ft\n\n    # Offset subtracts min (to zero) then adds centering buffer\n    offset_x = -minx + (extra_w_ft / 2)\n    offset_y = -miny + (extra_h_ft / 2)\n\n    return width_px, height_px, scale, scale, offset_x, offset_y, footer_height_px, margin_px",
+      "node_kind": "free_function",
+      "parameter_types": {
+        "bounds": "Tuple[float, float, float, float]",
+        "paper_size": "str",
+        "orientation": "str",
+        "margin": "float",
+        "scale_override": "str"
+      },
+      "return_type": "Tuple[int, int, float, float, float, float, int, int]",
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 15,
+      "idioms_needed": [
+        "multiple_return"
+      ]
+    },
+    "drawing__geo_to_svg": {
+      "node_id": "drawing__geo_to_svg",
+      "source_file": "drawing.py",
+      "line_start": 285,
+      "line_end": 322,
+      "source_text": "def geo_to_svg(\n    x: float,\n    y: float,\n    scale_x: float,\n    scale_y: float,\n    offset_x: float,\n    offset_y: float,\n    height_px: int,\n    footer_height_px: int,\n    margin_px: int\n) -> Tuple[float, float]:\n    \"\"\"\n    Convert geographic coordinates (feet) to SVG pixel coordinates.\n\n    Handles the Y-axis flip required for SVG (origin at top-left).\n\n    Args:\n        x: X coordinate in feet (EPSG:2238)\n        y: Y coordinate in feet (EPSG:2238)\n        scale_x: Horizontal scale (pixels per foot)\n        scale_y: Vertical scale (pixels per foot)\n        offset_x: X offset for centering\n        offset_y: Y offset for centering\n        height_px: Total SVG height in pixels\n        footer_height_px: Footer height in pixels\n        margin_px: Margin size in pixels\n\n    Returns:\n        Tuple of (svg_x, svg_y) in pixel coordinates\n    \"\"\"\n    svg_x = (x + offset_x) * scale_x + margin_px\n\n    # Y axis flip: SVG origin is top-left, geographic origin is bottom-left\n    # Bottom of drawable area = height_px - footer_height_px - margin_px\n    # We subtract the scaled relative Y from the bottom line\n    svg_y = (height_px - footer_height_px - margin_px) - ((y + offset_y) * scale_y)\n\n    return svg_x, svg_y",
+      "node_kind": "free_function",
+      "parameter_types": {
+        "x": "float",
+        "y": "float",
+        "scale_x": "float",
+        "scale_y": "float",
+        "offset_x": "float",
+        "offset_y": "float",
+        "height_px": "int",
+        "footer_height_px": "int",
+        "margin_px": "int"
+      },
+      "return_type": "Tuple[float, float]",
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 1,
+      "idioms_needed": [
+        "multiple_return"
+      ]
+    },
+    "drawing__create_transform_closure": {
+      "node_id": "drawing__create_transform_closure",
+      "source_file": "drawing.py",
+      "line_start": 325,
+      "line_end": 357,
+      "source_text": "def create_transform_closure(\n    scale_x: float,\n    scale_y: float,\n    offset_x: float,\n    offset_y: float,\n    height_px: int,\n    footer_height_px: int,\n    margin_px: int\n):\n    \"\"\"\n    Create a closure for coordinate transformation.\n\n    Returns a function that converts geographic coordinates to SVG coordinates\n    using the pre-configured transform parameters.\n\n    Args:\n        scale_x: Horizontal scale (pixels per foot)\n        scale_y: Vertical scale (pixels per foot)\n        offset_x: X offset for centering\n        offset_y: Y offset for centering\n        height_px: Total SVG height in pixels\n        footer_height_px: Footer height in pixels\n        margin_px: Margin size in pixels\n\n    Returns:\n        Function that takes (x, y) in feet and returns (svg_x, svg_y) in pixels\n    \"\"\"\n    def transform(x: float, y: float) -> Tuple[float, float]:\n        return geo_to_svg(\n            x, y, scale_x, scale_y, offset_x, offset_y,\n            height_px, footer_height_px, margin_px\n        )\n    return transform",
+      "node_kind": "free_function",
+      "parameter_types": {
+        "scale_x": "float",
+        "scale_y": "float",
+        "offset_x": "float",
+        "offset_y": "float",
+        "height_px": "int",
+        "footer_height_px": "int",
+        "margin_px": "int"
+      },
+      "return_type": null,
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layers__geometry_to_path": {
+      "node_id": "layers__geometry_to_path",
+      "source_file": "layers.py",
+      "line_start": 34,
+      "line_end": 76,
+      "source_text": "def geometry_to_path(\n    geom,\n    to_svg: CoordTransform\n) -> str:\n    \"\"\"\n    Convert a Shapely geometry to an SVG path string.\n\n    Args:\n        geom: Shapely geometry (Point, Polygon, LineString, or Multi* variants)\n        to_svg: Coordinate transform function (geo coords -> SVG coords)\n\n    Returns:\n        SVG path \"d\" attribute string\n    \"\"\"\n    if isinstance(geom, Point):\n        cx, cy = to_svg(geom.x, geom.y)\n        # Small circle path for points\n        return f\"M {cx},{cy} m -5,0 a 5,5 0 1,0 10,0 a 5,5 0 1,0 -10,0\"\n\n    elif isinstance(geom, Polygon):\n        coords = list(geom.exterior.coords)\n    elif isinstance(geom, LineString):\n        coords = list(geom.coords)\n    elif isinstance(geom, (MultiPolygon, MultiLineString)):\n        if len(geom.geoms) > 0:\n            return geometry_to_path(geom.geoms[0], to_svg)\n        return \"\"\n    else:\n        return \"\"\n\n    if not coords:\n        return \"\"\n\n    path = []\n    for i, (x, y) in enumerate(coords):\n        sx, sy = to_svg(x, y)\n        cmd = \"M\" if i == 0 else \"L\"\n        path.append(f\"{cmd} {sx:.2f},{sy:.2f}\")\n\n    if isinstance(geom, Polygon):\n        path.append(\"Z\")\n\n    return \" \".join(path)",
+      "node_kind": "free_function",
+      "parameter_types": {
+        "geom": "Any",
+        "to_svg": "CoordTransform"
+      },
+      "return_type": "str",
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 9,
+      "idioms_needed": [
+        "format_string",
+        "isinstance_check"
+      ]
+    },
+    "layers___rotate_and_crop_raster": {
+      "node_id": "layers___rotate_and_crop_raster",
+      "source_file": "layers.py",
+      "line_start": 79,
+      "line_end": 165,
+      "source_text": "def _rotate_and_crop_raster(\n    img_bytes: bytes,\n    rotation_deg: float,\n    place_x: float, place_y: float, place_w: float, place_h: float,\n    crop_rect: Tuple[float, float, float, float],\n) -> Tuple[bytes, float, float, float, float]:\n    \"\"\"Rotate a raster image with PIL and crop to the drawable area.\n\n    Args:\n        img_bytes: Raw image bytes (PNG/JPEG/WebP)\n        rotation_deg: Clockwise rotation in degrees\n        place_x, place_y, place_w, place_h: Current placement in SVG pixels\n        crop_rect: (x, y, w, h) of the drawable area to crop to\n\n    Returns:\n        (new_bytes, new_x, new_y, new_w, new_h) after rotation and crop\n    \"\"\"\n    img = Image.open(BytesIO(img_bytes))\n    if img.mode != 'RGBA':\n        img = img.convert('RGBA')\n\n    orig_w, orig_h = img.size\n\n    # PIL rotates counter-clockwise; SVG rotation is clockwise\n    rotated = img.rotate(\n        -rotation_deg,\n        resample=Image.Resampling.BICUBIC,\n        expand=True,\n        fillcolor=(0, 0, 0, 0),\n    )\n    rot_w, rot_h = rotated.size\n\n    # New placement bounds after expansion \u2014 center stays the same\n    cx = place_x + place_w / 2\n    cy = place_y + place_h / 2\n\n    # Scale factors: how many SVG pixels per image pixel\n    sx = place_w / orig_w\n    sy = place_h / orig_h\n\n    new_svg_w = rot_w * sx\n    new_svg_h = rot_h * sy\n    new_svg_x = cx - new_svg_w / 2\n    new_svg_y = cy - new_svg_h / 2\n\n    # Crop to intersection with drawable area\n    cr_x, cr_y, cr_w, cr_h = crop_rect\n    cr_right = cr_x + cr_w\n    cr_bottom = cr_y + cr_h\n\n    int_left = max(new_svg_x, cr_x)\n    int_top = max(new_svg_y, cr_y)\n    int_right = min(new_svg_x + new_svg_w, cr_right)\n    int_bottom = min(new_svg_y + new_svg_h, cr_bottom)\n\n    if int_right <= int_left or int_bottom <= int_top:\n        # No intersection \u2014 return empty transparent 1x1\n        buf = BytesIO()\n        Image.new('RGBA', (1, 1), (0, 0, 0, 0)).save(buf, format='PNG')\n        return buf.getvalue(), cr_x, cr_y, 0, 0\n\n    # Convert SVG pixel bounds back to image pixel bounds for cropping\n    # Use floor for left/top and ceil for right/bottom to avoid sub-pixel gaps\n    import math as _math\n    pix_left = _math.floor((int_left - new_svg_x) / sx)\n    pix_top = _math.floor((int_top - new_svg_y) / sy)\n    pix_right = _math.ceil((int_right - new_svg_x) / sx)\n    pix_bottom = _math.ceil((int_bottom - new_svg_y) / sy)\n\n    # Clamp to image dimensions\n    pix_left = max(0, min(pix_left, rot_w))\n    pix_top = max(0, min(pix_top, rot_h))\n    pix_right = max(0, min(pix_right, rot_w))\n    pix_bottom = max(0, min(pix_bottom, rot_h))\n\n    cropped = rotated.crop((pix_left, pix_top, pix_right, pix_bottom))\n\n    buf = BytesIO()\n    cropped.save(buf, format='PNG')\n\n    return (\n        buf.getvalue(),\n        int_left,\n        int_top,\n        int_right - int_left,\n        int_bottom - int_top,\n    )",
+      "node_kind": "free_function",
+      "parameter_types": {
+        "img_bytes": "bytes",
+        "rotation_deg": "float",
+        "place_x": "float",
+        "place_y": "float",
+        "place_w": "float",
+        "place_h": "float",
+        "crop_rect": "Tuple[float, float, float, float]"
+      },
+      "return_type": "Tuple[bytes, float, float, float, float]",
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 4,
+      "idioms_needed": [
+        "multiple_return"
+      ]
+    },
+    "layers__render_aerial_imagery": {
+      "node_id": "layers__render_aerial_imagery",
+      "source_file": "layers.py",
+      "line_start": 168,
+      "line_end": 312,
+      "source_text": "def render_aerial_imagery(\n    dwg: SvgDrawing,\n    imagery_data: Dict[str, Any],\n    to_svg: CoordTransform,\n    opacity: float = 0.7,\n    group_id: str = 'aerial_imagery',\n    fill_bounds: Optional[Tuple[float, float, float, float]] = None,\n    halign: str = 'center',\n    valign: str = 'center',\n    rotation_deg: float = 0.0,\n    crop_rect: Optional[Tuple[float, float, float, float]] = None,\n) -> Optional[Dict[str, float]]:\n    \"\"\"\n    Render aerial imagery as an embedded image in the SVG.\n\n    RECOMMENDED: Use fill_bounds parameter to position imagery directly to\n    the drawable area. This avoids CRS round-trip transformation errors.\n\n    Legacy mode (without fill_bounds) transforms Web Mercator bounds to\n    EPSG:2238, which can introduce alignment errors due to datum differences.\n\n    Args:\n        dwg: svgwrite.Drawing object to add the imagery to\n        imagery_data: Dictionary containing:\n            - bytes: Raw image bytes\n            - format: Image format (e.g., 'webp', 'png')\n            - bounds_wm: Web Mercator bounds [minx, miny, maxx, maxy]\n        to_svg: Coordinate transform function (geo feet -> SVG pixels)\n        opacity: Image opacity (0.0 - 1.0)\n        group_id: SVG group ID for the imagery layer\n        fill_bounds: (x, y, w, h) pixel bounds to fill (RECOMMENDED).\n            When provided, the image fills this area directly, avoiding\n            CRS transformation errors.\n        halign: Horizontal alignment ('left', 'center', 'right')\n        valign: Vertical alignment ('top', 'center', 'bottom')\n\n    Returns:\n        Dictionary with SVG position and dimensions:\n            {'x': float, 'y': float, 'width': float, 'height': float}\n        Or None if imagery_data is empty/invalid\n    \"\"\"\n    if not imagery_data:\n        return None\n\n    img_bytes = imagery_data.get('bytes')\n    img_format = imagery_data.get('format', 'webp')\n    img_bounds_wm = imagery_data.get('bounds_wm')\n    img_bounds_proj = imagery_data.get('bounds_proj')\n    img_crs = imagery_data.get('crs')\n\n    if img_bytes is None:\n        return None\n        \n    # PATH A: Image is already projected to target CRS (Preferred)\n    if img_bounds_proj is not None:\n        print(f\"  Adding aerial imagery (Pre-warped to {img_crs})...\")\n        img_minx, img_miny, img_maxx, img_maxy = img_bounds_proj\n        \n    # PATH B: Image is in Web Mercator (Legacy/Fallback)\n    elif img_bounds_wm is not None:\n        print(f\"  Adding aerial imagery (Legacy EPSG:3857 -> Reprojecting bounds only)...\")\n        # Convert Web Mercator bounds to EPSG:2238 (Feet)\n        img_bbox = box(img_bounds_wm[0], img_bounds_wm[1], img_bounds_wm[2], img_bounds_wm[3])\n        img_gdf = gpd.GeoDataFrame([1], geometry=[img_bbox], crs='EPSG:3857')\n\n        # Project to drawing CRS (EPSG:2238) - Note: This is an approximation of the bounds!\n        # It does NOT warp the pixels inside! This causes the \"warping\" visual issue.\n        img_gdf_proj = img_gdf.to_crs('EPSG:2238')\n        img_bounds_proj = img_gdf_proj.total_bounds\n        img_minx, img_miny, img_maxx, img_maxy = img_bounds_proj\n    else:\n        return None\n\n    # SVG Top-Left (from MinX, MaxY in projected coords)\n    img_svg_x, img_svg_y = to_svg(img_minx, img_maxy)\n\n    # SVG Bottom-Right (from MaxX, MinY)\n    img_svg_x2, img_svg_y2 = to_svg(img_maxx, img_miny)\n\n    img_svg_w = img_svg_x2 - img_svg_x\n    img_svg_h = img_svg_y2 - img_svg_y\n\n    # Force PNG conversion for Illustrator compatibility if not already PNG/JPEG\n    if img_format.lower() not in ['png', 'jpg', 'jpeg']:\n        print(f\"    Converting {img_format.upper()} to PNG for Illustrator compatibility...\")\n        img = Image.open(BytesIO(img_bytes))\n        # Ensure it has an alpha channel for consistency if needed, \n        # but PNG usually handles it.\n        buffer = BytesIO()\n        img.save(buffer, format='PNG')\n        img_bytes = buffer.getvalue()\n        img_format = 'png'\n\n    # Encode to base64 data URI\n    img_base64 = base64.b64encode(img_bytes).decode()\n    img_data_uri = f\"data:image/{img_format};base64,{img_base64}\"\n\n    # Determine placement: use fill_bounds if provided, otherwise geo bounds\n    if fill_bounds:\n        place_x, place_y, place_w, place_h = fill_bounds\n        # Use 'none' to stretch image to fill exactly\n        # The aerial bounds were already expanded in site_assembler to match\n        # the drawable area aspect ratio, so the image should fit without distortion.\n        # Illustrator doesn't properly support 'slice' mode anyway.\n        aspect_ratio = 'none'\n    else:\n        place_x, place_y, place_w, place_h = img_svg_x, img_svg_y, img_svg_w, img_svg_h\n        aspect_ratio = 'none'\n\n    # Apply PIL rotation + crop when requested (flat_layers mode)\n    if abs(rotation_deg) > 0.01 and crop_rect is not None:\n        img_bytes, place_x, place_y, place_w, place_h = _rotate_and_crop_raster(\n            img_bytes, rotation_deg,\n            place_x, place_y, place_w, place_h,\n            crop_rect,\n        )\n        img_format = 'png'\n        # Re-encode after rotation\n        img_base64 = base64.b64encode(img_bytes).decode()\n        img_data_uri = f\"data:image/{img_format};base64,{img_base64}\"\n        aspect_ratio = 'none'\n\n    svg_bounds = {\n        'x': place_x,\n        'y': place_y,\n        'width': place_w,\n        'height': place_h\n    }\n\n    # Create image element directly (no redundant group)\n\n    # Use xlink:href specifically for better affinity with Illustrator/CAD\n    image_args = {\n        'id': group_id,  # Use main ID for the item itself\n        'insert': (place_x, place_y),\n        'size': (f'{place_w}px', f'{place_h}px'),\n        'opacity': opacity,\n        'preserveAspectRatio': aspect_ratio,\n        'href': img_data_uri,\n        'xlink:href': img_data_uri\n    }\n\n    aerial_item = dwg.image(**image_args)\n    # Return the item directly instead of a group\n    return svg_bounds, aerial_item",
+      "node_kind": "free_function",
+      "parameter_types": {
+        "dwg": "SvgDrawing",
+        "imagery_data": "Dict[str, Any]",
+        "to_svg": "CoordTransform",
+        "opacity": "float",
+        "group_id": "str",
+        "fill_bounds": "Optional[Tuple[float, float, float, float]]",
+        "halign": "str",
+        "valign": "str",
+        "rotation_deg": "float",
+        "crop_rect": "Optional[Tuple[float, float, float, float]]"
+      },
+      "return_type": "Optional[Dict[str, float]]",
+      "type_dependencies": [],
+      "call_dependencies": [
+        "layers___rotate_and_crop_raster"
+      ],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 9,
+      "idioms_needed": [
+        "format_string",
+        "none_check",
+        "optional_type",
+        "svgwrite_buffer"
+      ]
+    },
+    "layers__render_terrain_heatmap": {
+      "node_id": "layers__render_terrain_heatmap",
+      "source_file": "layers.py",
+      "line_start": 315,
+      "line_end": 446,
+      "source_text": "def render_terrain_heatmap(\n    dwg: SvgDrawing,\n    terrain_data: Dict[str, Any],\n    to_svg: CoordTransform,\n    opacity: float = 0.5,\n    group_id: str = 'elevation_heatmap',\n    fill_bounds: Optional[Tuple[float, float, float, float]] = None,\n    rotation_deg: float = 0.0,\n    crop_rect: Optional[Tuple[float, float, float, float]] = None,\n) -> Optional[Tuple[Dict[str, float], Any]]:\n    \"\"\"\n    Render colorized terrain/elevation heatmap as an embedded image.\n\n    Takes a grayscale elevation image and colorizes it using a terrain colormap\n    (blue=low, green=mid, red=high).\n\n    Args:\n        dwg: svgwrite.Drawing object to add the heatmap to\n        terrain_data: Dictionary containing 'elevation_heatmap' with:\n            - image: Base64-encoded grayscale image\n            - bounds: Bounds [minx, miny, maxx, maxy] in the terrain CRS\n        to_svg: Coordinate transform function (EPSG:2238 feet -> SVG pixels)\n        opacity: Image opacity (0.0 - 1.0)\n        group_id: SVG group ID for the heatmap layer\n\n    Returns:\n        Tuple of (svg_bounds dict, SVG group element) or None if no valid data\n    \"\"\"\n    if not terrain_data or not terrain_data.get('elevation_heatmap'):\n        return None\n\n    terrain_heatmap = terrain_data['elevation_heatmap']\n    heatmap_image_b64 = terrain_heatmap.get('image')\n    heatmap_bounds = terrain_heatmap.get('bounds')\n\n    if not heatmap_image_b64 or heatmap_bounds is None:\n        return None\n\n    # Check if terrain data specifies its CRS (new EPSG:2238 pipeline)\n    terrain_crs = terrain_data.get('crs', 'EPSG:4326')\n\n    print(f\"  Adding colorized terrain heatmap (CRS: {terrain_crs})...\")\n\n    # Decode the grayscale image and colorize it\n    img_bytes = base64.b64decode(heatmap_image_b64)\n    grayscale_img = Image.open(BytesIO(img_bytes)).convert('L')\n    grayscale_array = np.array(grayscale_img)\n    height_img, width_img = grayscale_array.shape[:2]\n\n    # Create RGBA array for colorized output\n    colored_array = np.zeros((height_img, width_img, 4), dtype=np.uint8)\n    for y in range(height_img):\n        for x in range(width_img):\n            gray_val = grayscale_array[y, x]\n            if gray_val == 0:\n                colored_array[y, x] = [0, 0, 0, 0]  # Transparent for nodata\n            else:\n                normalized = gray_val / 255.0\n                r, g, b = apply_terrain_colormap(normalized)\n                colored_array[y, x] = [r, g, b, 180]  # Semi-transparent\n\n    # Convert to PNG\n    colored_img = Image.fromarray(colored_array, mode='RGBA')\n    buffer = BytesIO()\n    colored_img.save(buffer, format='PNG')\n    colored_bytes = buffer.getvalue()\n    colored_base64 = base64.b64encode(colored_bytes).decode()\n    terrain_data_uri = f\"data:image/png;base64,{colored_base64}\"\n\n    # SVG coordinates - use fill_bounds if provided (recommended), otherwise use geo bounds\n    if fill_bounds:\n        # fill_bounds provided - position directly, no CRS transformation needed\n        place_x, place_y, place_w, place_h = fill_bounds\n        aspect_ratio = 'none'  # Stretch to fill\n    else:\n        # Get bounds in EPSG:2238\n        # If terrain is already in EPSG:2238, use bounds directly (no reprojection distortion)\n        # If terrain is in WGS84 (legacy), reproject bounds\n        if terrain_crs in ['EPSG:2238', 'EPSG:2882']:\n            # Bounds are already in feet - use directly\n            terrain_minx, terrain_miny, terrain_maxx, terrain_maxy = heatmap_bounds\n            print(f\"    Using {terrain_crs} bounds directly (no reprojection)\")\n        else:\n            # Legacy WGS84 path - reproject bounds\n            terrain_bbox = box(heatmap_bounds[0], heatmap_bounds[1], heatmap_bounds[2], heatmap_bounds[3])\n            terrain_gdf = gpd.GeoDataFrame([1], geometry=[terrain_bbox], crs=terrain_crs)\n            terrain_gdf_proj = terrain_gdf.to_crs('EPSG:2238')\n            terrain_bounds_proj = terrain_gdf_proj.total_bounds\n            terrain_minx, terrain_miny, terrain_maxx, terrain_maxy = terrain_bounds_proj\n\n        terrain_svg_x, terrain_svg_y = to_svg(terrain_minx, terrain_maxy)\n        terrain_svg_x2, terrain_svg_y2 = to_svg(terrain_maxx, terrain_miny)\n        place_x = terrain_svg_x\n        place_y = terrain_svg_y\n        place_w = terrain_svg_x2 - terrain_svg_x\n        place_h = terrain_svg_y2 - terrain_svg_y\n        aspect_ratio = 'none'\n\n    # Apply PIL rotation + crop when requested (flat_layers mode)\n    if abs(rotation_deg) > 0.01 and crop_rect is not None:\n        colored_bytes, place_x, place_y, place_w, place_h = _rotate_and_crop_raster(\n            colored_bytes, rotation_deg,\n            place_x, place_y, place_w, place_h,\n            crop_rect,\n        )\n        colored_base64 = base64.b64encode(colored_bytes).decode()\n        terrain_data_uri = f\"data:image/png;base64,{colored_base64}\"\n        aspect_ratio = 'none'\n\n    svg_bounds = {\n        'x': place_x,\n        'y': place_y,\n        'width': place_w,\n        'height': place_h\n    }\n\n    # Create image element directly (no redundant group)\n    image_args = {\n        'id': group_id,  # Use main ID for the item itself\n        'insert': (place_x, place_y),\n        'size': (f'{place_w}px', f'{place_h}px'),\n        'opacity': opacity,\n        'preserveAspectRatio': aspect_ratio,\n        'href': terrain_data_uri,\n        'xlink:href': terrain_data_uri\n    }\n\n    heatmap_item = dwg.image(**image_args)\n\n    print(f\"    Added terrain heatmap ({width_img}x{height_img}px)\")\n\n    return svg_bounds, heatmap_item",
+      "node_kind": "free_function",
+      "parameter_types": {
+        "dwg": "SvgDrawing",
+        "terrain_data": "Dict[str, Any]",
+        "to_svg": "CoordTransform",
+        "opacity": "float",
+        "group_id": "str",
+        "fill_bounds": "Optional[Tuple[float, float, float, float]]",
+        "rotation_deg": "float",
+        "crop_rect": "Optional[Tuple[float, float, float, float]]"
+      },
+      "return_type": "Optional[Tuple[Dict[str, float], Any]]",
+      "type_dependencies": [],
+      "call_dependencies": [
+        "layers___rotate_and_crop_raster",
+        "drawing__apply_terrain_colormap"
+      ],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 12,
+      "idioms_needed": [
+        "format_string",
+        "multiple_return",
+        "none_check",
+        "optional_type",
+        "svgwrite_buffer"
+      ]
+    },
+    "layers__render_soils": {
+      "node_id": "layers__render_soils",
+      "source_file": "layers.py",
+      "line_start": 449,
+      "line_end": 516,
+      "source_text": "def render_soils(\n    dwg: SvgDrawing,\n    soils: gpd.GeoDataFrame,\n    to_svg: CoordTransform,\n    group_id: str = 'soils'\n) -> Optional[Any]:\n    \"\"\"\n    Render soil polygons with drainage-based coloring.\n\n    Soil colors are determined by drainage class:\n    - Hydric (>50%): Blue\n    - Very poorly drained: Light blue\n    - Poorly drained: Blue-gray\n    - Moderately well drained: Tan\n    - Well drained: Light tan\n\n    Args:\n        dwg: svgwrite.Drawing object to add soils to\n        soils: GeoDataFrame with soil polygons and attributes:\n            - geometry: Polygon geometries\n            - drclassdcd: Drainage class description (optional)\n            - hydclprs: Hydric percentage (optional)\n        to_svg: Coordinate transform function (geo coords -> SVG pixels)\n        group_id: SVG group ID for the soils layer\n\n    Returns:\n        SVG group element or None if soils is empty/None\n    \"\"\"\n    if soils is None or soils.empty:\n        return None\n\n    grp = dwg.g(id=group_id)\n\n    for zone_idx, (_, row) in enumerate(soils.iterrows()):\n        d = geometry_to_path(row.geometry, to_svg)\n        if not d:\n            continue\n\n        # Color by drainage class\n        drainage = row.get('drclassdcd', '') if hasattr(row, 'get') else ''\n        hydric_raw = row.get('hydclprs', 0) if hasattr(row, 'get') else 0\n        # Convert hydric to numeric (may be string from database)\n        try:\n            hydric = float(hydric_raw) if hydric_raw else 0\n        except (ValueError, TypeError):\n            hydric = 0\n\n        if hydric > 50:\n            css_class = 'soil-hydric'\n        elif drainage in ['Very poorly drained', 'Subaqueous']:\n            css_class = 'soil-verypoor'\n        elif drainage in ['Poorly drained', 'Somewhat poorly drained']:\n            css_class = 'soil-poor'\n        elif drainage == 'Moderately well drained':\n            css_class = 'soil-moderate'\n        else:\n            css_class = 'soil-well'\n\n        # Add data attributes for interactivity\n        extra_args = {\n            'data-soil-name': row.get('muname', ''),\n            'data-drainage': drainage,\n            'data-hydric': str(hydric),\n            'data-hydgrp': row.get('hydgrpdcd', '')\n        }\n        grp.add(dwg.path(d=d, id=f'soil_zone_{zone_idx}', class_=css_class, **extra_args))\n\n    return grp",
+      "node_kind": "free_function",
+      "parameter_types": {
+        "dwg": "SvgDrawing",
+        "soils": "gpd.GeoDataFrame",
+        "to_svg": "CoordTransform",
+        "group_id": "str"
+      },
+      "return_type": "Optional[Any]",
+      "type_dependencies": [],
+      "call_dependencies": [
+        "layers__geometry_to_path"
+      ],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 10,
+      "idioms_needed": [
+        "format_string",
+        "none_check",
+        "optional_type",
+        "svgwrite_buffer"
+      ]
+    },
+    "layers__render_contours": {
+      "node_id": "layers__render_contours",
+      "source_file": "layers.py",
+      "line_start": 519,
+      "line_end": 588,
+      "source_text": "def render_contours(\n    dwg: SvgDrawing,\n    contours: gpd.GeoDataFrame,\n    to_svg: CoordTransform,\n    include_labels: bool = True,\n    major_interval: int = 10,\n    group_id: str = 'contours',\n    label_group_id: str = 'contour_labels'\n) -> Tuple[Optional[Any], Optional[Any]]:\n    \"\"\"\n    Render contour lines with optional elevation labels.\n\n    Major contours (at specified interval) are rendered with thicker lines\n    and include elevation labels at the midpoint.\n\n    Args:\n        dwg: svgwrite.Drawing object to add contours to\n        contours: GeoDataFrame with contour lines and attributes:\n            - geometry: LineString geometries\n            - elevation: Elevation value in feet\n        to_svg: Coordinate transform function (geo coords -> SVG pixels)\n        include_labels: Whether to include elevation labels on major contours\n        major_interval: Interval for major contours (default: every 10ft)\n        group_id: SVG group ID for the contour lines\n        label_group_id: SVG group ID for the contour labels\n\n    Returns:\n        Tuple of (contours group, labels group) - either may be None\n    \"\"\"\n    if contours is None or contours.empty:\n        return None, None\n\n    grp = dwg.g(id=group_id)\n    lbl_grp = dwg.g(id=label_group_id) if include_labels else None\n\n    for _, row in contours.iterrows():\n        elev = row.get('elevation', 0)\n        is_major = (int(elev) % major_interval == 0)\n        cls = 'contour-major' if is_major else 'contour'\n\n        d = geometry_to_path(row.geometry, to_svg)\n        if not d:\n            continue\n\n        grp.add(dwg.path(d=d, class_=cls))\n\n        if is_major and include_labels and lbl_grp is not None:\n            # Get midpoint for label placement\n            geom = row.geometry\n            coords = []\n            if geom.geom_type == 'Polygon':\n                coords = list(geom.exterior.coords)\n            elif geom.geom_type == 'LineString':\n                coords = list(geom.coords)\n            elif geom.geom_type == 'MultiLineString':\n                if len(geom.geoms) > 0:\n                    coords = list(geom.geoms[0].coords)\n\n            if coords:\n                mx, my = coords[len(coords) // 2]\n                sx, sy = to_svg(mx, my)\n                lbl_grp.add(dwg.text(\n                    f\"{int(elev)}'\",\n                    insert=(sx, sy),\n                    class_='label',\n                    stroke='white',\n                    stroke_width=2\n                ))\n\n    return grp, lbl_grp",
+      "node_kind": "free_function",
+      "parameter_types": {
+        "dwg": "SvgDrawing",
+        "contours": "gpd.GeoDataFrame",
+        "to_svg": "CoordTransform",
+        "include_labels": "bool",
+        "major_interval": "int",
+        "group_id": "str",
+        "label_group_id": "str"
+      },
+      "return_type": "Tuple[Optional[Any], Optional[Any]]",
+      "type_dependencies": [],
+      "call_dependencies": [
+        "layers__geometry_to_path"
+      ],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 13,
+      "idioms_needed": [
+        "format_string",
+        "multiple_return",
+        "none_check",
+        "optional_type",
+        "svgwrite_buffer"
+      ]
+    },
+    "layers__render_buildings": {
+      "node_id": "layers__render_buildings",
+      "source_file": "layers.py",
+      "line_start": 591,
+      "line_end": 623,
+      "source_text": "def render_buildings(\n    dwg: SvgDrawing,\n    buildings: gpd.GeoDataFrame,\n    to_svg: CoordTransform,\n    group_id: str = 'buildings'\n) -> Optional[Any]:\n    \"\"\"\n    Render building footprints as filled polygons.\n\n    Args:\n        dwg: svgwrite.Drawing object to add buildings to\n        buildings: GeoDataFrame with building polygons\n        to_svg: Coordinate transform function (geo coords -> SVG pixels)\n        group_id: SVG group ID for the buildings layer\n\n    Returns:\n        SVG group element or None if buildings is empty/None\n    \"\"\"\n    if buildings is None or buildings.empty:\n        return None\n\n    grp = dwg.g(id=group_id)\n\n    for _, row in buildings.iterrows():\n        d = geometry_to_path(row.geometry, to_svg)\n        if d:\n            extra_args = {}\n            if 'height_ft' in row:\n                extra_args['data-height'] = f\"{row['height_ft']:.1f}\"\n            \n            grp.add(dwg.path(d=d, class_='building', **extra_args))\n\n    return grp",
+      "node_kind": "free_function",
+      "parameter_types": {
+        "dwg": "SvgDrawing",
+        "buildings": "gpd.GeoDataFrame",
+        "to_svg": "CoordTransform",
+        "group_id": "str"
+      },
+      "return_type": "Optional[Any]",
+      "type_dependencies": [],
+      "call_dependencies": [
+        "layers__geometry_to_path"
+      ],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 6,
+      "idioms_needed": [
+        "format_string",
+        "none_check",
+        "optional_type",
+        "svgwrite_buffer"
+      ]
+    },
+    "layers__render_trees": {
+      "node_id": "layers__render_trees",
+      "source_file": "layers.py",
+      "line_start": 626,
+      "line_end": 659,
+      "source_text": "def render_trees(\n    dwg: SvgDrawing,\n    trees: gpd.GeoDataFrame,\n    to_svg: CoordTransform,\n    scale_x: float,\n    radius_ft: float = 10.0,\n    group_id: str = 'trees'\n) -> Optional[Any]:\n    \"\"\"\n    Render tree symbols as circles at point locations.\n\n    Args:\n        dwg: svgwrite.Drawing object to add trees to\n        trees: GeoDataFrame with tree point locations\n        to_svg: Coordinate transform function (geo coords -> SVG pixels)\n        scale_x: Scale factor (pixels per foot) for sizing circles\n        radius_ft: Tree symbol radius in feet (default: 10ft)\n        group_id: SVG group ID for the trees layer\n\n    Returns:\n        SVG group element or None if trees is empty/None\n    \"\"\"\n    if trees is None or trees.empty:\n        return None\n\n    grp = dwg.g(id=group_id)\n    r_px = radius_ft * scale_x\n\n    for _, row in trees.iterrows():\n        geom = row.geometry\n        cx, cy = to_svg(geom.x, geom.y)\n        grp.add(dwg.circle(center=(cx, cy), r=r_px, class_='tree'))\n\n    return grp",
+      "node_kind": "free_function",
+      "parameter_types": {
+        "dwg": "SvgDrawing",
+        "trees": "gpd.GeoDataFrame",
+        "to_svg": "CoordTransform",
+        "scale_x": "float",
+        "radius_ft": "float",
+        "group_id": "str"
+      },
+      "return_type": "Optional[Any]",
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 4,
+      "idioms_needed": [
+        "none_check",
+        "optional_type",
+        "svgwrite_buffer"
+      ]
+    },
+    "layers__render_parcel": {
+      "node_id": "layers__render_parcel",
+      "source_file": "layers.py",
+      "line_start": 662,
+      "line_end": 696,
+      "source_text": "def render_parcel(\n    dwg: SvgDrawing,\n    parcel: gpd.GeoDataFrame,\n    to_svg: CoordTransform,\n    group_id: str = 'parcel'\n) -> Optional[Any]:\n    \"\"\"\n    Render parcel boundary as a dashed outline.\n\n    Args:\n        dwg: svgwrite.Drawing object to add parcel to\n        parcel: GeoDataFrame with parcel polygon (uses first row)\n        to_svg: Coordinate transform function (geo coords -> SVG pixels)\n        group_id: SVG group ID for the parcel layer\n\n    Returns:\n        SVG group element or None if parcel is empty/None\n    \"\"\"\n    if parcel is None or parcel.empty:\n        return None\n\n    d = geometry_to_path(parcel.iloc[0].geometry, to_svg)\n    if not d:\n        return None\n\n    # Return path directly (no redundant group)\n    # Note: id is now set to group_id (\"parcel\") instead of \"parcel_path\"\n    parcel_path = dwg.path(\n        d=d, \n        class_='parcel', \n        id=group_id, \n        **{'data-layer': 'parcel_boundary'}\n    )\n\n    return parcel_path",
+      "node_kind": "free_function",
+      "parameter_types": {
+        "dwg": "SvgDrawing",
+        "parcel": "gpd.GeoDataFrame",
+        "to_svg": "CoordTransform",
+        "group_id": "str"
+      },
+      "return_type": "Optional[Any]",
+      "type_dependencies": [],
+      "call_dependencies": [
+        "layers__geometry_to_path"
+      ],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 4,
+      "idioms_needed": [
+        "none_check",
+        "optional_type",
+        "svgwrite_buffer"
+      ]
+    },
+    "layers__render_calibration_square": {
+      "node_id": "layers__render_calibration_square",
+      "source_file": "layers.py",
+      "line_start": 699,
+      "line_end": 758,
+      "source_text": "def render_calibration_square(\n    dwg: SvgDrawing,\n    to_svg: CoordTransform,\n    scale_x: float,\n    size_ft: float = 10.0,\n    group_id: str = 'calibration'\n) -> Optional[Any]:\n    \"\"\"\n    Render a calibration square of known real-world size.\n    Useful for verifying scale in CAD/Illustrator.\n\n    Args:\n        dwg: svgwrite.Drawing object\n        to_svg: Coordinate transform function\n        scale_x: Pixels per foot\n        size_ft: Size of square in feet (default: 10ft)\n        group_id: SVG group ID\n\n    Returns:\n        SVG group element\n    \"\"\"\n    # Start at origin (0,0 in feet)\n    # We place it at (margin, margin) in SVG for visibility if site is far from origin\n    # But usually it's better to place it at a known location in site coordinates\n    # Let's place it at the site origin (0,0) if possible, or near the first parcel point\n    \n    grp = dwg.g(id=group_id)\n    \n    # We'll use the transform to place it at (0,0) in feet\n    x1, y1 = to_svg(0, 0)\n    x2, y2 = to_svg(size_ft, size_ft)\n    \n    w = abs(x2 - x1)\n    h = abs(y2 - y1)\n    \n    # SVG Y is flipped, so (0,0) to (10,10) feet is (x1, y1) to (x1+w, y1-h)\n    # But to_svg handles the flip.\n    \n    # Draw blue 10x10 box\n    grp.add(dwg.rect(\n        insert=(min(x1, x2), min(y1, y2)),\n        size=(w, h),\n        fill='none',\n        stroke='cyan',\n        stroke_width=2,\n        id='calibration_square_10ft'\n    ))\n    \n    # Add label\n    font_size = max(10, min(14, w / 5)) # Scale text with box\n    grp.add(dwg.text(\n        f\"{int(size_ft)}' x {int(size_ft)}' CHECK\",\n        insert=(min(x1, x2) + 2, min(y1, y2) + font_size + 2),\n        fill='cyan',\n        font_size=f'{font_size}px',\n        font_family='Arial, sans-serif',\n        font_weight='bold'\n    ))\n    \n    return grp",
+      "node_kind": "free_function",
+      "parameter_types": {
+        "dwg": "SvgDrawing",
+        "to_svg": "CoordTransform",
+        "scale_x": "float",
+        "size_ft": "float",
+        "group_id": "str"
+      },
+      "return_type": "Optional[Any]",
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 1,
+      "idioms_needed": [
+        "format_string",
+        "optional_type",
+        "svgwrite_buffer"
+      ]
+    },
+    "layers__render_scale_bar": {
+      "node_id": "layers__render_scale_bar",
+      "source_file": "layers.py",
+      "line_start": 761,
+      "line_end": 815,
+      "source_text": "def render_scale_bar(\n    dwg: SvgDrawing,\n    scale_px_per_ft: float,\n    group_id: str = 'scale_bar'\n) -> Any:\n    \"\"\"\n    Render a 1-inch graphic scale bar showing feet per inch.\n\n    The bar is exactly 1 inch long (SVG_DPI pixels) and labeled\n    with the engineering scale, e.g. '1\" = 40''.\n\n    Args:\n        dwg: svgwrite.Drawing object\n        scale_px_per_ft: Scale factor (pixels per foot)\n        group_id: SVG group ID\n\n    Returns:\n        SVG group element\n    \"\"\"\n    from .drawing import SVG_DPI\n\n    grp = dwg.g(id=group_id)\n\n    # Bar is exactly 1 inch = SVG_DPI pixels\n    pixel_len = SVG_DPI\n    ft_per_inch = SVG_DPI / scale_px_per_ft\n\n    # Semi-transparent white background for legibility over aerial\n    pad = 6\n    grp.add(dwg.rect(\n        insert=(-pad, -20),\n        size=(pixel_len + 2 * pad, 42),\n        fill='white',\n        fill_opacity=0.85,\n        stroke='none',\n        rx=3, ry=3\n    ))\n\n    # Line with ticks\n    y = 0\n    grp.add(dwg.line((0, y), (pixel_len, y), stroke='black', stroke_width=2))\n    grp.add(dwg.line((0, y - 5), (0, y + 5), stroke='black', stroke_width=2))\n    grp.add(dwg.line((pixel_len, y - 5), (pixel_len, y + 5), stroke='black', stroke_width=2))\n\n    # Label: 1\" = X'\n    label = f'1\" = {ft_per_inch:.0f}\\''\n    grp.add(dwg.text(\n        label,\n        insert=(pixel_len / 2, y + 15),\n        class_='label',\n        font_weight='bold',\n        text_anchor='middle'\n    ))\n\n    return grp",
+      "node_kind": "free_function",
+      "parameter_types": {
+        "dwg": "SvgDrawing",
+        "scale_px_per_ft": "float",
+        "group_id": "str"
+      },
+      "return_type": "Any",
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 1,
+      "idioms_needed": [
+        "format_string",
+        "svgwrite_buffer"
+      ]
+    },
+    "layers__render_north_arrow": {
+      "node_id": "layers__render_north_arrow",
+      "source_file": "layers.py",
+      "line_start": 818,
+      "line_end": 854,
+      "source_text": "def render_north_arrow(\n    dwg: SvgDrawing,\n    height_px: float = 40,\n    group_id: str = 'north_arrow'\n) -> Any:\n    \"\"\"\n    Render the north arrow from the embedded SVG path data.\n\n    The arrow is scaled to the requested height while preserving\n    aspect ratio. It includes a semi-transparent white background\n    for legibility over aerial imagery.\n\n    Args:\n        dwg: svgwrite.Drawing object\n        height_px: Desired height in pixels (width auto-calculated)\n        group_id: SVG group ID\n\n    Returns:\n        SVG group element (position with transform on the caller side)\n    \"\"\"\n    from gis.assets.north_arrow import (\n        NORTH_ARROW_PATH,\n        NORTH_ARROW_WIDTH,\n        NORTH_ARROW_HEIGHT,\n    )\n\n    grp = dwg.g(id=group_id)\n\n    # Scale to fit desired height\n    scale = height_px / NORTH_ARROW_HEIGHT\n\n    # Path group with scale transform\n    path_grp = dwg.g(transform=f\"scale({scale})\")\n    path_grp.add(dwg.path(d=NORTH_ARROW_PATH, fill='#000000'))\n    grp.add(path_grp)\n\n    return grp",
+      "node_kind": "free_function",
+      "parameter_types": {
+        "dwg": "SvgDrawing",
+        "height_px": "float",
+        "group_id": "str"
+      },
+      "return_type": "Any",
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 1,
+      "idioms_needed": [
+        "format_string",
+        "svgwrite_buffer"
+      ]
+    },
+    "layers__render_roof_lines": {
+      "node_id": "layers__render_roof_lines",
+      "source_file": "layers.py",
+      "line_start": 857,
+      "line_end": 931,
+      "source_text": "def render_roof_lines(\n    dwg: SvgDrawing,\n    roof_lines: gpd.GeoDataFrame,\n    to_svg: CoordTransform,\n    group_id: str = 'roof_lines'\n) -> Optional[Any]:\n    \"\"\"\n    Render roof lines (ridges, valleys, hips, eaves) as architectural line work.\n\n    Lines are styled by type:\n    - ridge: Thick solid line (primary roof feature)\n    - hip: Medium dashed line (angled roof edge)\n    - valley: Medium dotted line (roof valley)\n    - eave: Thin solid line (roof edge)\n    - unknown: Default thin solid line\n\n    Args:\n        dwg: svgwrite.Drawing object to add roof lines to\n        roof_lines: GeoDataFrame with roof line geometries and attributes:\n            - geometry: LineString geometries\n            - line_type: Type of roof line (ridge, hip, valley, eave)\n        to_svg: Coordinate transform function (geo coords -> SVG pixels)\n        group_id: SVG group ID for the roof lines layer\n\n    Returns:\n        SVG group element or None if roof_lines is empty/None\n    \"\"\"\n    if roof_lines is None or roof_lines.empty:\n        return None\n\n    grp = dwg.g(id=group_id)\n\n    # Define line styles per type\n    line_styles = {\n        'ridge': {'stroke': '#333333', 'stroke_width': 2.5, 'stroke_dasharray': None},\n        'hip': {'stroke': '#555555', 'stroke_width': 1.5, 'stroke_dasharray': '8,4'},\n        'valley': {'stroke': '#555555', 'stroke_width': 1.5, 'stroke_dasharray': '2,4'},\n        'eave': {'stroke': '#777777', 'stroke_width': 1.0, 'stroke_dasharray': None},\n        'rake': {'stroke': '#777777', 'stroke_width': 1.0, 'stroke_dasharray': None},\n        'unknown': {'stroke': '#666666', 'stroke_width': 1.0, 'stroke_dasharray': None},\n    }\n\n    for _, row in roof_lines.iterrows():\n        geom = row.geometry\n        if geom is None or geom.is_empty:\n            continue\n\n        # Get line type for styling\n        line_type = row.get('line_type', 'unknown') if hasattr(row, 'get') else 'unknown'\n        if line_type not in line_styles:\n            line_type = 'unknown'\n\n        style = line_styles[line_type]\n\n        # Convert geometry to SVG path\n        d = geometry_to_path(geom, to_svg)\n        if not d:\n            continue\n\n        # Build path attributes\n        path_attrs = {\n            'd': d,\n            'fill': 'none',\n            'stroke': style['stroke'],\n            'stroke_width': style['stroke_width'],\n            'stroke_linecap': 'round',\n            'stroke_linejoin': 'round',\n        }\n\n        if style['stroke_dasharray']:\n            path_attrs['stroke_dasharray'] = style['stroke_dasharray']\n\n        grp.add(dwg.path(**path_attrs))\n\n    return grp",
+      "node_kind": "free_function",
+      "parameter_types": {
+        "dwg": "SvgDrawing",
+        "roof_lines": "gpd.GeoDataFrame",
+        "to_svg": "CoordTransform",
+        "group_id": "str"
+      },
+      "return_type": "Optional[Any]",
+      "type_dependencies": [],
+      "call_dependencies": [
+        "layers__geometry_to_path"
+      ],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 9,
+      "idioms_needed": [
+        "none_check",
+        "optional_type",
+        "svgwrite_buffer"
+      ]
+    },
+    "layers__render_roof_lines_from_pixels": {
+      "node_id": "layers__render_roof_lines_from_pixels",
+      "source_file": "layers.py",
+      "line_start": 934,
+      "line_end": 998,
+      "source_text": "def render_roof_lines_from_pixels(\n    dwg: SvgDrawing,\n    lines: List[List[float]],\n    img_transform,\n    img_crs,\n    to_svg: CoordTransform,\n    group_id: str = 'roof_lines'\n) -> Optional[Any]:\n    \"\"\"\n    Render roof lines from pixel coordinates (e.g., from M-LSD).\n\n    Converts pixel coordinates to geographic coordinates using the\n    image's affine transform, then renders as SVG paths.\n\n    Args:\n        dwg: svgwrite.Drawing object\n        lines: List of lines as [x1, y1, x2, y2] in pixel coordinates\n        img_transform: Rasterio affine transform from the source image\n        img_crs: CRS of the source image\n        to_svg: Coordinate transform function (EPSG:2238 feet -> SVG pixels)\n        group_id: SVG group ID\n\n    Returns:\n        SVG group element or None if no valid lines\n    \"\"\"\n    if not lines:\n        return None\n\n    from pyproj import Transformer\n\n    grp = dwg.g(id=group_id)\n\n    # Create transformer from image CRS to EPSG:2238\n    transformer = Transformer.from_crs(img_crs, 'EPSG:2238', always_xy=True)\n\n    for line in lines:\n        x1_px, y1_px, x2_px, y2_px = line\n\n        # Convert pixel to image CRS coordinates using affine transform\n        # affine: (a, b, c, d, e, f) where x' = a*col + b*row + c, y' = d*col + e*row + f\n        # rasterio transform: x = transform.c + col * transform.a\n        #                     y = transform.f + row * transform.e\n        x1_geo = img_transform.c + x1_px * img_transform.a + y1_px * img_transform.b\n        y1_geo = img_transform.f + x1_px * img_transform.d + y1_px * img_transform.e\n        x2_geo = img_transform.c + x2_px * img_transform.a + y2_px * img_transform.b\n        y2_geo = img_transform.f + x2_px * img_transform.d + y2_px * img_transform.e\n\n        # Transform to EPSG:2238\n        x1_ft, y1_ft = transformer.transform(x1_geo, y1_geo)\n        x2_ft, y2_ft = transformer.transform(x2_geo, y2_geo)\n\n        # Convert to SVG coordinates\n        sx1, sy1 = to_svg(x1_ft, y1_ft)\n        sx2, sy2 = to_svg(x2_ft, y2_ft)\n\n        # Draw line\n        grp.add(dwg.line(\n            start=(sx1, sy1),\n            end=(sx2, sy2),\n            stroke='#333333',\n            stroke_width=1.5,\n            stroke_linecap='round'\n        ))\n\n    return grp",
+      "node_kind": "free_function",
+      "parameter_types": {
+        "dwg": "SvgDrawing",
+        "lines": "List[List[float]]",
+        "img_transform": "Any",
+        "img_crs": "Any",
+        "to_svg": "CoordTransform",
+        "group_id": "str"
+      },
+      "return_type": "Optional[Any]",
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 3,
+      "idioms_needed": [
+        "optional_type",
+        "svgwrite_buffer"
+      ]
+    },
+    "layout__Rect": {
+      "node_id": "layout__Rect",
+      "source_file": "layout.py",
+      "line_start": 39,
+      "line_end": 63,
+      "source_text": "@dataclass\nclass Rect:\n    \"\"\"A rectangle with position and size.\"\"\"\n    x: float\n    y: float\n    w: float\n    h: float\n\n    @property\n    def right(self) -> float:\n        return self.x + self.w\n\n    @property\n    def bottom(self) -> float:\n        return self.y + self.h\n\n    @property\n    def center_x(self) -> float:\n        return self.x + self.w / 2\n\n    @property\n    def center_y(self) -> float:\n        return self.y + self.h / 2\n\n    def as_dict(self) -> Dict[str, float]:\n        return {'x': self.x, 'y': self.y, 'w': self.w, 'h': self.h}",
+      "node_kind": "class",
+      "parameter_types": {},
+      "return_type": null,
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout__Rect__right": {
+      "node_id": "layout__Rect__right",
+      "source_file": "layout.py",
+      "line_start": 47,
+      "line_end": 48,
+      "source_text": "    @property\n    def right(self) -> float:\n        return self.x + self.w",
+      "node_kind": "getter",
+      "parameter_types": {},
+      "return_type": "float",
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": "layout__Rect",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout__Rect__bottom": {
+      "node_id": "layout__Rect__bottom",
+      "source_file": "layout.py",
+      "line_start": 51,
+      "line_end": 52,
+      "source_text": "    @property\n    def bottom(self) -> float:\n        return self.y + self.h",
+      "node_kind": "getter",
+      "parameter_types": {},
+      "return_type": "float",
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": "layout__Rect",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout__Rect__center_x": {
+      "node_id": "layout__Rect__center_x",
+      "source_file": "layout.py",
+      "line_start": 55,
+      "line_end": 56,
+      "source_text": "    @property\n    def center_x(self) -> float:\n        return self.x + self.w / 2",
+      "node_kind": "getter",
+      "parameter_types": {},
+      "return_type": "float",
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": "layout__Rect",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout__Rect__center_y": {
+      "node_id": "layout__Rect__center_y",
+      "source_file": "layout.py",
+      "line_start": 59,
+      "line_end": 60,
+      "source_text": "    @property\n    def center_y(self) -> float:\n        return self.y + self.h / 2",
+      "node_kind": "getter",
+      "parameter_types": {},
+      "return_type": "float",
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": "layout__Rect",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout__Rect__as_dict": {
+      "node_id": "layout__Rect__as_dict",
+      "source_file": "layout.py",
+      "line_start": 62,
+      "line_end": 63,
+      "source_text": "    def as_dict(self) -> Dict[str, float]:\n        return {'x': self.x, 'y': self.y, 'w': self.w, 'h': self.h}",
+      "node_kind": "method",
+      "parameter_types": {},
+      "return_type": "Dict[str, float]",
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": "layout__Rect",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout__LayoutElement": {
+      "node_id": "layout__LayoutElement",
+      "source_file": "layout.py",
+      "line_start": 66,
+      "line_end": 120,
+      "source_text": "class LayoutElement:\n    \"\"\"\n    An element in the layout with constraint variables.\n\n    Each element has x, y, w, h variables that can be constrained.\n    \"\"\"\n\n    def __init__(self, name: str, solver: SimplexSolver):\n        self.name = name\n        self.solver = solver\n\n        # Position and size variables\n        self.x = Variable(f'{name}_x', 0)\n        self.y = Variable(f'{name}_y', 0)\n        self.w = Variable(f'{name}_w', 0)\n        self.h = Variable(f'{name}_h', 0)\n\n    @property\n    def right(self):\n        \"\"\"Right edge expression: x + w\"\"\"\n        return self.x + self.w\n\n    @property\n    def bottom(self):\n        \"\"\"Bottom edge expression: y + h\"\"\"\n        return self.y + self.h\n\n    @property\n    def center_x(self):\n        \"\"\"Horizontal center expression: x + w/2\"\"\"\n        return self.x + self.w * 0.5\n\n    @property\n    def center_y(self):\n        \"\"\"Vertical center expression: y + h/2\"\"\"\n        return self.y + self.h * 0.5\n\n    def get_rect(self) -> Rect:\n        \"\"\"Get the solved rectangle.\"\"\"\n        return Rect(\n            x=self.x.value,\n            y=self.y.value,\n            w=self.w.value,\n            h=self.h.value\n        )\n\n    def set_fixed_size(self, width: float, height: float, strength=REQUIRED):\n        \"\"\"Constrain this element to a fixed size.\"\"\"\n        self.solver.add_constraint(self.w == width, strength=strength)\n        self.solver.add_constraint(self.h == height, strength=strength)\n\n    def set_min_size(self, min_width: float, min_height: float, strength=REQUIRED):\n        \"\"\"Constrain this element to a minimum size.\"\"\"\n        self.solver.add_constraint(self.w >= min_width, strength=strength)\n        self.solver.add_constraint(self.h >= min_height, strength=strength)",
+      "node_kind": "class",
+      "parameter_types": {},
+      "return_type": null,
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 1,
+      "idioms_needed": [
+        "format_string"
+      ]
+    },
+    "layout__LayoutElement____init__": {
+      "node_id": "layout__LayoutElement____init__",
+      "source_file": "layout.py",
+      "line_start": 73,
+      "line_end": 81,
+      "source_text": "    def __init__(self, name: str, solver: SimplexSolver):\n        self.name = name\n        self.solver = solver\n\n        # Position and size variables\n        self.x = Variable(f'{name}_x', 0)\n        self.y = Variable(f'{name}_y', 0)\n        self.w = Variable(f'{name}_w', 0)\n        self.h = Variable(f'{name}_h', 0)",
+      "node_kind": "constructor",
+      "parameter_types": {
+        "name": "str",
+        "solver": "SimplexSolver"
+      },
+      "return_type": null,
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": "layout__LayoutElement",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout__LayoutElement__right": {
+      "node_id": "layout__LayoutElement__right",
+      "source_file": "layout.py",
+      "line_start": 84,
+      "line_end": 86,
+      "source_text": "    @property\n    def right(self):\n        \"\"\"Right edge expression: x + w\"\"\"\n        return self.x + self.w",
+      "node_kind": "getter",
+      "parameter_types": {},
+      "return_type": null,
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": "layout__LayoutElement",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout__LayoutElement__bottom": {
+      "node_id": "layout__LayoutElement__bottom",
+      "source_file": "layout.py",
+      "line_start": 89,
+      "line_end": 91,
+      "source_text": "    @property\n    def bottom(self):\n        \"\"\"Bottom edge expression: y + h\"\"\"\n        return self.y + self.h",
+      "node_kind": "getter",
+      "parameter_types": {},
+      "return_type": null,
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": "layout__LayoutElement",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout__LayoutElement__center_x": {
+      "node_id": "layout__LayoutElement__center_x",
+      "source_file": "layout.py",
+      "line_start": 94,
+      "line_end": 96,
+      "source_text": "    @property\n    def center_x(self):\n        \"\"\"Horizontal center expression: x + w/2\"\"\"\n        return self.x + self.w * 0.5",
+      "node_kind": "getter",
+      "parameter_types": {},
+      "return_type": null,
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": "layout__LayoutElement",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout__LayoutElement__center_y": {
+      "node_id": "layout__LayoutElement__center_y",
+      "source_file": "layout.py",
+      "line_start": 99,
+      "line_end": 101,
+      "source_text": "    @property\n    def center_y(self):\n        \"\"\"Vertical center expression: y + h/2\"\"\"\n        return self.y + self.h * 0.5",
+      "node_kind": "getter",
+      "parameter_types": {},
+      "return_type": null,
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": "layout__LayoutElement",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout__LayoutElement__get_rect": {
+      "node_id": "layout__LayoutElement__get_rect",
+      "source_file": "layout.py",
+      "line_start": 103,
+      "line_end": 110,
+      "source_text": "    def get_rect(self) -> Rect:\n        \"\"\"Get the solved rectangle.\"\"\"\n        return Rect(\n            x=self.x.value,\n            y=self.y.value,\n            w=self.w.value,\n            h=self.h.value\n        )",
+      "node_kind": "method",
+      "parameter_types": {},
+      "return_type": "Rect",
+      "type_dependencies": [],
+      "call_dependencies": [
+        "layout__Rect"
+      ],
+      "callers": [],
+      "parent_class": "layout__LayoutElement",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout__LayoutElement__set_fixed_size": {
+      "node_id": "layout__LayoutElement__set_fixed_size",
+      "source_file": "layout.py",
+      "line_start": 112,
+      "line_end": 115,
+      "source_text": "    def set_fixed_size(self, width: float, height: float, strength=REQUIRED):\n        \"\"\"Constrain this element to a fixed size.\"\"\"\n        self.solver.add_constraint(self.w == width, strength=strength)\n        self.solver.add_constraint(self.h == height, strength=strength)",
+      "node_kind": "method",
+      "parameter_types": {
+        "width": "float",
+        "height": "float",
+        "strength": "Any"
+      },
+      "return_type": null,
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": "layout__LayoutElement",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout__LayoutElement__set_min_size": {
+      "node_id": "layout__LayoutElement__set_min_size",
+      "source_file": "layout.py",
+      "line_start": 117,
+      "line_end": 120,
+      "source_text": "    def set_min_size(self, min_width: float, min_height: float, strength=REQUIRED):\n        \"\"\"Constrain this element to a minimum size.\"\"\"\n        self.solver.add_constraint(self.w >= min_width, strength=strength)\n        self.solver.add_constraint(self.h >= min_height, strength=strength)",
+      "node_kind": "method",
+      "parameter_types": {
+        "min_width": "float",
+        "min_height": "float",
+        "strength": "Any"
+      },
+      "return_type": null,
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": "layout__LayoutElement",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout__SheetLayout": {
+      "node_id": "layout__SheetLayout",
+      "source_file": "layout.py",
+      "line_start": 123,
+      "line_end": 530,
+      "source_text": "class SheetLayout:\n    \"\"\"\n    Constraint-based layout solver for SVG site plan sheets.\n\n    Defines a standard sheet layout with:\n    - Page margins\n    - Footer/title block area\n    - Drawable content area\n    - Scale bar (bottom-left of drawable)\n    - Elevation legend (bottom-right of drawable)\n    - Soil legend (top-right of drawable)\n\n    All positions are computed via constraints, so changing the page\n    size or margins automatically repositions everything.\n    \"\"\"\n\n    # Default footer ratio (percentage of page height)\n    DEFAULT_FOOTER_RATIO = 0.10  # 10% of page height\n    MIN_FOOTER_INCHES = 1.0     # Minimum footer height\n    MAX_FOOTER_INCHES = 4.0     # Maximum footer height\n\n    def __init__(\n        self,\n        paper_size: str = 'Letter',\n        orientation: str = 'Portrait',\n        margin_inches: float = 0.5,\n        footer_inches: Optional[float] = None,\n        footer_ratio: float = DEFAULT_FOOTER_RATIO,\n        aerial_halign: str = 'center',\n        aerial_valign: str = 'center',\n    ):\n        \"\"\"\n        Initialize the layout solver.\n\n        Args:\n            paper_size: Paper size name ('Letter', 'A3', 'Arch D', etc.)\n            orientation: 'Portrait', 'Landscape', or 'Auto'\n            margin_inches: Page margin in inches\n            footer_inches: Explicit footer height in inches (overrides footer_ratio)\n            footer_ratio: Footer height as ratio of page height (default 10%)\n            aerial_halign: Horizontal alignment of aerial when there's side\n                           white space ('left', 'center', 'right')\n            aerial_valign: Vertical alignment of aerial when there's top/bottom\n                           white space ('top', 'center', 'bottom')\n        \"\"\"\n        # Store alignment settings\n        self._aerial_halign = aerial_halign\n        self._aerial_valign = aerial_valign\n        self.solver = SimplexSolver()\n\n        # Get paper dimensions\n        paper_w, paper_h = PAPER_SIZES.get(paper_size, PAPER_SIZES['Letter'])\n\n        # Handle orientation\n        if orientation == 'Landscape':\n            paper_w, paper_h = max(paper_w, paper_h), min(paper_w, paper_h)\n        elif orientation == 'Portrait':\n            paper_w, paper_h = min(paper_w, paper_h), max(paper_w, paper_h)\n        # 'Auto' will be handled by caller based on content aspect ratio\n\n        # Calculate footer height\n        if footer_inches is not None:\n            # Explicit override\n            computed_footer = footer_inches\n        else:\n            # Proportional to page height, clamped to min/max\n            computed_footer = paper_h * footer_ratio\n            computed_footer = max(self.MIN_FOOTER_INCHES, min(self.MAX_FOOTER_INCHES, computed_footer))\n\n        # Convert to pixels\n        self._page_w_px = paper_w * SVG_DPI\n        self._page_h_px = paper_h * SVG_DPI\n        self._margin_px = margin_inches * SVG_DPI\n        self._footer_px = computed_footer * SVG_DPI\n\n        # Create layout elements\n        self._setup_variables()\n        self._setup_constraints()\n\n    def _setup_variables(self):\n        \"\"\"Create all layout variables.\"\"\"\n        # Page dimensions - input variables that drive the layout\n        # Initial values come from constructor, can be changed via set_* methods\n        self._page_w = Variable('page_w', self._page_w_px)\n        self._page_h = Variable('page_h', self._page_h_px)\n        self._margin = Variable('margin', self._margin_px)\n        self._footer_h = Variable('footer_h', self._footer_px)\n\n        # Stay constraints tell solver to keep these values stable\n        # Use STRONG so edit suggestions can override them\n        # (REQUIRED would make them immutable)\n        self.solver.add_stay(self._page_w, STRONG)\n        self.solver.add_stay(self._page_h, STRONG)\n        self.solver.add_stay(self._margin, STRONG)\n        self.solver.add_stay(self._footer_h, STRONG)\n\n        # Layout elements - positions computed from constraints\n        self._drawable = LayoutElement('drawable', self.solver)\n        self._title_block = LayoutElement('title_block', self.solver)\n        self._scale_bar = LayoutElement('scale_bar', self.solver)\n        self._elev_legend = LayoutElement('elev_legend', self.solver)\n        self._soil_legend = LayoutElement('soil_legend', self.solver)\n\n        # Site geometry (set via set_site_bounds/set_site_dimensions)\n        # These are stored directly, not as constraint variables, because\n        # aerial size computation requires non-linear math (aspect ratio)\n        self._site_w_ft = 100.0  # Default placeholder\n        self._site_h_ft = 100.0\n\n    def _setup_constraints(self):\n        \"\"\"Define all layout constraints.\"\"\"\n        s = self.solver\n\n        # --- Drawable area ---\n        # Fills page minus margins and footer\n        s.add_constraint(self._drawable.x == self._margin, REQUIRED)\n        s.add_constraint(self._drawable.y == self._margin, REQUIRED)\n        s.add_constraint(self._drawable.w == self._page_w - 2 * self._margin, REQUIRED)\n        s.add_constraint(self._drawable.h == self._page_h - self._footer_h - 2 * self._margin, REQUIRED)\n\n        # --- Title block (footer) ---\n        # Full width at bottom of page\n        s.add_constraint(self._title_block.x == self._margin, REQUIRED)\n        s.add_constraint(self._title_block.y == self._page_h - self._footer_h - self._margin, REQUIRED)\n        s.add_constraint(self._title_block.w == self._page_w - 2 * self._margin, REQUIRED)\n        s.add_constraint(self._title_block.h == self._footer_h, REQUIRED)\n\n        # --- Scale bar ---\n        # Fixed size: 1 inch wide (72px), ~30px tall\n        scale_bar_w = SVG_DPI  # 1 inch\n        scale_bar_h = 30\n        s.add_constraint(self._scale_bar.w == scale_bar_w, REQUIRED)\n        s.add_constraint(self._scale_bar.h == scale_bar_h, REQUIRED)\n\n        # Position: bottom-left of drawable, inset 15px from left, 20px from bottom\n        s.add_constraint(self._scale_bar.x == self._drawable.x + 15, REQUIRED)\n        s.add_constraint(\n            self._scale_bar.y == self._drawable.y + self._drawable.h - scale_bar_h - 20,\n            REQUIRED\n        )\n\n        # --- Elevation legend ---\n        # Fixed size\n        elev_w = 220\n        elev_h = 140\n        s.add_constraint(self._elev_legend.w == elev_w, REQUIRED)\n        s.add_constraint(self._elev_legend.h == elev_h, REQUIRED)\n\n        # Position: bottom-right of drawable, inset 10px from right and bottom\n        s.add_constraint(\n            self._elev_legend.x == self._drawable.x + self._drawable.w - elev_w - 10,\n            REQUIRED\n        )\n        s.add_constraint(\n            self._elev_legend.y == self._drawable.y + self._drawable.h - elev_h - 10,\n            REQUIRED\n        )\n\n        # --- Soil legend ---\n        # Fixed width, variable height (will be set based on content)\n        soil_w = 220\n        soil_h = 200  # Default, can be updated\n        s.add_constraint(self._soil_legend.w == soil_w, REQUIRED)\n        s.add_constraint(self._soil_legend.h == soil_h, WEAK)  # Weak so it can be updated\n\n        # Position: top-right of drawable, inset 10px\n        s.add_constraint(\n            self._soil_legend.x == self._drawable.x + self._drawable.w - soil_w - 10,\n            REQUIRED\n        )\n        s.add_constraint(self._soil_legend.y == self._drawable.y + 10, REQUIRED)\n\n        # --- Aerial (site content area) ---\n        # NOTE: The aerial rect is computed in the `aerial` property getter,\n        # not via constraints. This is because preserving aspect ratio while\n        # fitting into a bounding box requires non-linear math (min of two\n        # scale factors), which Cassowary's linear solver cannot express.\n\n    # --- Public accessors ---\n\n    @property\n    def page_width(self) -> float:\n        \"\"\"Page width in pixels.\"\"\"\n        return self._page_w.value\n\n    @property\n    def page_height(self) -> float:\n        \"\"\"Page height in pixels.\"\"\"\n        return self._page_h.value\n\n    @property\n    def margin(self) -> float:\n        \"\"\"Page margin in pixels.\"\"\"\n        return self._margin.value\n\n    @property\n    def footer_height(self) -> float:\n        \"\"\"Footer height in pixels.\"\"\"\n        return self._footer_h.value\n\n    @property\n    def drawable(self) -> Rect:\n        \"\"\"The drawable content area.\"\"\"\n        return self._drawable.get_rect()\n\n    @property\n    def title_block(self) -> Rect:\n        \"\"\"The title block/footer area.\"\"\"\n        return self._title_block.get_rect()\n\n    @property\n    def scale_bar(self) -> Rect:\n        \"\"\"The scale bar position and size.\"\"\"\n        return self._scale_bar.get_rect()\n\n    @property\n    def elev_legend(self) -> Rect:\n        \"\"\"The elevation legend position and size.\"\"\"\n        return self._elev_legend.get_rect()\n\n    @property\n    def soil_legend(self) -> Rect:\n        \"\"\"The soil legend position and size.\"\"\"\n        return self._soil_legend.get_rect()\n\n    @property\n    def aerial(self) -> Rect:\n        \"\"\"\n        The aerial/site content area (aspect-ratio preserved, aligned in drawable).\n\n        Computed dynamically based on site dimensions and drawable area.\n        The aerial will be as large as possible while:\n        - Preserving the site's aspect ratio\n        - Fitting entirely within the drawable area\n        - Aligned according to aerial_halign and aerial_valign settings\n        \"\"\"\n        drawable = self.drawable\n        site_w = self._site_w_ft\n        site_h = self._site_h_ft\n\n        if site_w <= 0 or site_h <= 0:\n            return drawable  # Fallback to full drawable\n\n        site_aspect = site_w / site_h\n        drawable_aspect = drawable.w / drawable.h if drawable.h > 0 else 1.0\n\n        if site_aspect > drawable_aspect:\n            # Site is wider than drawable - constrained by width\n            # White space will be on top/bottom\n            aerial_w = drawable.w\n            aerial_h = drawable.w / site_aspect\n        else:\n            # Site is taller than drawable - constrained by height\n            # White space will be on left/right\n            aerial_h = drawable.h\n            aerial_w = drawable.h * site_aspect\n\n        # Horizontal alignment (for when there's side white space)\n        h_gap = drawable.w - aerial_w\n        if self._aerial_halign == 'left':\n            aerial_x = drawable.x\n        elif self._aerial_halign == 'right':\n            aerial_x = drawable.x + h_gap\n        else:  # center\n            aerial_x = drawable.x + h_gap / 2\n\n        # Vertical alignment (for when there's top/bottom white space)\n        v_gap = drawable.h - aerial_h\n        if self._aerial_valign == 'top':\n            aerial_y = drawable.y\n        elif self._aerial_valign == 'bottom':\n            aerial_y = drawable.y + v_gap\n        else:  # center\n            aerial_y = drawable.y + v_gap / 2\n\n        return Rect(x=aerial_x, y=aerial_y, w=aerial_w, h=aerial_h)\n\n    @property\n    def scale(self) -> float:\n        \"\"\"Scale factor in pixels per foot.\"\"\"\n        if self._site_w_ft > 0:\n            return self.aerial.w / self._site_w_ft\n        return 1.0\n\n    @property\n    def ft_per_inch(self) -> float:\n        \"\"\"Feet per inch (for scale bar label, e.g., '1\" = 40'').\"\"\"\n        if self.scale > 0:\n            return SVG_DPI / self.scale\n        return 0.0\n\n    def get_clip_rect(self) -> Rect:\n        \"\"\"Get the clip rectangle for the drawable area.\"\"\"\n        return self.drawable\n\n    def _edit_var(self, var: Variable, value: float):\n        \"\"\"Helper to edit a single variable.\"\"\"\n        self.solver.add_edit_var(var)\n        self.solver.begin_edit()\n        self.solver.suggest_value(var, value)\n        self.solver.end_edit()\n\n    def set_page_size(self, width_px: float, height_px: float):\n        \"\"\"\n        Change the page size. All dependent elements recompute automatically.\n\n        Args:\n            width_px: New page width in pixels\n            height_px: New page height in pixels\n        \"\"\"\n        self.solver.add_edit_var(self._page_w)\n        self.solver.add_edit_var(self._page_h)\n        self.solver.begin_edit()\n        self.solver.suggest_value(self._page_w, width_px)\n        self.solver.suggest_value(self._page_h, height_px)\n        self.solver.end_edit()\n\n    def set_margin(self, margin_px: float):\n        \"\"\"\n        Change the margin. All dependent elements recompute automatically.\n\n        Args:\n            margin_px: New margin in pixels\n        \"\"\"\n        self._edit_var(self._margin, margin_px)\n\n    def set_footer_height(self, footer_px: float):\n        \"\"\"\n        Change the footer height. All dependent elements recompute automatically.\n\n        Args:\n            footer_px: New footer height in pixels\n        \"\"\"\n        self._edit_var(self._footer_h, footer_px)\n\n    def set_site_bounds(self, minx: float, miny: float, maxx: float, maxy: float):\n        \"\"\"\n        Set the site bounds in feet. The aerial area will be computed to:\n        - Preserve the site's aspect ratio\n        - Fit within the drawable area\n        - Be as large as possible\n        - Be centered in the drawable area\n\n        Args:\n            minx, miny, maxx, maxy: Site bounds in feet (EPSG:2238 or similar)\n        \"\"\"\n        self._site_w_ft = maxx - minx\n        self._site_h_ft = maxy - miny\n\n    def set_site_dimensions(self, width_ft: float, height_ft: float):\n        \"\"\"\n        Set the site dimensions in feet. The aerial area will be computed to:\n        - Preserve site aspect ratio\n        - Fit within drawable area\n        - Be as large as possible\n        - Aligned according to halign/valign settings\n\n        Args:\n            width_ft: Site width in feet\n            height_ft: Site height in feet\n        \"\"\"\n        self._site_w_ft = width_ft\n        self._site_h_ft = height_ft\n\n    def set_aerial_halign(self, halign: str):\n        \"\"\"\n        Set horizontal alignment of aerial when there's side white space.\n\n        Args:\n            halign: 'left', 'center', or 'right'\n        \"\"\"\n        if halign not in ('left', 'center', 'right'):\n            raise ValueError(f\"halign must be 'left', 'center', or 'right', got '{halign}'\")\n        self._aerial_halign = halign\n\n    def set_aerial_valign(self, valign: str):\n        \"\"\"\n        Set vertical alignment of aerial when there's top/bottom white space.\n\n        Args:\n            valign: 'top', 'center', or 'bottom'\n        \"\"\"\n        if valign not in ('top', 'center', 'bottom'):\n            raise ValueError(f\"valign must be 'top', 'center', or 'bottom', got '{valign}'\")\n        self._aerial_valign = valign\n\n    @property\n    def aerial_halign(self) -> str:\n        \"\"\"Current horizontal alignment setting.\"\"\"\n        return self._aerial_halign\n\n    @property\n    def aerial_valign(self) -> str:\n        \"\"\"Current vertical alignment setting.\"\"\"\n        return self._aerial_valign\n\n    def debug_print(self):\n        \"\"\"Print all layout values for debugging.\"\"\"\n        print(f\"Page: {self.page_width:.0f} x {self.page_height:.0f} px\")\n        print(f\"Margin: {self.margin:.0f} px\")\n        print(f\"Footer: {self.footer_height:.0f} px\")\n        print(f\"Drawable: {self.drawable}\")\n        print(f\"Aerial: {self.aerial}\")\n        print(f\"Scale: {self.scale:.2f} px/ft (1\\\" = {self.ft_per_inch:.0f}')\")\n        print(f\"Title block: {self.title_block}\")\n        print(f\"Scale bar: {self.scale_bar}\")\n        print(f\"Elev legend: {self.elev_legend}\")\n        print(f\"Soil legend: {self.soil_legend}\")",
+      "node_kind": "class",
+      "parameter_types": {},
+      "return_type": null,
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 1,
+      "idioms_needed": [
+        "format_string",
+        "none_check"
+      ]
+    },
+    "layout__SheetLayout____init__": {
+      "node_id": "layout__SheetLayout____init__",
+      "source_file": "layout.py",
+      "line_start": 144,
+      "line_end": 200,
+      "source_text": "    def __init__(\n        self,\n        paper_size: str = 'Letter',\n        orientation: str = 'Portrait',\n        margin_inches: float = 0.5,\n        footer_inches: Optional[float] = None,\n        footer_ratio: float = DEFAULT_FOOTER_RATIO,\n        aerial_halign: str = 'center',\n        aerial_valign: str = 'center',\n    ):\n        \"\"\"\n        Initialize the layout solver.\n\n        Args:\n            paper_size: Paper size name ('Letter', 'A3', 'Arch D', etc.)\n            orientation: 'Portrait', 'Landscape', or 'Auto'\n            margin_inches: Page margin in inches\n            footer_inches: Explicit footer height in inches (overrides footer_ratio)\n            footer_ratio: Footer height as ratio of page height (default 10%)\n            aerial_halign: Horizontal alignment of aerial when there's side\n                           white space ('left', 'center', 'right')\n            aerial_valign: Vertical alignment of aerial when there's top/bottom\n                           white space ('top', 'center', 'bottom')\n        \"\"\"\n        # Store alignment settings\n        self._aerial_halign = aerial_halign\n        self._aerial_valign = aerial_valign\n        self.solver = SimplexSolver()\n\n        # Get paper dimensions\n        paper_w, paper_h = PAPER_SIZES.get(paper_size, PAPER_SIZES['Letter'])\n\n        # Handle orientation\n        if orientation == 'Landscape':\n            paper_w, paper_h = max(paper_w, paper_h), min(paper_w, paper_h)\n        elif orientation == 'Portrait':\n            paper_w, paper_h = min(paper_w, paper_h), max(paper_w, paper_h)\n        # 'Auto' will be handled by caller based on content aspect ratio\n\n        # Calculate footer height\n        if footer_inches is not None:\n            # Explicit override\n            computed_footer = footer_inches\n        else:\n            # Proportional to page height, clamped to min/max\n            computed_footer = paper_h * footer_ratio\n            computed_footer = max(self.MIN_FOOTER_INCHES, min(self.MAX_FOOTER_INCHES, computed_footer))\n\n        # Convert to pixels\n        self._page_w_px = paper_w * SVG_DPI\n        self._page_h_px = paper_h * SVG_DPI\n        self._margin_px = margin_inches * SVG_DPI\n        self._footer_px = computed_footer * SVG_DPI\n\n        # Create layout elements\n        self._setup_variables()\n        self._setup_constraints()",
+      "node_kind": "constructor",
+      "parameter_types": {
+        "paper_size": "str",
+        "orientation": "str",
+        "margin_inches": "float",
+        "footer_inches": "Optional[float]",
+        "footer_ratio": "float",
+        "aerial_halign": "str",
+        "aerial_valign": "str"
+      },
+      "return_type": null,
+      "type_dependencies": [],
+      "call_dependencies": [
+        "layout__SheetLayout___setup_variables",
+        "layout__SheetLayout___setup_constraints"
+      ],
+      "callers": [],
+      "parent_class": "layout__SheetLayout",
+      "cyclomatic_complexity": 4,
+      "idioms_needed": []
+    },
+    "layout__SheetLayout___setup_variables": {
+      "node_id": "layout__SheetLayout___setup_variables",
+      "source_file": "layout.py",
+      "line_start": 202,
+      "line_end": 230,
+      "source_text": "    def _setup_variables(self):\n        \"\"\"Create all layout variables.\"\"\"\n        # Page dimensions - input variables that drive the layout\n        # Initial values come from constructor, can be changed via set_* methods\n        self._page_w = Variable('page_w', self._page_w_px)\n        self._page_h = Variable('page_h', self._page_h_px)\n        self._margin = Variable('margin', self._margin_px)\n        self._footer_h = Variable('footer_h', self._footer_px)\n\n        # Stay constraints tell solver to keep these values stable\n        # Use STRONG so edit suggestions can override them\n        # (REQUIRED would make them immutable)\n        self.solver.add_stay(self._page_w, STRONG)\n        self.solver.add_stay(self._page_h, STRONG)\n        self.solver.add_stay(self._margin, STRONG)\n        self.solver.add_stay(self._footer_h, STRONG)\n\n        # Layout elements - positions computed from constraints\n        self._drawable = LayoutElement('drawable', self.solver)\n        self._title_block = LayoutElement('title_block', self.solver)\n        self._scale_bar = LayoutElement('scale_bar', self.solver)\n        self._elev_legend = LayoutElement('elev_legend', self.solver)\n        self._soil_legend = LayoutElement('soil_legend', self.solver)\n\n        # Site geometry (set via set_site_bounds/set_site_dimensions)\n        # These are stored directly, not as constraint variables, because\n        # aerial size computation requires non-linear math (aspect ratio)\n        self._site_w_ft = 100.0  # Default placeholder\n        self._site_h_ft = 100.0",
+      "node_kind": "method",
+      "parameter_types": {},
+      "return_type": null,
+      "type_dependencies": [],
+      "call_dependencies": [
+        "layout__LayoutElement"
+      ],
+      "callers": [],
+      "parent_class": "layout__SheetLayout",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout__SheetLayout___setup_constraints": {
+      "node_id": "layout__SheetLayout___setup_constraints",
+      "source_file": "layout.py",
+      "line_start": 232,
+      "line_end": 293,
+      "source_text": "    def _setup_constraints(self):\n        \"\"\"Define all layout constraints.\"\"\"\n        s = self.solver\n\n        # --- Drawable area ---\n        # Fills page minus margins and footer\n        s.add_constraint(self._drawable.x == self._margin, REQUIRED)\n        s.add_constraint(self._drawable.y == self._margin, REQUIRED)\n        s.add_constraint(self._drawable.w == self._page_w - 2 * self._margin, REQUIRED)\n        s.add_constraint(self._drawable.h == self._page_h - self._footer_h - 2 * self._margin, REQUIRED)\n\n        # --- Title block (footer) ---\n        # Full width at bottom of page\n        s.add_constraint(self._title_block.x == self._margin, REQUIRED)\n        s.add_constraint(self._title_block.y == self._page_h - self._footer_h - self._margin, REQUIRED)\n        s.add_constraint(self._title_block.w == self._page_w - 2 * self._margin, REQUIRED)\n        s.add_constraint(self._title_block.h == self._footer_h, REQUIRED)\n\n        # --- Scale bar ---\n        # Fixed size: 1 inch wide (72px), ~30px tall\n        scale_bar_w = SVG_DPI  # 1 inch\n        scale_bar_h = 30\n        s.add_constraint(self._scale_bar.w == scale_bar_w, REQUIRED)\n        s.add_constraint(self._scale_bar.h == scale_bar_h, REQUIRED)\n\n        # Position: bottom-left of drawable, inset 15px from left, 20px from bottom\n        s.add_constraint(self._scale_bar.x == self._drawable.x + 15, REQUIRED)\n        s.add_constraint(\n            self._scale_bar.y == self._drawable.y + self._drawable.h - scale_bar_h - 20,\n            REQUIRED\n        )\n\n        # --- Elevation legend ---\n        # Fixed size\n        elev_w = 220\n        elev_h = 140\n        s.add_constraint(self._elev_legend.w == elev_w, REQUIRED)\n        s.add_constraint(self._elev_legend.h == elev_h, REQUIRED)\n\n        # Position: bottom-right of drawable, inset 10px from right and bottom\n        s.add_constraint(\n            self._elev_legend.x == self._drawable.x + self._drawable.w - elev_w - 10,\n            REQUIRED\n        )\n        s.add_constraint(\n            self._elev_legend.y == self._drawable.y + self._drawable.h - elev_h - 10,\n            REQUIRED\n        )\n\n        # --- Soil legend ---\n        # Fixed width, variable height (will be set based on content)\n        soil_w = 220\n        soil_h = 200  # Default, can be updated\n        s.add_constraint(self._soil_legend.w == soil_w, REQUIRED)\n        s.add_constraint(self._soil_legend.h == soil_h, WEAK)  # Weak so it can be updated\n\n        # Position: top-right of drawable, inset 10px\n        s.add_constraint(\n            self._soil_legend.x == self._drawable.x + self._drawable.w - soil_w - 10,\n            REQUIRED\n        )\n        s.add_constraint(self._soil_legend.y == self._drawable.y + 10, REQUIRED)",
+      "node_kind": "method",
+      "parameter_types": {},
+      "return_type": null,
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": "layout__SheetLayout",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout__SheetLayout__page_width": {
+      "node_id": "layout__SheetLayout__page_width",
+      "source_file": "layout.py",
+      "line_start": 304,
+      "line_end": 306,
+      "source_text": "    @property\n    def page_width(self) -> float:\n        \"\"\"Page width in pixels.\"\"\"\n        return self._page_w.value",
+      "node_kind": "getter",
+      "parameter_types": {},
+      "return_type": "float",
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": "layout__SheetLayout",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout__SheetLayout__page_height": {
+      "node_id": "layout__SheetLayout__page_height",
+      "source_file": "layout.py",
+      "line_start": 309,
+      "line_end": 311,
+      "source_text": "    @property\n    def page_height(self) -> float:\n        \"\"\"Page height in pixels.\"\"\"\n        return self._page_h.value",
+      "node_kind": "getter",
+      "parameter_types": {},
+      "return_type": "float",
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": "layout__SheetLayout",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout__SheetLayout__margin": {
+      "node_id": "layout__SheetLayout__margin",
+      "source_file": "layout.py",
+      "line_start": 314,
+      "line_end": 316,
+      "source_text": "    @property\n    def margin(self) -> float:\n        \"\"\"Page margin in pixels.\"\"\"\n        return self._margin.value",
+      "node_kind": "getter",
+      "parameter_types": {},
+      "return_type": "float",
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": "layout__SheetLayout",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout__SheetLayout__footer_height": {
+      "node_id": "layout__SheetLayout__footer_height",
+      "source_file": "layout.py",
+      "line_start": 319,
+      "line_end": 321,
+      "source_text": "    @property\n    def footer_height(self) -> float:\n        \"\"\"Footer height in pixels.\"\"\"\n        return self._footer_h.value",
+      "node_kind": "getter",
+      "parameter_types": {},
+      "return_type": "float",
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": "layout__SheetLayout",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout__SheetLayout__drawable": {
+      "node_id": "layout__SheetLayout__drawable",
+      "source_file": "layout.py",
+      "line_start": 324,
+      "line_end": 326,
+      "source_text": "    @property\n    def drawable(self) -> Rect:\n        \"\"\"The drawable content area.\"\"\"\n        return self._drawable.get_rect()",
+      "node_kind": "getter",
+      "parameter_types": {},
+      "return_type": "Rect",
+      "type_dependencies": [],
+      "call_dependencies": [
+        "layout__LayoutElement__get_rect"
+      ],
+      "callers": [],
+      "parent_class": "layout__SheetLayout",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout__SheetLayout__title_block": {
+      "node_id": "layout__SheetLayout__title_block",
+      "source_file": "layout.py",
+      "line_start": 329,
+      "line_end": 331,
+      "source_text": "    @property\n    def title_block(self) -> Rect:\n        \"\"\"The title block/footer area.\"\"\"\n        return self._title_block.get_rect()",
+      "node_kind": "getter",
+      "parameter_types": {},
+      "return_type": "Rect",
+      "type_dependencies": [],
+      "call_dependencies": [
+        "layout__LayoutElement__get_rect"
+      ],
+      "callers": [],
+      "parent_class": "layout__SheetLayout",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout__SheetLayout__scale_bar": {
+      "node_id": "layout__SheetLayout__scale_bar",
+      "source_file": "layout.py",
+      "line_start": 334,
+      "line_end": 336,
+      "source_text": "    @property\n    def scale_bar(self) -> Rect:\n        \"\"\"The scale bar position and size.\"\"\"\n        return self._scale_bar.get_rect()",
+      "node_kind": "getter",
+      "parameter_types": {},
+      "return_type": "Rect",
+      "type_dependencies": [],
+      "call_dependencies": [
+        "layout__LayoutElement__get_rect"
+      ],
+      "callers": [],
+      "parent_class": "layout__SheetLayout",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout__SheetLayout__elev_legend": {
+      "node_id": "layout__SheetLayout__elev_legend",
+      "source_file": "layout.py",
+      "line_start": 339,
+      "line_end": 341,
+      "source_text": "    @property\n    def elev_legend(self) -> Rect:\n        \"\"\"The elevation legend position and size.\"\"\"\n        return self._elev_legend.get_rect()",
+      "node_kind": "getter",
+      "parameter_types": {},
+      "return_type": "Rect",
+      "type_dependencies": [],
+      "call_dependencies": [
+        "layout__LayoutElement__get_rect"
+      ],
+      "callers": [],
+      "parent_class": "layout__SheetLayout",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout__SheetLayout__soil_legend": {
+      "node_id": "layout__SheetLayout__soil_legend",
+      "source_file": "layout.py",
+      "line_start": 344,
+      "line_end": 346,
+      "source_text": "    @property\n    def soil_legend(self) -> Rect:\n        \"\"\"The soil legend position and size.\"\"\"\n        return self._soil_legend.get_rect()",
+      "node_kind": "getter",
+      "parameter_types": {},
+      "return_type": "Rect",
+      "type_dependencies": [],
+      "call_dependencies": [
+        "layout__LayoutElement__get_rect"
+      ],
+      "callers": [],
+      "parent_class": "layout__SheetLayout",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout__SheetLayout__aerial": {
+      "node_id": "layout__SheetLayout__aerial",
+      "source_file": "layout.py",
+      "line_start": 349,
+      "line_end": 398,
+      "source_text": "    @property\n    def aerial(self) -> Rect:\n        \"\"\"\n        The aerial/site content area (aspect-ratio preserved, aligned in drawable).\n\n        Computed dynamically based on site dimensions and drawable area.\n        The aerial will be as large as possible while:\n        - Preserving the site's aspect ratio\n        - Fitting entirely within the drawable area\n        - Aligned according to aerial_halign and aerial_valign settings\n        \"\"\"\n        drawable = self.drawable\n        site_w = self._site_w_ft\n        site_h = self._site_h_ft\n\n        if site_w <= 0 or site_h <= 0:\n            return drawable  # Fallback to full drawable\n\n        site_aspect = site_w / site_h\n        drawable_aspect = drawable.w / drawable.h if drawable.h > 0 else 1.0\n\n        if site_aspect > drawable_aspect:\n            # Site is wider than drawable - constrained by width\n            # White space will be on top/bottom\n            aerial_w = drawable.w\n            aerial_h = drawable.w / site_aspect\n        else:\n            # Site is taller than drawable - constrained by height\n            # White space will be on left/right\n            aerial_h = drawable.h\n            aerial_w = drawable.h * site_aspect\n\n        # Horizontal alignment (for when there's side white space)\n        h_gap = drawable.w - aerial_w\n        if self._aerial_halign == 'left':\n            aerial_x = drawable.x\n        elif self._aerial_halign == 'right':\n            aerial_x = drawable.x + h_gap\n        else:  # center\n            aerial_x = drawable.x + h_gap / 2\n\n        # Vertical alignment (for when there's top/bottom white space)\n        v_gap = drawable.h - aerial_h\n        if self._aerial_valign == 'top':\n            aerial_y = drawable.y\n        elif self._aerial_valign == 'bottom':\n            aerial_y = drawable.y + v_gap\n        else:  # center\n            aerial_y = drawable.y + v_gap / 2\n\n        return Rect(x=aerial_x, y=aerial_y, w=aerial_w, h=aerial_h)",
+      "node_kind": "getter",
+      "parameter_types": {},
+      "return_type": "Rect",
+      "type_dependencies": [],
+      "call_dependencies": [
+        "layout__Rect"
+      ],
+      "callers": [],
+      "parent_class": "layout__SheetLayout",
+      "cyclomatic_complexity": 8,
+      "idioms_needed": []
+    },
+    "layout__SheetLayout__scale": {
+      "node_id": "layout__SheetLayout__scale",
+      "source_file": "layout.py",
+      "line_start": 401,
+      "line_end": 405,
+      "source_text": "    @property\n    def scale(self) -> float:\n        \"\"\"Scale factor in pixels per foot.\"\"\"\n        if self._site_w_ft > 0:\n            return self.aerial.w / self._site_w_ft\n        return 1.0",
+      "node_kind": "getter",
+      "parameter_types": {},
+      "return_type": "float",
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": "layout__SheetLayout",
+      "cyclomatic_complexity": 2,
+      "idioms_needed": []
+    },
+    "layout__SheetLayout__ft_per_inch": {
+      "node_id": "layout__SheetLayout__ft_per_inch",
+      "source_file": "layout.py",
+      "line_start": 408,
+      "line_end": 412,
+      "source_text": "    @property\n    def ft_per_inch(self) -> float:\n        \"\"\"Feet per inch (for scale bar label, e.g., '1\" = 40'').\"\"\"\n        if self.scale > 0:\n            return SVG_DPI / self.scale\n        return 0.0",
+      "node_kind": "getter",
+      "parameter_types": {},
+      "return_type": "float",
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": "layout__SheetLayout",
+      "cyclomatic_complexity": 2,
+      "idioms_needed": []
+    },
+    "layout__SheetLayout__get_clip_rect": {
+      "node_id": "layout__SheetLayout__get_clip_rect",
+      "source_file": "layout.py",
+      "line_start": 414,
+      "line_end": 416,
+      "source_text": "    def get_clip_rect(self) -> Rect:\n        \"\"\"Get the clip rectangle for the drawable area.\"\"\"\n        return self.drawable",
+      "node_kind": "method",
+      "parameter_types": {},
+      "return_type": "Rect",
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": "layout__SheetLayout",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout__SheetLayout___edit_var": {
+      "node_id": "layout__SheetLayout___edit_var",
+      "source_file": "layout.py",
+      "line_start": 418,
+      "line_end": 423,
+      "source_text": "    def _edit_var(self, var: Variable, value: float):\n        \"\"\"Helper to edit a single variable.\"\"\"\n        self.solver.add_edit_var(var)\n        self.solver.begin_edit()\n        self.solver.suggest_value(var, value)\n        self.solver.end_edit()",
+      "node_kind": "method",
+      "parameter_types": {
+        "var": "Variable",
+        "value": "float"
+      },
+      "return_type": null,
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": "layout__SheetLayout",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout__SheetLayout__set_page_size": {
+      "node_id": "layout__SheetLayout__set_page_size",
+      "source_file": "layout.py",
+      "line_start": 425,
+      "line_end": 438,
+      "source_text": "    def set_page_size(self, width_px: float, height_px: float):\n        \"\"\"\n        Change the page size. All dependent elements recompute automatically.\n\n        Args:\n            width_px: New page width in pixels\n            height_px: New page height in pixels\n        \"\"\"\n        self.solver.add_edit_var(self._page_w)\n        self.solver.add_edit_var(self._page_h)\n        self.solver.begin_edit()\n        self.solver.suggest_value(self._page_w, width_px)\n        self.solver.suggest_value(self._page_h, height_px)\n        self.solver.end_edit()",
+      "node_kind": "method",
+      "parameter_types": {
+        "width_px": "float",
+        "height_px": "float"
+      },
+      "return_type": null,
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": "layout__SheetLayout",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout__SheetLayout__set_margin": {
+      "node_id": "layout__SheetLayout__set_margin",
+      "source_file": "layout.py",
+      "line_start": 440,
+      "line_end": 447,
+      "source_text": "    def set_margin(self, margin_px: float):\n        \"\"\"\n        Change the margin. All dependent elements recompute automatically.\n\n        Args:\n            margin_px: New margin in pixels\n        \"\"\"\n        self._edit_var(self._margin, margin_px)",
+      "node_kind": "method",
+      "parameter_types": {
+        "margin_px": "float"
+      },
+      "return_type": null,
+      "type_dependencies": [],
+      "call_dependencies": [
+        "layout__SheetLayout___edit_var"
+      ],
+      "callers": [],
+      "parent_class": "layout__SheetLayout",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout__SheetLayout__set_footer_height": {
+      "node_id": "layout__SheetLayout__set_footer_height",
+      "source_file": "layout.py",
+      "line_start": 449,
+      "line_end": 456,
+      "source_text": "    def set_footer_height(self, footer_px: float):\n        \"\"\"\n        Change the footer height. All dependent elements recompute automatically.\n\n        Args:\n            footer_px: New footer height in pixels\n        \"\"\"\n        self._edit_var(self._footer_h, footer_px)",
+      "node_kind": "method",
+      "parameter_types": {
+        "footer_px": "float"
+      },
+      "return_type": null,
+      "type_dependencies": [],
+      "call_dependencies": [
+        "layout__SheetLayout___edit_var"
+      ],
+      "callers": [],
+      "parent_class": "layout__SheetLayout",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout__SheetLayout__set_site_bounds": {
+      "node_id": "layout__SheetLayout__set_site_bounds",
+      "source_file": "layout.py",
+      "line_start": 458,
+      "line_end": 470,
+      "source_text": "    def set_site_bounds(self, minx: float, miny: float, maxx: float, maxy: float):\n        \"\"\"\n        Set the site bounds in feet. The aerial area will be computed to:\n        - Preserve the site's aspect ratio\n        - Fit within the drawable area\n        - Be as large as possible\n        - Be centered in the drawable area\n\n        Args:\n            minx, miny, maxx, maxy: Site bounds in feet (EPSG:2238 or similar)\n        \"\"\"\n        self._site_w_ft = maxx - minx\n        self._site_h_ft = maxy - miny",
+      "node_kind": "method",
+      "parameter_types": {
+        "minx": "float",
+        "miny": "float",
+        "maxx": "float",
+        "maxy": "float"
+      },
+      "return_type": null,
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": "layout__SheetLayout",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout__SheetLayout__set_site_dimensions": {
+      "node_id": "layout__SheetLayout__set_site_dimensions",
+      "source_file": "layout.py",
+      "line_start": 472,
+      "line_end": 485,
+      "source_text": "    def set_site_dimensions(self, width_ft: float, height_ft: float):\n        \"\"\"\n        Set the site dimensions in feet. The aerial area will be computed to:\n        - Preserve site aspect ratio\n        - Fit within drawable area\n        - Be as large as possible\n        - Aligned according to halign/valign settings\n\n        Args:\n            width_ft: Site width in feet\n            height_ft: Site height in feet\n        \"\"\"\n        self._site_w_ft = width_ft\n        self._site_h_ft = height_ft",
+      "node_kind": "method",
+      "parameter_types": {
+        "width_ft": "float",
+        "height_ft": "float"
+      },
+      "return_type": null,
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": "layout__SheetLayout",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout__SheetLayout__set_aerial_halign": {
+      "node_id": "layout__SheetLayout__set_aerial_halign",
+      "source_file": "layout.py",
+      "line_start": 487,
+      "line_end": 496,
+      "source_text": "    def set_aerial_halign(self, halign: str):\n        \"\"\"\n        Set horizontal alignment of aerial when there's side white space.\n\n        Args:\n            halign: 'left', 'center', or 'right'\n        \"\"\"\n        if halign not in ('left', 'center', 'right'):\n            raise ValueError(f\"halign must be 'left', 'center', or 'right', got '{halign}'\")\n        self._aerial_halign = halign",
+      "node_kind": "method",
+      "parameter_types": {
+        "halign": "str"
+      },
+      "return_type": null,
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": "layout__SheetLayout",
+      "cyclomatic_complexity": 2,
+      "idioms_needed": []
+    },
+    "layout__SheetLayout__set_aerial_valign": {
+      "node_id": "layout__SheetLayout__set_aerial_valign",
+      "source_file": "layout.py",
+      "line_start": 498,
+      "line_end": 507,
+      "source_text": "    def set_aerial_valign(self, valign: str):\n        \"\"\"\n        Set vertical alignment of aerial when there's top/bottom white space.\n\n        Args:\n            valign: 'top', 'center', or 'bottom'\n        \"\"\"\n        if valign not in ('top', 'center', 'bottom'):\n            raise ValueError(f\"valign must be 'top', 'center', or 'bottom', got '{valign}'\")\n        self._aerial_valign = valign",
+      "node_kind": "method",
+      "parameter_types": {
+        "valign": "str"
+      },
+      "return_type": null,
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": "layout__SheetLayout",
+      "cyclomatic_complexity": 2,
+      "idioms_needed": []
+    },
+    "layout__SheetLayout__aerial_halign": {
+      "node_id": "layout__SheetLayout__aerial_halign",
+      "source_file": "layout.py",
+      "line_start": 510,
+      "line_end": 512,
+      "source_text": "    @property\n    def aerial_halign(self) -> str:\n        \"\"\"Current horizontal alignment setting.\"\"\"\n        return self._aerial_halign",
+      "node_kind": "getter",
+      "parameter_types": {},
+      "return_type": "str",
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": "layout__SheetLayout",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout__SheetLayout__aerial_valign": {
+      "node_id": "layout__SheetLayout__aerial_valign",
+      "source_file": "layout.py",
+      "line_start": 515,
+      "line_end": 517,
+      "source_text": "    @property\n    def aerial_valign(self) -> str:\n        \"\"\"Current vertical alignment setting.\"\"\"\n        return self._aerial_valign",
+      "node_kind": "getter",
+      "parameter_types": {},
+      "return_type": "str",
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": "layout__SheetLayout",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout__SheetLayout__debug_print": {
+      "node_id": "layout__SheetLayout__debug_print",
+      "source_file": "layout.py",
+      "line_start": 519,
+      "line_end": 530,
+      "source_text": "    def debug_print(self):\n        \"\"\"Print all layout values for debugging.\"\"\"\n        print(f\"Page: {self.page_width:.0f} x {self.page_height:.0f} px\")\n        print(f\"Margin: {self.margin:.0f} px\")\n        print(f\"Footer: {self.footer_height:.0f} px\")\n        print(f\"Drawable: {self.drawable}\")\n        print(f\"Aerial: {self.aerial}\")\n        print(f\"Scale: {self.scale:.2f} px/ft (1\\\" = {self.ft_per_inch:.0f}')\")\n        print(f\"Title block: {self.title_block}\")\n        print(f\"Scale bar: {self.scale_bar}\")\n        print(f\"Elev legend: {self.elev_legend}\")\n        print(f\"Soil legend: {self.soil_legend}\")",
+      "node_kind": "method",
+      "parameter_types": {},
+      "return_type": null,
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": "layout__SheetLayout",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout__create_sheet_layout": {
+      "node_id": "layout__create_sheet_layout",
+      "source_file": "layout.py",
+      "line_start": 533,
+      "line_end": 580,
+      "source_text": "def create_sheet_layout(\n    paper_size: str = 'Letter',\n    orientation: str = 'Portrait',\n    margin_inches: float = 0.5,\n    footer_inches: Optional[float] = None,\n    footer_ratio: float = SheetLayout.DEFAULT_FOOTER_RATIO,\n    site_aspect_ratio: Optional[float] = None,\n    aerial_halign: str = 'center',\n    aerial_valign: str = 'center',\n) -> SheetLayout:\n    \"\"\"\n    Factory function to create a sheet layout.\n\n    Args:\n        paper_size: Paper size name\n        orientation: 'Portrait', 'Landscape', or 'Auto'\n        margin_inches: Page margin in inches\n        footer_inches: Explicit footer height (overrides footer_ratio if set)\n        footer_ratio: Footer as ratio of page height (default 10%)\n        site_aspect_ratio: Width/height ratio of site bounds (for Auto orientation)\n        aerial_halign: Horizontal alignment ('left', 'center', 'right')\n        aerial_valign: Vertical alignment ('top', 'center', 'bottom')\n\n    Returns:\n        Configured SheetLayout instance\n    \"\"\"\n    # Handle Auto orientation\n    if orientation == 'Auto' and site_aspect_ratio is not None:\n        paper_w, paper_h = PAPER_SIZES.get(paper_size, PAPER_SIZES['Letter'])\n        paper_aspect = paper_w / paper_h\n\n        # Choose orientation based on site aspect ratio\n        if site_aspect_ratio > 1.1 and paper_aspect < 1:\n            orientation = 'Landscape'\n        elif site_aspect_ratio < 0.9 and paper_aspect > 1:\n            orientation = 'Portrait'\n        else:\n            orientation = 'Portrait'  # Default\n\n    return SheetLayout(\n        paper_size=paper_size,\n        orientation=orientation,\n        margin_inches=margin_inches,\n        footer_inches=footer_inches,\n        footer_ratio=footer_ratio,\n        aerial_halign=aerial_halign,\n        aerial_valign=aerial_valign,\n    )",
+      "node_kind": "free_function",
+      "parameter_types": {
+        "paper_size": "str",
+        "orientation": "str",
+        "margin_inches": "float",
+        "footer_inches": "Optional[float]",
+        "footer_ratio": "float",
+        "site_aspect_ratio": "Optional[float]",
+        "aerial_halign": "str",
+        "aerial_valign": "str"
+      },
+      "return_type": "SheetLayout",
+      "type_dependencies": [],
+      "call_dependencies": [
+        "layout__SheetLayout"
+      ],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 7,
+      "idioms_needed": [
+        "none_check",
+        "optional_type"
+      ]
+    },
+    "layout_calculator__DrawableArea": {
+      "node_id": "layout_calculator__DrawableArea",
+      "source_file": "layout_calculator.py",
+      "line_start": 27,
+      "line_end": 40,
+      "source_text": "@dataclass\nclass DrawableArea:\n    \"\"\"The area available for drawing content (inside margins, above footer).\"\"\"\n    x: float  # Left edge in pixels\n    y: float  # Top edge in pixels\n    width: float  # Width in pixels\n    height: float  # Height in pixels\n\n    @property\n    def right(self) -> float:\n        return self.x + self.width\n\n    @property\n    def bottom(self) -> float:\n        return self.y + self.height",
+      "node_kind": "class",
+      "parameter_types": {},
+      "return_type": null,
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout_calculator__DrawableArea__right": {
+      "node_id": "layout_calculator__DrawableArea__right",
+      "source_file": "layout_calculator.py",
+      "line_start": 35,
+      "line_end": 36,
+      "source_text": "    @property\n    def right(self) -> float:\n        return self.x + self.width",
+      "node_kind": "getter",
+      "parameter_types": {},
+      "return_type": "float",
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": "layout_calculator__DrawableArea",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout_calculator__DrawableArea__bottom": {
+      "node_id": "layout_calculator__DrawableArea__bottom",
+      "source_file": "layout_calculator.py",
+      "line_start": 39,
+      "line_end": 40,
+      "source_text": "    @property\n    def bottom(self) -> float:\n        return self.y + self.height",
+      "node_kind": "getter",
+      "parameter_types": {},
+      "return_type": "float",
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": "layout_calculator__DrawableArea",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout_calculator__PageLayout": {
+      "node_id": "layout_calculator__PageLayout",
+      "source_file": "layout_calculator.py",
+      "line_start": 44,
+      "line_end": 50,
+      "source_text": "@dataclass\nclass PageLayout:\n    \"\"\"Complete page layout information.\"\"\"\n    width_px: int  # Total page width in pixels\n    height_px: int  # Total page height in pixels\n    margin_px: int  # Margin size in pixels\n    footer_height_px: int  # Footer height in pixels\n    drawable: DrawableArea  # Drawable content area",
+      "node_kind": "class",
+      "parameter_types": {},
+      "return_type": null,
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout_calculator__LayoutCalculator": {
+      "node_id": "layout_calculator__LayoutCalculator",
+      "source_file": "layout_calculator.py",
+      "line_start": 53,
+      "line_end": 214,
+      "source_text": "class LayoutCalculator:\n    \"\"\"\n    Single source of truth for coordinate transforms.\n\n    Usage:\n        calc = LayoutCalculator(\n            geo_bounds=(minx, miny, maxx, maxy),  # EPSG:2238 feet\n            page_width_in=11.0,\n            page_height_in=8.5,\n            margin_in=0.5\n        )\n\n        # Transform any geo coordinate to SVG\n        svg_x, svg_y = calc.geo_to_svg(geo_x, geo_y)\n\n        # Get the transform function for layer renderers\n        to_svg = calc.get_transform()\n    \"\"\"\n\n    def __init__(\n        self,\n        geo_bounds: Tuple[float, float, float, float],\n        page_width_in: float,\n        page_height_in: float,\n        margin_in: float = 0.5\n    ):\n        \"\"\"\n        Initialize the layout calculator.\n\n        Args:\n            geo_bounds: (minx, miny, maxx, maxy) in feet (EPSG:2238)\n            page_width_in: Page width in inches\n            page_height_in: Page height in inches\n            margin_in: Margin size in inches\n        \"\"\"\n        self.geo_bounds = geo_bounds\n        minx, miny, maxx, maxy = geo_bounds\n\n        # Geographic dimensions in feet\n        self.geo_width_ft = maxx - minx\n        self.geo_height_ft = maxy - miny\n\n        # Page dimensions in pixels\n        self.page_width_px = int(page_width_in * SVG_DPI)\n        self.page_height_px = int(page_height_in * SVG_DPI)\n        self.margin_px = int(margin_in * SVG_DPI)\n\n        # Footer height (scales with page, minimum 0.75\")\n        footer_height_in = max(MIN_FOOTER_INCHES, page_height_in * FOOTER_RATIO)\n        self.footer_height_px = int(footer_height_in * SVG_DPI)\n\n        # Drawable area (inside margins, above footer)\n        drawable_x = self.margin_px\n        drawable_y = self.margin_px\n        drawable_w = self.page_width_px - (2 * self.margin_px)\n        drawable_h = self.page_height_px - (2 * self.margin_px) - self.footer_height_px\n\n        self.drawable = DrawableArea(\n            x=drawable_x,\n            y=drawable_y,\n            width=drawable_w,\n            height=drawable_h\n        )\n\n        # Calculate scale to FIT content in drawable area\n        # Use the smaller scale to ensure everything fits\n        scale_x = drawable_w / self.geo_width_ft if self.geo_width_ft > 0 else 1.0\n        scale_y = drawable_h / self.geo_height_ft if self.geo_height_ft > 0 else 1.0\n        self.scale = min(scale_x, scale_y)\n\n        # Calculate how much content will actually occupy\n        content_w_px = self.geo_width_ft * self.scale\n        content_h_px = self.geo_height_ft * self.scale\n\n        # Center content within drawable area\n        self.content_offset_x = (drawable_w - content_w_px) / 2\n        self.content_offset_y = (drawable_h - content_h_px) / 2\n\n        # Pre-calculate transform constants for geo_to_svg\n        # SVG Y-axis is inverted (0 at top)\n        self._tx_scale = self.scale\n        self._tx_offset_x = self.margin_px + self.content_offset_x - (minx * self.scale)\n        self._tx_offset_y = self.margin_px + self.content_offset_y + (maxy * self.scale)\n\n    def geo_to_svg(self, geo_x: float, geo_y: float) -> Tuple[float, float]:\n        \"\"\"\n        Transform geographic coordinates to SVG pixel coordinates.\n\n        Args:\n            geo_x: X coordinate in feet (EPSG:2238)\n            geo_y: Y coordinate in feet (EPSG:2238)\n\n        Returns:\n            (svg_x, svg_y) in pixels\n        \"\"\"\n        svg_x = geo_x * self._tx_scale + self._tx_offset_x\n        svg_y = self._tx_offset_y - geo_y * self._tx_scale  # Y-axis flip\n        return svg_x, svg_y\n\n    def get_transform(self, rotation_deg: float = 0.0) -> Callable[[float, float], Tuple[float, float]]:\n        \"\"\"\n        Get the transform function for use by layer renderers.\n\n        Args:\n            rotation_deg: Optional rotation in degrees. When non-zero, the\n                returned function bakes 2D rotation into the coordinate\n                conversion so SVG output needs no transform attributes.\n\n        Returns:\n            Function that takes (geo_x, geo_y) and returns (svg_x, svg_y)\n        \"\"\"\n        if abs(rotation_deg) < 0.01:\n            return self.geo_to_svg\n\n        cx = self.drawable.x + self.drawable.width / 2\n        cy = self.drawable.y + self.drawable.height / 2\n        cos_a = math.cos(math.radians(rotation_deg))\n        sin_a = math.sin(math.radians(rotation_deg))\n\n        def rotated_to_svg(geo_x: float, geo_y: float) -> Tuple[float, float]:\n            raw_x, raw_y = self.geo_to_svg(geo_x, geo_y)\n            dx, dy = raw_x - cx, raw_y - cy\n            return (cx + dx * cos_a - dy * sin_a,\n                    cy + dx * sin_a + dy * cos_a)\n\n        return rotated_to_svg\n\n    def get_page_layout(self) -> PageLayout:\n        \"\"\"Get the complete page layout information.\"\"\"\n        return PageLayout(\n            width_px=self.page_width_px,\n            height_px=self.page_height_px,\n            margin_px=self.margin_px,\n            footer_height_px=self.footer_height_px,\n            drawable=self.drawable\n        )\n\n    def get_content_bounds_svg(self) -> Tuple[float, float, float, float]:\n        \"\"\"\n        Get the SVG pixel bounds where geo content will be rendered.\n\n        Returns:\n            (left, top, right, bottom) in SVG pixels\n        \"\"\"\n        left = self.margin_px + self.content_offset_x\n        top = self.margin_px + self.content_offset_y\n        right = left + (self.geo_width_ft * self.scale)\n        bottom = top + (self.geo_height_ft * self.scale)\n        return left, top, right, bottom\n\n    @property\n    def feet_per_inch(self) -> float:\n        \"\"\"Get the drawing scale in feet per inch.\"\"\"\n        return SVG_DPI / self.scale\n\n    @property\n    def scale_string(self) -> str:\n        \"\"\"Get human-readable scale string like '1\\\" = 20\\\\''.\"\"\"\n        fpi = self.feet_per_inch\n        if fpi == int(fpi):\n            return f'1\" = {int(fpi)}\\''\n        return f'1\" = {fpi:.1f}\\''",
+      "node_kind": "class",
+      "parameter_types": {},
+      "return_type": null,
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 1,
+      "idioms_needed": [
+        "format_string"
+      ]
+    },
+    "layout_calculator__LayoutCalculator____init__": {
+      "node_id": "layout_calculator__LayoutCalculator____init__",
+      "source_file": "layout_calculator.py",
+      "line_start": 72,
+      "line_end": 135,
+      "source_text": "    def __init__(\n        self,\n        geo_bounds: Tuple[float, float, float, float],\n        page_width_in: float,\n        page_height_in: float,\n        margin_in: float = 0.5\n    ):\n        \"\"\"\n        Initialize the layout calculator.\n\n        Args:\n            geo_bounds: (minx, miny, maxx, maxy) in feet (EPSG:2238)\n            page_width_in: Page width in inches\n            page_height_in: Page height in inches\n            margin_in: Margin size in inches\n        \"\"\"\n        self.geo_bounds = geo_bounds\n        minx, miny, maxx, maxy = geo_bounds\n\n        # Geographic dimensions in feet\n        self.geo_width_ft = maxx - minx\n        self.geo_height_ft = maxy - miny\n\n        # Page dimensions in pixels\n        self.page_width_px = int(page_width_in * SVG_DPI)\n        self.page_height_px = int(page_height_in * SVG_DPI)\n        self.margin_px = int(margin_in * SVG_DPI)\n\n        # Footer height (scales with page, minimum 0.75\")\n        footer_height_in = max(MIN_FOOTER_INCHES, page_height_in * FOOTER_RATIO)\n        self.footer_height_px = int(footer_height_in * SVG_DPI)\n\n        # Drawable area (inside margins, above footer)\n        drawable_x = self.margin_px\n        drawable_y = self.margin_px\n        drawable_w = self.page_width_px - (2 * self.margin_px)\n        drawable_h = self.page_height_px - (2 * self.margin_px) - self.footer_height_px\n\n        self.drawable = DrawableArea(\n            x=drawable_x,\n            y=drawable_y,\n            width=drawable_w,\n            height=drawable_h\n        )\n\n        # Calculate scale to FIT content in drawable area\n        # Use the smaller scale to ensure everything fits\n        scale_x = drawable_w / self.geo_width_ft if self.geo_width_ft > 0 else 1.0\n        scale_y = drawable_h / self.geo_height_ft if self.geo_height_ft > 0 else 1.0\n        self.scale = min(scale_x, scale_y)\n\n        # Calculate how much content will actually occupy\n        content_w_px = self.geo_width_ft * self.scale\n        content_h_px = self.geo_height_ft * self.scale\n\n        # Center content within drawable area\n        self.content_offset_x = (drawable_w - content_w_px) / 2\n        self.content_offset_y = (drawable_h - content_h_px) / 2\n\n        # Pre-calculate transform constants for geo_to_svg\n        # SVG Y-axis is inverted (0 at top)\n        self._tx_scale = self.scale\n        self._tx_offset_x = self.margin_px + self.content_offset_x - (minx * self.scale)\n        self._tx_offset_y = self.margin_px + self.content_offset_y + (maxy * self.scale)",
+      "node_kind": "constructor",
+      "parameter_types": {
+        "geo_bounds": "Tuple[float, float, float, float]",
+        "page_width_in": "float",
+        "page_height_in": "float",
+        "margin_in": "float"
+      },
+      "return_type": null,
+      "type_dependencies": [],
+      "call_dependencies": [
+        "layout_calculator__DrawableArea"
+      ],
+      "callers": [],
+      "parent_class": "layout_calculator__LayoutCalculator",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout_calculator__LayoutCalculator__geo_to_svg": {
+      "node_id": "layout_calculator__LayoutCalculator__geo_to_svg",
+      "source_file": "layout_calculator.py",
+      "line_start": 137,
+      "line_end": 150,
+      "source_text": "    def geo_to_svg(self, geo_x: float, geo_y: float) -> Tuple[float, float]:\n        \"\"\"\n        Transform geographic coordinates to SVG pixel coordinates.\n\n        Args:\n            geo_x: X coordinate in feet (EPSG:2238)\n            geo_y: Y coordinate in feet (EPSG:2238)\n\n        Returns:\n            (svg_x, svg_y) in pixels\n        \"\"\"\n        svg_x = geo_x * self._tx_scale + self._tx_offset_x\n        svg_y = self._tx_offset_y - geo_y * self._tx_scale  # Y-axis flip\n        return svg_x, svg_y",
+      "node_kind": "method",
+      "parameter_types": {
+        "geo_x": "float",
+        "geo_y": "float"
+      },
+      "return_type": "Tuple[float, float]",
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": "layout_calculator__LayoutCalculator",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout_calculator__LayoutCalculator__get_transform": {
+      "node_id": "layout_calculator__LayoutCalculator__get_transform",
+      "source_file": "layout_calculator.py",
+      "line_start": 152,
+      "line_end": 178,
+      "source_text": "    def get_transform(self, rotation_deg: float = 0.0) -> Callable[[float, float], Tuple[float, float]]:\n        \"\"\"\n        Get the transform function for use by layer renderers.\n\n        Args:\n            rotation_deg: Optional rotation in degrees. When non-zero, the\n                returned function bakes 2D rotation into the coordinate\n                conversion so SVG output needs no transform attributes.\n\n        Returns:\n            Function that takes (geo_x, geo_y) and returns (svg_x, svg_y)\n        \"\"\"\n        if abs(rotation_deg) < 0.01:\n            return self.geo_to_svg\n\n        cx = self.drawable.x + self.drawable.width / 2\n        cy = self.drawable.y + self.drawable.height / 2\n        cos_a = math.cos(math.radians(rotation_deg))\n        sin_a = math.sin(math.radians(rotation_deg))\n\n        def rotated_to_svg(geo_x: float, geo_y: float) -> Tuple[float, float]:\n            raw_x, raw_y = self.geo_to_svg(geo_x, geo_y)\n            dx, dy = raw_x - cx, raw_y - cy\n            return (cx + dx * cos_a - dy * sin_a,\n                    cy + dx * sin_a + dy * cos_a)\n\n        return rotated_to_svg",
+      "node_kind": "method",
+      "parameter_types": {
+        "rotation_deg": "float"
+      },
+      "return_type": "Callable[[float, float], Tuple[float, float]]",
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": "layout_calculator__LayoutCalculator",
+      "cyclomatic_complexity": 2,
+      "idioms_needed": []
+    },
+    "layout_calculator__LayoutCalculator__get_page_layout": {
+      "node_id": "layout_calculator__LayoutCalculator__get_page_layout",
+      "source_file": "layout_calculator.py",
+      "line_start": 180,
+      "line_end": 188,
+      "source_text": "    def get_page_layout(self) -> PageLayout:\n        \"\"\"Get the complete page layout information.\"\"\"\n        return PageLayout(\n            width_px=self.page_width_px,\n            height_px=self.page_height_px,\n            margin_px=self.margin_px,\n            footer_height_px=self.footer_height_px,\n            drawable=self.drawable\n        )",
+      "node_kind": "method",
+      "parameter_types": {},
+      "return_type": "PageLayout",
+      "type_dependencies": [],
+      "call_dependencies": [
+        "layout_calculator__PageLayout"
+      ],
+      "callers": [],
+      "parent_class": "layout_calculator__LayoutCalculator",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout_calculator__LayoutCalculator__get_content_bounds_svg": {
+      "node_id": "layout_calculator__LayoutCalculator__get_content_bounds_svg",
+      "source_file": "layout_calculator.py",
+      "line_start": 190,
+      "line_end": 201,
+      "source_text": "    def get_content_bounds_svg(self) -> Tuple[float, float, float, float]:\n        \"\"\"\n        Get the SVG pixel bounds where geo content will be rendered.\n\n        Returns:\n            (left, top, right, bottom) in SVG pixels\n        \"\"\"\n        left = self.margin_px + self.content_offset_x\n        top = self.margin_px + self.content_offset_y\n        right = left + (self.geo_width_ft * self.scale)\n        bottom = top + (self.geo_height_ft * self.scale)\n        return left, top, right, bottom",
+      "node_kind": "method",
+      "parameter_types": {},
+      "return_type": "Tuple[float, float, float, float]",
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": "layout_calculator__LayoutCalculator",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout_calculator__LayoutCalculator__feet_per_inch": {
+      "node_id": "layout_calculator__LayoutCalculator__feet_per_inch",
+      "source_file": "layout_calculator.py",
+      "line_start": 204,
+      "line_end": 206,
+      "source_text": "    @property\n    def feet_per_inch(self) -> float:\n        \"\"\"Get the drawing scale in feet per inch.\"\"\"\n        return SVG_DPI / self.scale",
+      "node_kind": "getter",
+      "parameter_types": {},
+      "return_type": "float",
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": "layout_calculator__LayoutCalculator",
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "layout_calculator__LayoutCalculator__scale_string": {
+      "node_id": "layout_calculator__LayoutCalculator__scale_string",
+      "source_file": "layout_calculator.py",
+      "line_start": 209,
+      "line_end": 214,
+      "source_text": "    @property\n    def scale_string(self) -> str:\n        \"\"\"Get human-readable scale string like '1\\\" = 20\\\\''.\"\"\"\n        fpi = self.feet_per_inch\n        if fpi == int(fpi):\n            return f'1\" = {int(fpi)}\\''\n        return f'1\" = {fpi:.1f}\\''",
+      "node_kind": "getter",
+      "parameter_types": {},
+      "return_type": "str",
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": "layout_calculator__LayoutCalculator",
+      "cyclomatic_complexity": 2,
+      "idioms_needed": []
+    },
+    "layout_calculator__create_layout_calculator": {
+      "node_id": "layout_calculator__create_layout_calculator",
+      "source_file": "layout_calculator.py",
+      "line_start": 217,
+      "line_end": 229,
+      "source_text": "def create_layout_calculator(\n    geo_bounds: Tuple[float, float, float, float],\n    page_width_in: float,\n    page_height_in: float,\n    margin_in: float = 0.5\n) -> LayoutCalculator:\n    \"\"\"\n    Factory function to create a LayoutCalculator.\n\n    This is the ONLY way coordinate transforms should be created.\n    All layer renderers must use the same calculator instance.\n    \"\"\"\n    return LayoutCalculator(geo_bounds, page_width_in, page_height_in, margin_in)",
+      "node_kind": "free_function",
+      "parameter_types": {
+        "geo_bounds": "Tuple[float, float, float, float]",
+        "page_width_in": "float",
+        "page_height_in": "float",
+        "margin_in": "float"
+      },
+      "return_type": "LayoutCalculator",
+      "type_dependencies": [],
+      "call_dependencies": [
+        "layout_calculator__LayoutCalculator"
+      ],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "legends___get_terrain_color": {
+      "node_id": "legends___get_terrain_color",
+      "source_file": "legends.py",
+      "line_start": 13,
+      "line_end": 39,
+      "source_text": "def _get_terrain_color(normalized: float) -> Tuple[int, int, int]:\n    \"\"\"\n    Apply terrain colormap using HSV colorspace.\n\n    Blue (240 deg) = lowest altitude -> Green (120 deg) -> Yellow (60 deg) -> Red (0 deg) = highest altitude\n\n    Args:\n        normalized: Value between 0 and 1 (0 = lowest, 1 = highest)\n\n    Returns:\n        (r, g, b) tuple with values 0-255\n    \"\"\"\n    import colorsys\n\n    t = max(0, min(1, normalized))\n\n    # Map normalized value to hue:\n    # 0.0 (low) -> 240 deg (blue)\n    # 1.0 (high) -> 0 deg (red)\n    hue = 240.0 * (1.0 - t)\n\n    # Keep saturation and value high for vivid colors\n    saturation = 0.85\n    value = 0.95\n\n    r, g, b = colorsys.hsv_to_rgb(hue / 360.0, saturation, value)\n    return (int(r * 255), int(g * 255), int(b * 255))",
+      "node_kind": "free_function",
+      "parameter_types": {
+        "normalized": "float"
+      },
+      "return_type": "Tuple[int, int, int]",
+      "type_dependencies": [],
+      "call_dependencies": [
+        "drawing__hsv_to_rgb"
+      ],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 1,
+      "idioms_needed": [
+        "multiple_return"
+      ]
+    },
+    "legends__render_soil_legend": {
+      "node_id": "legends__render_soil_legend",
+      "source_file": "legends.py",
+      "line_start": 42,
+      "line_end": 261,
+      "source_text": "def render_soil_legend(\n    dwg: svgwrite.Drawing,\n    width_px: int,\n    margin_px: int,\n    soils: pd.DataFrame,\n    offset_y: float = 0\n) -> svgwrite.container.Group:\n    \"\"\"\n    Render a soil legend showing SSURGO soil types and drainage classification.\n\n    Creates an SVG group containing a legend box with:\n    - Header \"SOILS (SSURGO)\"\n    - List of soil types found on site (up to 6)\n    - Color-coded swatches by drainage class\n    - Drainage color key at bottom\n\n    Args:\n        dwg: The svgwrite.Drawing object to create elements with\n        width_px: Total width of the SVG canvas in pixels\n        margin_px: Margin from edge of canvas in pixels\n        soils: GeoDataFrame with soil data containing columns:\n            - muname: Soil map unit name\n            - drclassdcd: Drainage class description\n            - hydclprs: Hydric percentage (0-100)\n            - hydgrpdcd: Hydrologic group (A, B, C, D)\n        offset_y: Vertical offset from top margin (for stacking legends)\n\n    Returns:\n        svgwrite.container.Group: The legend group element to add to the drawing\n\n    Example:\n        >>> grp = render_soil_legend(dwg, 816, 48, soils_gdf)\n        >>> dwg.add(grp)\n    \"\"\"\n    legend_w = 220\n    legend_x = width_px - margin_px - legend_w - 10\n    legend_y = margin_px + 10 + offset_y\n\n    # Extract unique soil types from the dataframe\n    soil_types = []\n    if 'muname' in soils.columns:\n        for _, row in soils.drop_duplicates(subset=['muname']).iterrows():\n            muname = row.get('muname', 'Unknown')\n            drainage = row.get('drclassdcd', '')\n            hydric_raw = row.get('hydclprs', 0)\n            # Convert hydric to numeric (may be string from database)\n            try:\n                hydric = float(hydric_raw) if hydric_raw else 0\n            except (ValueError, TypeError):\n                hydric = 0\n            hydgrp = row.get('hydgrpdcd', '')\n            if muname:\n                soil_types.append({\n                    'name': muname,\n                    'drainage': drainage,\n                    'hydric': hydric,\n                    'hydgrp': hydgrp\n                })\n\n    # Determine which drainage key entries are needed\n    present_classes = set()\n    for soil in soil_types[:6]:\n        drainage = soil['drainage']\n        hydric = soil['hydric']\n        if hydric and hydric > 50:\n            present_classes.add('__hydric__')\n        elif drainage:\n            present_classes.add(drainage)\n        else:\n            present_classes.add('')\n\n    num_key_entries = sum(\n        1 for _, _, classes in [\n            ('#d4c4a8', 'Well Drained', {'Well drained', 'Excessively drained', 'Somewhat excessively drained', ''}),\n            ('#c9b896', 'Mod. Well', {'Moderately well drained'}),\n            ('#a8c4d4', 'Poorly', {'Poorly drained', 'Somewhat poorly drained'}),\n            ('#7bb3c9', 'Very Poorly', {'Very poorly drained', 'Subaqueous'}),\n            ('#6495ed', 'Hydric', {'__hydric__'}),\n        ] if classes & present_classes\n    )\n    key_rows = max(1, (num_key_entries + 2) // 3)  # 3 per row, at least 1 row\n\n    # Calculate legend dimensions\n    row_h = 26  # Two lines per entry\n    header_h = 25\n    key_h = 25 + key_rows * 14 + 10  # Header + rows + padding\n    legend_h = header_h + len(soil_types[:6]) * row_h + key_h + 10\n\n    # Create legend group\n    grp = dwg.g(id='soil_legend', opacity=0.5)\n\n    # Background rectangle\n    grp.add(dwg.rect(\n        insert=(legend_x, legend_y),\n        size=(legend_w, legend_h),\n        fill='white',\n        stroke='black',\n        stroke_width=1,\n        fill_opacity=0.95\n    ))\n\n    # Header text\n    grp.add(dwg.text(\n        \"SOILS (SSURGO)\",\n        insert=(legend_x + 10, legend_y + 18),\n        style=\"font-family: 'brandon-grotesque', Arial; font-size: 11px; font-weight: bold;\"\n    ))\n\n    # Soil entries\n    y = legend_y + header_h + 8\n    for soil in soil_types[:6]:  # Limit to 6 entries\n        drainage = soil['drainage']\n        hydric = soil['hydric']\n        hydgrp = soil['hydgrp']\n\n        # Determine fill color and drainage label based on drainage class\n        if hydric and hydric > 50:\n            fill = '#6495ed'\n            drain_label = f\"Hydric ({hydric:.0f}%)\"\n        elif drainage in ['Very poorly drained', 'Subaqueous']:\n            fill = '#7bb3c9'\n            drain_label = \"Very Poorly Drained\"\n        elif drainage in ['Poorly drained', 'Somewhat poorly drained']:\n            fill = '#a8c4d4'\n            drain_label = drainage\n        elif drainage == 'Moderately well drained':\n            fill = '#c9b896'\n            drain_label = \"Mod. Well Drained\"\n        else:\n            fill = '#d4c4a8'\n            drain_label = drainage if drainage else \"Well Drained\"\n\n        # Add hydrologic group if available\n        if hydgrp:\n            drain_label += f\" (Group {hydgrp})\"\n\n        # Color swatch\n        grp.add(dwg.rect(\n            insert=(legend_x + 10, y - 8),\n            size=(14, 14),\n            fill=fill,\n            stroke='#666',\n            stroke_width=0.5\n        ))\n\n        # Soil name (truncated if too long)\n        name = soil['name']\n        if len(name) > 28:\n            name = name[:26] + '...'\n\n        grp.add(dwg.text(\n            name,\n            insert=(legend_x + 30, y + 2),\n            style=\"font-family: Arial; font-size: 9px; font-weight: bold;\"\n        ))\n\n        # Drainage info on second line\n        grp.add(dwg.text(\n            drain_label,\n            insert=(legend_x + 30, y + 14),\n            style=\"font-family: Arial; font-size: 8px; fill: #666;\"\n        ))\n\n        y += row_h\n\n    # Drainage Color Key section\n    key_y = y + 5\n\n    # Separator line\n    grp.add(dwg.line(\n        (legend_x + 10, key_y),\n        (legend_x + legend_w - 10, key_y),\n        stroke='#ccc',\n        stroke_width=0.5\n    ))\n\n    # Key header\n    grp.add(dwg.text(\n        \"DRAINAGE COLOR KEY:\",\n        insert=(legend_x + 10, key_y + 15),\n        style=\"font-family: Arial; font-size: 8px; font-weight: bold;\"\n    ))\n\n    # Color key entries - only include drainage classes present on this property\n    all_key_entries = [\n        ('#d4c4a8', 'Well Drained', {'Well drained', 'Excessively drained', 'Somewhat excessively drained', ''}),\n        ('#c9b896', 'Mod. Well', {'Moderately well drained'}),\n        ('#a8c4d4', 'Poorly', {'Poorly drained', 'Somewhat poorly drained'}),\n        ('#7bb3c9', 'Very Poorly', {'Very poorly drained', 'Subaqueous'}),\n        ('#6495ed', 'Hydric', {'__hydric__'}),\n    ]\n\n    key_entries = [\n        (color, label)\n        for color, label, classes in all_key_entries\n        if classes & present_classes\n    ]\n\n    key_x = legend_x + 10\n    key_row_y = key_y + 28\n    for i, (color, label) in enumerate(key_entries):\n        col = i % 3\n        row = i // 3\n        x = key_x + col * 70\n        y_pos = key_row_y + row * 14\n\n        grp.add(dwg.rect(\n            insert=(x, y_pos - 6),\n            size=(10, 10),\n            fill=color,\n            stroke='#666',\n            stroke_width=0.5\n        ))\n        grp.add(dwg.text(\n            label,\n            insert=(x + 14, y_pos + 2),\n            style=\"font-family: Arial; font-size: 7px;\"\n        ))\n\n    return grp",
+      "node_kind": "free_function",
+      "parameter_types": {
+        "dwg": "svgwrite.Drawing",
+        "width_px": "int",
+        "margin_px": "int",
+        "soils": "pd.DataFrame",
+        "offset_y": "float"
+      },
+      "return_type": "svgwrite.container.Group",
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 18,
+      "idioms_needed": [
+        "format_string",
+        "generator_function",
+        "list_comprehension",
+        "svgwrite_buffer"
+      ]
+    },
+    "legends__render_elevation_legend": {
+      "node_id": "legends__render_elevation_legend",
+      "source_file": "legends.py",
+      "line_start": 264,
+      "line_end": 385,
+      "source_text": "def render_elevation_legend(\n    dwg: svgwrite.Drawing,\n    width_px: int,\n    margin_px: int,\n    min_elevation: float,\n    max_elevation: float,\n    offset_y: float = 0,\n    position: Tuple[float, float] = None,\n) -> svgwrite.container.Group:\n    \"\"\"\n    Render an elevation legend with a color gradient showing the elevation range.\n\n    Creates an SVG group containing a legend box with:\n    - Header \"ELEVATION\"\n    - Vertical gradient bar from blue (low) to red (high)\n    - Min and max elevation labels in feet\n    - Color interpretation note\n\n    Args:\n        dwg: The svgwrite.Drawing object to create elements with\n        width_px: Total width of the SVG canvas in pixels\n        margin_px: Margin from edge of canvas in pixels\n        min_elevation: Minimum elevation value in feet\n        max_elevation: Maximum elevation value in feet\n        offset_y: Vertical offset from top margin (for stacking below other legends)\n        position: Optional explicit (x, y) for the legend's top-left corner.\n            When provided, width_px/margin_px/offset_y are ignored for positioning.\n\n    Returns:\n        svgwrite.container.Group: The legend group element to add to the drawing\n\n    Example:\n        >>> grp = render_elevation_legend(dwg, 816, 48, 25.0, 45.0, offset_y=200)\n        >>> dwg.add(grp)\n    \"\"\"\n    legend_w = 220  # Match soil legend width\n    if position:\n        legend_x, legend_y = position\n    else:\n        legend_x = width_px - margin_px - legend_w - 10\n        legend_y = margin_px + 10 + offset_y\n\n    # Legend dimensions\n    header_h = 25\n    gradient_h = 80\n    labels_h = 20\n    legend_h = header_h + gradient_h + labels_h + 15\n\n    # Create legend group\n    grp = dwg.g(id='elevation_legend', opacity=0.5)\n\n    # Background rectangle\n    grp.add(dwg.rect(\n        insert=(legend_x, legend_y),\n        size=(legend_w, legend_h),\n        fill='white',\n        stroke='black',\n        stroke_width=1,\n        fill_opacity=0.95\n    ))\n\n    # Header text\n    grp.add(dwg.text(\n        \"ELEVATION\",\n        insert=(legend_x + 10, legend_y + 18),\n        style=\"font-family: 'brandon-grotesque', Arial; font-size: 11px; font-weight: bold;\"\n    ))\n\n    # Draw gradient bar with discrete color bands\n    gradient_x = legend_x + 15\n    gradient_y = legend_y + header_h + 5\n    gradient_w = legend_w - 30\n    band_count = 20\n\n    for i in range(band_count):\n        # Calculate normalized value (0 at bottom, 1 at top)\n        normalized = i / (band_count - 1)\n        r, g, b = _get_terrain_color(normalized)\n        color = f'rgb({r},{g},{b})'\n\n        # Draw band (from bottom to top)\n        band_y = gradient_y + gradient_h - (i + 1) * (gradient_h / band_count)\n        band_h = gradient_h / band_count\n\n        grp.add(dwg.rect(\n            insert=(gradient_x, band_y),\n            size=(gradient_w, band_h + 0.5),  # Slight overlap to prevent gaps\n            fill=color,\n            stroke='none'\n        ))\n\n    # Border around gradient\n    grp.add(dwg.rect(\n        insert=(gradient_x, gradient_y),\n        size=(gradient_w, gradient_h),\n        fill='none',\n        stroke='#666',\n        stroke_width=0.5\n    ))\n\n    # Elevation labels\n    label_style = \"font-family: Arial; font-size: 9px;\"\n    grp.add(dwg.text(\n        f\"{max_elevation:.0f}' (high)\",\n        insert=(gradient_x, gradient_y - 3),\n        style=label_style\n    ))\n    grp.add(dwg.text(\n        f\"{min_elevation:.0f}' (low)\",\n        insert=(gradient_x, gradient_y + gradient_h + 12),\n        style=label_style\n    ))\n\n    # Add note about color interpretation\n    grp.add(dwg.text(\n        \"Blue = Low, Red = High\",\n        insert=(legend_x + legend_w / 2, legend_y + legend_h - 5),\n        style=\"font-family: Arial; font-size: 8px; font-style: italic;\",\n        text_anchor='middle'\n    ))\n\n    return grp",
+      "node_kind": "free_function",
+      "parameter_types": {
+        "dwg": "svgwrite.Drawing",
+        "width_px": "int",
+        "margin_px": "int",
+        "min_elevation": "float",
+        "max_elevation": "float",
+        "offset_y": "float",
+        "position": "Tuple[float, float]"
+      },
+      "return_type": "svgwrite.container.Group",
+      "type_dependencies": [],
+      "call_dependencies": [
+        "legends___get_terrain_color"
+      ],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 3,
+      "idioms_needed": [
+        "format_string",
+        "svgwrite_buffer"
+      ]
+    },
+    "legends__calculate_soil_legend_height": {
+      "node_id": "legends__calculate_soil_legend_height",
+      "source_file": "legends.py",
+      "line_start": 388,
+      "line_end": 409,
+      "source_text": "def calculate_soil_legend_height(soils: pd.DataFrame) -> float:\n    \"\"\"\n    Calculate the height of a soil legend based on the number of soil types.\n\n    Useful for positioning other legends below the soil legend.\n\n    Args:\n        soils: GeoDataFrame with soil data\n\n    Returns:\n        Height in pixels that the soil legend will occupy\n    \"\"\"\n    if soils is None or soils.empty:\n        return 0\n\n    # Count unique soil types (limited to 6)\n    soil_types_count = 0\n    if 'muname' in soils.columns:\n        soil_types_count = min(6, len(soils.drop_duplicates(subset=['muname'])))\n\n    # Match soil legend dimensions: header(25) + entries(26 each) + key(70) + padding(10)\n    return 25 + soil_types_count * 26 + 70 + 20",
+      "node_kind": "free_function",
+      "parameter_types": {
+        "soils": "pd.DataFrame"
+      },
+      "return_type": "float",
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 4,
+      "idioms_needed": [
+        "none_check"
+      ]
+    },
+    "title_block__TitleBlockDimensions": {
+      "node_id": "title_block__TitleBlockDimensions",
+      "source_file": "title_block.py",
+      "line_start": 30,
+      "line_end": 35,
+      "source_text": "class TitleBlockDimensions(TypedDict):\n    \"\"\"Dimensions required for title block positioning.\"\"\"\n    width_px: int\n    height_px: int\n    footer_h: int\n    margin_px: int",
+      "node_kind": "class",
+      "parameter_types": {},
+      "return_type": null,
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "title_block__TitleBlockMetadata": {
+      "node_id": "title_block__TitleBlockMetadata",
+      "source_file": "title_block.py",
+      "line_start": 38,
+      "line_end": 52,
+      "source_text": "class TitleBlockMetadata(TypedDict, total=False):\n    \"\"\"Metadata for the title block content.\"\"\"\n    project_title: str\n    client_email: str\n    client_phone: str\n    owner_name: str\n    designed_by: str\n    drawn_by: str\n    checked_by: str\n    issue_status: str\n    revision: str\n    nursery_name: str\n    nursery_details: str\n    nursery_website: str\n    nursery_email: str",
+      "node_kind": "class",
+      "parameter_types": {},
+      "return_type": null,
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 1,
+      "idioms_needed": []
+    },
+    "title_block__render_title_block": {
+      "node_id": "title_block__render_title_block",
+      "source_file": "title_block.py",
+      "line_start": 55,
+      "line_end": 214,
+      "source_text": "def render_title_block(\n    dwg: svgwrite.Drawing,\n    parent_grp: svgwrite.container.Group,\n    dimensions: TitleBlockDimensions,\n    site_data: Dict[str, Any],\n    paper_size: str,\n    scale_px_per_ft: float,\n    metadata: TitleBlockMetadata | None = None,\n) -> None:\n    \"\"\"\n    Render an architectural title block footer with Florida Native Plants branding.\n\n    The title block is divided into three columns:\n    - Column 1 (40%): Project info (title, address, owner, description)\n    - Column 2 (30%): Technical details grid (date, scale, sheet size, etc.)\n    - Column 3 (30%): FNP logo and contact information\n\n    Args:\n        dwg: The svgwrite Drawing object for creating SVG elements.\n        parent_grp: The parent SVG group to add the title block to.\n        dimensions: Dictionary containing width_px, height_px, and footer_h.\n        site_data: Site data dictionary containing address and parcel_info.\n        paper_size: Paper size string (e.g., 'Letter', 'A3', 'Arch D').\n        scale_px_per_ft: Scale factor in pixels per foot for calculating drawing scale.\n        metadata: Optional metadata dictionary with project details. If not provided,\n            values will be extracted from site_data['metadata'] with defaults applied.\n\n    Returns:\n        None. The title block is added directly to parent_grp.\n\n    Example:\n        >>> from gis.pipeline.svg.title_block import render_title_block\n        >>> dimensions = {'width_px': 816, 'height_px': 1056, 'footer_h': 144}\n        >>> render_title_block(dwg, sheet_info_grp, dimensions, site_data, 'Letter', 4.0)\n    \"\"\"\n    width_px = dimensions['width_px']\n    height_px = dimensions['height_px']\n    footer_h = dimensions['footer_h']\n    margin_px = dimensions.get('margin_px', 0)\n\n    if footer_h <= 0:\n        return\n\n    # Extract metadata from site_data if not provided\n    if metadata is None:\n        metadata = site_data.get('metadata', {})\n\n    # Get values with defaults\n    project_title = metadata.get('project_title', 'LANDSCAPE CONCEPT PLAN')\n    client_email = metadata.get('client_email', '')\n    client_phone = metadata.get('client_phone', '')\n    # Owner name: use metadata if provided, otherwise fall back to parcel_info\n    owner_name = metadata.get('owner_name') or site_data.get('parcel_info', {}).get('owner', '')\n    designed_by = metadata.get('designed_by', 'Annie Schiller')\n    drawn_by = metadata.get('drawn_by', '')\n    checked_by = metadata.get('checked_by', '')\n    issue_status = metadata.get('issue_status', '')\n    revision = metadata.get('revision', 'Rev 0')\n    nursery_name = metadata.get('nursery_name', 'FLORIDA NATIVE PLANTS NURSERY & LANDSCAPING')\n    nursery_details = metadata.get('nursery_details', '730 Myakka Rd, Sarasota, FL | (941) 322-1915')\n    nursery_website = metadata.get('nursery_website', 'floridanativeplants.com')\n    nursery_email = metadata.get('nursery_email', 'annie@floridanativeplants.com')\n\n    title_block_id = 'title_block'\n    g_title_block = dwg.g(id=title_block_id)\n\n    # Calculate footer Y position\n    # Footer sits above the bottom margin (margin_px from page bottom)\n    footer_y = height_px - footer_h - margin_px\n\n    # Inset dimensions: title block respects page margins\n    inset_x = margin_px\n    inset_w = width_px - 2 * margin_px\n\n    # Background\n    g_title_block.add(dwg.rect(\n        insert=(inset_x, footer_y),\n        size=(inset_w, footer_h),\n        fill='white',\n        stroke='black',\n        stroke_width=1\n    ))\n\n    col1_w = inset_w * 0.40\n    col2_w = inset_w * 0.30\n\n    # Footer bottom Y coordinate\n    footer_bottom_y = footer_y + footer_h\n\n    # Vertical dividers (extend to footer bottom, not page bottom)\n    g_title_block.add(dwg.line((inset_x + col1_w, footer_y), (inset_x + col1_w, footer_bottom_y), stroke='black', stroke_width=1))\n    g_title_block.add(dwg.line((inset_x + col1_w + col2_w, footer_y), (inset_x + col1_w + col2_w, footer_bottom_y), stroke='black', stroke_width=1))\n\n    # Pre-compute unified font size for columns 2 and 3\n    footer_scale = footer_h / REFERENCE_FOOTER_PX\n    ft_per_inch = SVG_DPI / scale_px_per_ft\n    scale_text = f'1\" = {int(round(ft_per_inch))}\\''\n    today = datetime.date.today().strftime(\"%m.%d.%Y\")\n\n    # Column 2 cell dimensions (3 rows: DATE/SCALE, SHEET SIZE/SHEET NO., DESIGNED BY/REVISION)\n    half_col2 = col2_w / 2\n    col2_pad_x = 8 * footer_scale\n    col2_cell_w = half_col2 - (col2_pad_x * 2)\n    row_h = footer_h / 3\n    label_h = 12 * footer_scale\n    col2_value_h = row_h - label_h - 4 * footer_scale\n\n    # Column 3 text dimensions\n    col3_x = inset_x + col1_w + col2_w\n    col3_w = (inset_x + inset_w) - col3_x\n    col3_pad = 10\n    col3_text_w = col3_w - col3_pad * 2\n\n    # Gather all text items: (text, max_width, max_height)\n    text_items = [\n        # Column 2 values (3 rows: DATE/SCALE, SHEET SIZE/SHEET NO., DESIGNED BY/REVISION)\n        (today, col2_cell_w, col2_value_h),\n        (scale_text, col2_cell_w, col2_value_h),\n        (paper_size, col2_cell_w, col2_value_h),\n        (\"1 OF 1\", col2_cell_w, col2_value_h),\n        (designed_by, col2_cell_w, col2_value_h),\n        (revision or \"\u2014\", col2_cell_w, col2_value_h),\n        # Column 3 text\n        (nursery_name, col3_text_w, 24 * footer_scale),\n    ]\n    # Add nursery detail lines\n    detail_lines_raw = nursery_details.split('|') if '|' in nursery_details else [nursery_details]\n    for detail in detail_lines_raw:\n        text_items.append((detail.strip(), col3_text_w, 14 * footer_scale))\n    if nursery_website:\n        text_items.append((nursery_website, col3_text_w, 14 * footer_scale))\n    if nursery_email:\n        text_items.append((nursery_email, col3_text_w, 14 * footer_scale))\n\n    unified_font_size = compute_unified_font_size(text_items, base_font_size=10, min_font_size=5)\n\n    # Column 1: Project Information\n    _render_project_info_column(\n        dwg, g_title_block, footer_y, footer_h, site_data,\n        project_title, client_email, client_phone, owner_name, issue_status,\n        inset_x, col1_w\n    )\n\n    # Column 2: Technical Details Grid\n    _render_technical_details_column(\n        dwg, g_title_block, footer_y, footer_h, height_px,\n        inset_x + col1_w, col2_w, paper_size, scale_px_per_ft,\n        designed_by, drawn_by, checked_by, revision,\n        unified_font_size=unified_font_size\n    )\n\n    # Column 3: Logo and Branding\n    _render_branding_column(\n        dwg, g_title_block, footer_y, footer_h, inset_x + inset_w,\n        inset_x + col1_w, col2_w, nursery_name, nursery_details,\n        nursery_website=nursery_website, nursery_email=nursery_email,\n        unified_font_size=unified_font_size,\n    )\n\n    parent_grp.add(g_title_block)",
+      "node_kind": "free_function",
+      "parameter_types": {
+        "dwg": "svgwrite.Drawing",
+        "parent_grp": "svgwrite.container.Group",
+        "dimensions": "TitleBlockDimensions",
+        "site_data": "Dict[str, Any]",
+        "paper_size": "str",
+        "scale_px_per_ft": "float",
+        "metadata": "TitleBlockMetadata | None"
+      },
+      "return_type": "None",
+      "type_dependencies": [],
+      "call_dependencies": [
+        "title_block__compute_unified_font_size",
+        "title_block___render_project_info_column",
+        "title_block___render_technical_details_column",
+        "title_block___render_branding_column"
+      ],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 8,
+      "idioms_needed": [
+        "format_string",
+        "none_check",
+        "optional_type",
+        "svgwrite_buffer"
+      ]
+    },
+    "title_block__fit_text_to_cell": {
+      "node_id": "title_block__fit_text_to_cell",
+      "source_file": "title_block.py",
+      "line_start": 218,
+      "line_end": 280,
+      "source_text": "def fit_text_to_cell(\n    text: str,\n    max_width: float,\n    max_height: float,\n    base_font_size: float = 10,\n    min_font_size: float = 7,\n    chars_per_px: float = CHARS_PER_PX\n) -> Tuple[List[str], float]:\n    \"\"\"\n    Fit text into a cell by word wrapping and shrinking font if needed.\n\n    Returns:\n        Tuple of (lines, font_size) where lines is a list of text lines\n        and font_size is the calculated font size to use.\n    \"\"\"\n    if not text:\n        return ([\"\"], base_font_size)\n\n    font_size = base_font_size\n\n    while font_size >= min_font_size:\n        # Calculate approximate characters that fit per line at this font size\n        scale_factor = font_size / 10.0\n        chars_per_line = int(max_width * chars_per_px / scale_factor)\n\n        if chars_per_line < 3:\n            chars_per_line = 3\n\n        # Word wrap the text\n        words = text.split()\n        lines = []\n        current_line = \"\"\n\n        for word in words:\n            test_line = f\"{current_line} {word}\".strip() if current_line else word\n            if len(text) > 0 and len(test_line) <= chars_per_line:\n                current_line = test_line\n            else:\n                if current_line:\n                    lines.append(current_line)\n                current_line = word\n\n        if current_line:\n            lines.append(current_line)\n\n        # Check if any line overflows horizontally (e.g. long words like emails)\n        max_line_len = max(len(line) for line in lines) if lines else 0\n        if max_line_len > chars_per_line:\n            font_size -= 1\n            continue\n\n        # Check if lines fit vertically\n        line_height = font_size * 1.2\n        total_height = len(lines) * line_height\n\n        if total_height <= max_height:\n            return (lines, font_size)\n\n        # Reduce font size and try again\n        font_size -= 1\n\n    # At minimum font size, just return what we have\n    return (lines[:int(max_height / (min_font_size * 1.2))], min_font_size)",
+      "node_kind": "free_function",
+      "parameter_types": {
+        "text": "str",
+        "max_width": "float",
+        "max_height": "float",
+        "base_font_size": "float",
+        "min_font_size": "float",
+        "chars_per_px": "float"
+      },
+      "return_type": "Tuple[List[str], float]",
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 11,
+      "idioms_needed": [
+        "format_string",
+        "generator_function",
+        "multiple_return"
+      ]
+    },
+    "title_block__compute_unified_font_size": {
+      "node_id": "title_block__compute_unified_font_size",
+      "source_file": "title_block.py",
+      "line_start": 283,
+      "line_end": 343,
+      "source_text": "def compute_unified_font_size(\n    text_items: List[Tuple[str, float, float]],\n    base_font_size: float = 10,\n    min_font_size: float = 5,\n    chars_per_px: float = CHARS_PER_PX,\n) -> float:\n    \"\"\"\n    Compute the smallest font size that fits ALL text items into their cells.\n\n    Args:\n        text_items: List of (text, max_width, max_height) tuples.\n        base_font_size: Starting font size to try.\n        min_font_size: Minimum font size to allow.\n        chars_per_px: Approximate chars per pixel at 10px font.\n\n    Returns:\n        The unified font size that fits all items.\n    \"\"\"\n    font_size = base_font_size\n\n    while font_size >= min_font_size:\n        all_fit = True\n        for text, max_width, max_height in text_items:\n            if not text:\n                continue\n            scale_factor = font_size / 10.0\n            chars_per_line = max(3, int(max_width * chars_per_px / scale_factor))\n\n            # Word wrap\n            words = text.split()\n            lines = []\n            current_line = \"\"\n            for word in words:\n                test_line = f\"{current_line} {word}\".strip() if current_line else word\n                if len(test_line) <= chars_per_line:\n                    current_line = test_line\n                else:\n                    if current_line:\n                        lines.append(current_line)\n                    current_line = word\n            if current_line:\n                lines.append(current_line)\n\n            # Check horizontal overflow\n            max_line_len = max(len(line) for line in lines) if lines else 0\n            if max_line_len > chars_per_line:\n                all_fit = False\n                break\n\n            # Check vertical overflow\n            line_height = font_size * 1.2\n            total_height = len(lines) * line_height\n            if total_height > max_height:\n                all_fit = False\n                break\n\n        if all_fit:\n            return font_size\n        font_size -= 1\n\n    return min_font_size",
+      "node_kind": "free_function",
+      "parameter_types": {
+        "text_items": "List[Tuple[str, float, float]]",
+        "base_font_size": "float",
+        "min_font_size": "float",
+        "chars_per_px": "float"
+      },
+      "return_type": "float",
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 11,
+      "idioms_needed": [
+        "format_string",
+        "generator_function"
+      ]
+    },
+    "title_block___render_project_info_column": {
+      "node_id": "title_block___render_project_info_column",
+      "source_file": "title_block.py",
+      "line_start": 346,
+      "line_end": 434,
+      "source_text": "def _render_project_info_column(\n    dwg: svgwrite.Drawing,\n    g_title_block: svgwrite.container.Group,\n    footer_y: int,\n    footer_h: int,\n    site_data: Dict[str, Any],\n    project_title: str,\n    client_email: str,\n    client_phone: str,\n    owner_name: str,\n    issue_status: str,\n    inset_x: float = 0,\n    col1_w: float = 200,\n) -> None:\n    \"\"\"\n    Render the project information column (Column 1).\n\n    Args:\n        dwg: The svgwrite Drawing object.\n        g_title_block: The title block group to add elements to.\n        footer_y: Y coordinate of the footer top.\n        footer_h: Height of the footer in pixels.\n        site_data: Site data dictionary containing address.\n        project_title: Title of the project.\n        client_email: Client's email address.\n        client_phone: Client's phone number.\n        owner_name: Name of the property owner.\n        issue_status: Issue status string (e.g., 'NOT FOR CONSTRUCTION').\n        inset_x: Left margin inset in pixels.\n        col1_w: Width of column 1 in pixels.\n    \"\"\"\n    pad = inset_x + 20\n    address = site_data.get('address', 'Unknown Address')\n\n    # Scale vertical offsets proportionally with footer height\n    # Reference offsets were designed for 108px (1.5\") footer\n    scale = footer_h / REFERENCE_FOOTER_PX\n\n    g_col1 = dwg.g(id='footer_col1')\n    # Calculate dimensions\n    max_width = (col1_w - 40) if col1_w > 40 else col1_w\n\n    # 1. Project Title\n    title_lines, title_font_size = fit_text_to_cell(\n        project_title, max_width, max_height=30 * scale,\n        base_font_size=14, min_font_size=8\n    )\n\n    title_y = footer_y + 20 * scale\n    for i, line in enumerate(title_lines):\n        style = f\"font-size: {title_font_size}px; font-weight: bold;\"\n        text_id = f'tb_project_title_{i}' if len(title_lines) > 1 else 'tb_project_title'\n        g_col1.add(dwg.text(\n            line,\n            insert=(pad, title_y + (i * title_font_size * 1.2)),\n            class_='footer-title',\n            style=style,\n            id=text_id\n        ))\n\n    # 2. Address\n    addr_lines, addr_font_size = fit_text_to_cell(\n        address, max_width, max_height=20 * scale,\n        base_font_size=10, min_font_size=7\n    )\n    addr_y = footer_y + 50 * scale\n    for i, line in enumerate(addr_lines):\n        style = f\"font-size: {addr_font_size}px;\"\n        text_id = f'tb_address_{i}' if len(addr_lines) > 1 else 'tb_address'\n        g_col1.add(dwg.text(\n            line,\n            insert=(pad, addr_y + (i * addr_font_size * 1.2)),\n            class_='footer-text',\n            style=style,\n            id=text_id\n        ))\n\n    # 3. Owner name with contact info below\n    next_y = footer_y + 70 * scale\n    if owner_name:\n        g_col1.add(dwg.text(f\"Owner: {owner_name}\", insert=(pad, next_y), class_='footer-text', fill='#444', id='tb_owner'))\n        next_y += 14 * scale\n    if client_phone:\n        g_col1.add(dwg.text(client_phone, insert=(pad, next_y), class_='footer-text', fill='#666', id='tb_client_phone'))\n        next_y += 12 * scale\n    if client_email:\n        g_col1.add(dwg.text(client_email, insert=(pad, next_y), class_='footer-text', fill='#666', id='tb_client_email'))\n\n    g_title_block.add(g_col1)",
+      "node_kind": "free_function",
+      "parameter_types": {
+        "dwg": "svgwrite.Drawing",
+        "g_title_block": "svgwrite.container.Group",
+        "footer_y": "int",
+        "footer_h": "int",
+        "site_data": "Dict[str, Any]",
+        "project_title": "str",
+        "client_email": "str",
+        "client_phone": "str",
+        "owner_name": "str",
+        "issue_status": "str",
+        "inset_x": "float",
+        "col1_w": "float"
+      },
+      "return_type": "None",
+      "type_dependencies": [],
+      "call_dependencies": [
+        "title_block__fit_text_to_cell"
+      ],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 6,
+      "idioms_needed": [
+        "format_string",
+        "svgwrite_buffer"
+      ]
+    },
+    "title_block___render_technical_details_column": {
+      "node_id": "title_block___render_technical_details_column",
+      "source_file": "title_block.py",
+      "line_start": 437,
+      "line_end": 583,
+      "source_text": "def _render_technical_details_column(\n    dwg: svgwrite.Drawing,\n    g_title_block: svgwrite.container.Group,\n    footer_y: int,\n    footer_h: int,\n    height_px: int,\n    col1_w: float,\n    col2_w: float,\n    paper_size: str,\n    scale_px_per_ft: float,\n    designed_by: str,\n    drawn_by: str,\n    checked_by: str,\n    revision: str,\n    unified_font_size: float | None = None,\n) -> None:\n    \"\"\"\n    Render the technical details grid column (Column 2).\n\n    The column contains a 3x2 grid with:\n    - Row 0: Date | Scale\n    - Row 1: Sheet Size | Sheet No.\n    - Row 2: Designed By | Revision\n\n    Args:\n        dwg: The svgwrite Drawing object.\n        g_title_block: The title block group to add elements to.\n        footer_y: Y coordinate of the footer top.\n        footer_h: Height of the footer in pixels.\n        height_px: Total height of the SVG in pixels.\n        col1_w: Width of column 1 (x offset for column 2).\n        col2_w: Width of column 2.\n        paper_size: Paper size string (e.g., 'Letter').\n        scale_px_per_ft: Scale factor in pixels per foot.\n        designed_by: Designer name.\n        drawn_by: Drafter name or email (unused, kept for API compat).\n        checked_by: Checker name (unused, kept for API compat).\n        revision: Revision string.\n    \"\"\"\n    # Calculate scale text\n    ft_per_inch = SVG_DPI / scale_px_per_ft\n    scale_text = f'1\" = {int(round(ft_per_inch))}\\''\n\n    today = datetime.date.today().strftime(\"%m.%d.%Y\")\n\n    # Scale factor for proportional spacing\n    footer_scale = footer_h / REFERENCE_FOOTER_PX\n\n    col2_x = col1_w\n    row_h = footer_h / 3  # 3 rows\n    half_col2 = col2_w / 2\n    pad_x = 8 * footer_scale\n\n    # Grid lines - horizontal (2 lines for 3 rows)\n    for i in range(1, 3):\n        g_title_block.add(dwg.line(\n            (col2_x, footer_y + row_h * i),\n            (col2_x + col2_w, footer_y + row_h * i),\n            stroke='black', stroke_width=0.5\n        ))\n    # Grid line - vertical center\n    g_title_block.add(dwg.line(\n        (col2_x + half_col2, footer_y),\n        (col2_x + half_col2, footer_y + footer_h),\n        stroke='black', stroke_width=0.5\n    ))\n\n    # Cell dimensions for text fitting (scale with footer)\n    cell_width = half_col2 - (pad_x * 2)\n    label_height = 12 * footer_scale  # Space for label\n    value_area_height = row_h - label_height - 4 * footer_scale  # Remaining space for value\n\n    # Helper to draw label + value in a cell with auto-fitting text\n    def draw_cell(label: str, value: str, row: int, is_right_col: bool = False, cell_id: str = '') -> None:\n        cell_x = col2_x + (half_col2 if is_right_col else 0) + pad_x\n        cell_y = footer_y + row_h * row\n\n        # Add label (offset scales with footer)\n        g_title_block.add(dwg.text(label, insert=(cell_x, cell_y + 10 * footer_scale), class_='footer-label'))\n\n        # Use unified font size if provided, otherwise fit individually\n        if unified_font_size is not None:\n            font_size = unified_font_size\n            # Word wrap at this font size\n            scale_factor = font_size / 10.0\n            chars_per_line = max(3, int(cell_width * CHARS_PER_PX / scale_factor))\n            words = value.split()\n            lines = []\n            current_line = \"\"\n            for word in words:\n                test_line = f\"{current_line} {word}\".strip() if current_line else word\n                if len(test_line) <= chars_per_line:\n                    current_line = test_line\n                else:\n                    if current_line:\n                        lines.append(current_line)\n                    current_line = word\n            if current_line:\n                lines.append(current_line)\n            if not lines:\n                lines = [\"\"]\n        else:\n            lines, font_size = fit_text_to_cell(value, cell_width, value_area_height)\n\n        line_height = font_size * 1.2\n\n        # Start value text below label\n        value_y = cell_y + label_height + font_size\n\n        # Use inline style for dynamic font size, but keep font family from CSS\n        style = f\"font-size: {font_size}px;\" if font_size != 10 else None\n\n        if len(lines) > 1:\n            # Multiple lines: single <text> with <tspan> children\n            text_elem = dwg.text(\n                '',\n                insert=(cell_x, value_y),\n                class_='footer-value',\n                **({\"id\": cell_id} if cell_id else {})\n            )\n            for i, line in enumerate(lines):\n                dy_offset = 0 if i == 0 else line_height\n                tspan = dwg.tspan(line, x=[cell_x], dy=[dy_offset])\n                text_elem.add(tspan)\n        else:\n            text_elem = dwg.text(\n                lines[0] if lines else '',\n                insert=(cell_x, value_y),\n                class_='footer-value',\n                **({\"id\": cell_id} if cell_id else {})\n            )\n\n        if style:\n            text_elem['style'] = style\n        g_title_block.add(text_elem)\n\n    # Row 0: Date | Scale\n    draw_cell(\"DATE\", today, 0, False, cell_id='tb_date')\n    draw_cell(\"SCALE\", scale_text, 0, True, cell_id='tb_scale')\n\n    # Row 1: Sheet Size | Sheet No.\n    draw_cell(\"SHEET SIZE\", paper_size, 1, False, cell_id='tb_sheet_size')\n    draw_cell(\"SHEET NO.\", \"1 OF 1\", 1, True, cell_id='tb_sheet_no')\n\n    # Row 2: Designed By | Revision\n    draw_cell(\"DESIGNED BY\", designed_by, 2, False, cell_id='tb_designed_by')\n    draw_cell(\"REVISION\", revision or \"\u2014\", 2, True, cell_id='tb_revision')",
+      "node_kind": "free_function",
+      "parameter_types": {
+        "dwg": "svgwrite.Drawing",
+        "g_title_block": "svgwrite.container.Group",
+        "footer_y": "int",
+        "footer_h": "int",
+        "height_px": "int",
+        "col1_w": "float",
+        "col2_w": "float",
+        "paper_size": "str",
+        "scale_px_per_ft": "float",
+        "designed_by": "str",
+        "drawn_by": "str",
+        "checked_by": "str",
+        "revision": "str",
+        "unified_font_size": "float | None"
+      },
+      "return_type": "None",
+      "type_dependencies": [],
+      "call_dependencies": [
+        "title_block__fit_text_to_cell"
+      ],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 12,
+      "idioms_needed": [
+        "format_string",
+        "none_check",
+        "optional_type",
+        "svgwrite_buffer"
+      ]
+    },
+    "title_block___render_branding_column": {
+      "node_id": "title_block___render_branding_column",
+      "source_file": "title_block.py",
+      "line_start": 586,
+      "line_end": 786,
+      "source_text": "def _render_branding_column(\n    dwg: svgwrite.Drawing,\n    g_title_block: svgwrite.container.Group,\n    footer_y: int,\n    footer_h: int,\n    right_edge_x: float,\n    col1_x: float,\n    col2_w: float,\n    nursery_name: str,\n    nursery_details: str,\n    nursery_website: str = '',\n    nursery_email: str = '',\n    unified_font_size: float | None = None,\n) -> None:\n    \"\"\"\n    Render the branding column with FNP logo (Column 3).\n\n    Args:\n        dwg: The svgwrite Drawing object.\n        g_title_block: The title block group to add elements to.\n        footer_y: Y coordinate of the footer top.\n        footer_h: Height of the footer in pixels.\n        right_edge_x: Right edge X coordinate of the inset title block.\n        col1_x: X coordinate of column 2 start (inset_x + col1_w).\n        col2_w: Width of column 2.\n        nursery_name: Full nursery name.\n        nursery_details: Contact details string, optionally pipe-separated for two lines.\n        nursery_website: Nursery website URL.\n        nursery_email: Nursery email address.\n    \"\"\"\n    col3_x = col1_x + col2_w\n    col3_w = right_edge_x - col3_x\n    col3_pad = 10  # Left padding inside column 3\n    col3_left = col3_x + col3_pad\n\n    # Scale factor for proportional spacing\n    footer_scale = footer_h / REFERENCE_FOOTER_PX\n\n    g_col3 = dwg.g(id='footer_col3')\n\n    # Logo dimensions and position (scales with footer, left-justified)\n    # Aspect ratio from new logo: 306.64 / 254.98 \u2248 1.20\n    logo_h = footer_h * 0.35\n    logo_w = logo_h * (LOGO_CONTENT_WIDTH / LOGO_CONTENT_HEIGHT)\n    logo_x = col3_left\n    logo_y = footer_y + 4 * footer_scale\n\n    # Scale factor: logo content is LOGO_CONTENT_WIDTH x LOGO_CONTENT_HEIGHT\n    logo_scale = logo_w / LOGO_CONTENT_WIDTH\n\n    # Combined transform: move to position and scale\n    combined_transform = f\"translate({logo_x},{logo_y}) scale({logo_scale},{logo_scale})\"\n\n    logo_group = dwg.g(id='fnp_logo', transform=combined_transform, stroke='none')\n\n    # Render black paths (text and brackets)\n    # Note: d= must be passed in constructor - dict-style assignment doesn't serialize\n    # fill-rule=\"evenodd\" is needed for paths with holes (like the O letter)\n    # Requires main drawing to have debug=False to bypass path validation\n    for path_d in LOGO_BLACK_PATHS:\n        path_elem = dwg.path(d=path_d, fill=LOGO_BLACK_COLOR, fill_rule='evenodd')\n        logo_group.add(path_elem)\n\n    # Render black rects (I letters)\n    for rect in LOGO_BLACK_RECTS:\n        rect_elem = dwg.rect(\n            insert=(rect['x'], rect['y']),\n            size=(rect['width'], rect['height']),\n            fill=LOGO_BLACK_COLOR\n        )\n        if 'transform' in rect:\n            rect_elem['transform'] = rect['transform']\n        logo_group.add(rect_elem)\n\n    # Render black circles (i dots)\n    for circle in LOGO_BLACK_CIRCLES:\n        logo_group.add(dwg.circle(\n            center=(circle['cx'], circle['cy']),\n            r=circle['r'],\n            fill=LOGO_BLACK_COLOR\n        ))\n\n    # Render green paths (plant/dragonfly illustration)\n    # Note: d= must be passed in constructor - dict-style assignment doesn't serialize\n    for path_d in LOGO_GREEN_PATHS:\n        path_elem = dwg.path(d=path_d, fill=LOGO_GREEN_COLOR, fill_rule='evenodd')\n        logo_group.add(path_elem)\n\n    g_col3.add(logo_group)\n\n    # Available width for text in column 3\n    col3_text_w = col3_w - col3_pad * 2\n\n    text_y = logo_y + logo_h + 12 * footer_scale\n\n    # Use unified font size or fall back to individual fitting\n    font = unified_font_size if unified_font_size is not None else 9\n\n    # Helper to word-wrap at the unified font size\n    def wrap_text(text: str, max_w: float) -> List[str]:\n        if not text:\n            return [\"\"]\n        scale_factor = font / 10.0\n        chars_per_line = max(3, int(max_w * CHARS_PER_PX / scale_factor))\n        words = text.split()\n        lines = []\n        current_line = \"\"\n        for word in words:\n            test_line = f\"{current_line} {word}\".strip() if current_line else word\n            if len(test_line) <= chars_per_line:\n                current_line = test_line\n            else:\n                if current_line:\n                    lines.append(current_line)\n                current_line = word\n        if current_line:\n            lines.append(current_line)\n        return lines or [\"\"]\n\n    line_h = font * 1.2\n\n    # Nursery name below logo (left-justified)\n    name_lines = wrap_text(nursery_name, col3_text_w)\n    name_style = f\"font-size: {font}px; font-weight: bold;\"\n    if len(name_lines) > 1:\n        name_elem = dwg.text(\n            '',\n            insert=(col3_left, text_y),\n            class_='footer-tagline',\n            text_anchor='start',\n            style=name_style,\n            id='tb_nursery_name'\n        )\n        for i, line in enumerate(name_lines):\n            dy_offset = 0 if i == 0 else line_h\n            tspan = dwg.tspan(line, x=[col3_left], dy=[dy_offset])\n            name_elem.add(tspan)\n        g_col3.add(name_elem)\n    else:\n        g_col3.add(dwg.text(\n            name_lines[0],\n            insert=(col3_left, text_y),\n            class_='footer-tagline',\n            text_anchor='start',\n            style=name_style,\n            id='tb_nursery_name'\n        ))\n    text_y += len(name_lines) * line_h\n\n    # Contact details (left-justified)\n    text_y += 2 * footer_scale\n    detail_lines_raw = nursery_details.split('|') if '|' in nursery_details else [nursery_details]\n    detail_idx = 0\n    for detail in detail_lines_raw:\n        detail_text = detail.strip()\n        d_lines = wrap_text(detail_text, col3_text_w)\n        for line in d_lines:\n            style = f\"font-size: {font}px;\"\n            elem = dwg.text(line, insert=(col3_left, text_y), class_='footer-text', text_anchor='start', style=style,\n                            id=f'tb_nursery_details_{detail_idx}')\n            detail_idx += 1\n            g_col3.add(elem)\n            text_y += line_h\n\n    # Nursery website\n    if nursery_website:\n        w_lines = wrap_text(nursery_website, col3_text_w)\n        style = f\"font-size: {font}px;\"\n        if len(w_lines) > 1:\n            w_elem = dwg.text('', insert=(col3_left, text_y), class_='footer-text', text_anchor='start', style=style,\n                              id='tb_nursery_website')\n            for i, line in enumerate(w_lines):\n                dy_offset = 0 if i == 0 else line_h\n                tspan = dwg.tspan(line, x=[col3_left], dy=[dy_offset])\n                w_elem.add(tspan)\n            g_col3.add(w_elem)\n        else:\n            elem = dwg.text(w_lines[0], insert=(col3_left, text_y), class_='footer-text', text_anchor='start',\n                            style=style, id='tb_nursery_website')\n            g_col3.add(elem)\n        text_y += len(w_lines) * line_h\n\n    # Nursery email\n    if nursery_email:\n        e_lines = wrap_text(nursery_email, col3_text_w)\n        style = f\"font-size: {font}px;\"\n        if len(e_lines) > 1:\n            e_elem = dwg.text('', insert=(col3_left, text_y), class_='footer-text', text_anchor='start', style=style,\n                              id='tb_nursery_email')\n            for i, line in enumerate(e_lines):\n                dy_offset = 0 if i == 0 else line_h\n                tspan = dwg.tspan(line, x=[col3_left], dy=[dy_offset])\n                e_elem.add(tspan)\n            g_col3.add(e_elem)\n        else:\n            elem = dwg.text(e_lines[0], insert=(col3_left, text_y), class_='footer-text', text_anchor='start',\n                            style=style, id='tb_nursery_email')\n            g_col3.add(elem)\n        text_y += len(e_lines) * line_h\n\n    g_title_block.add(g_col3)",
+      "node_kind": "free_function",
+      "parameter_types": {
+        "dwg": "svgwrite.Drawing",
+        "g_title_block": "svgwrite.container.Group",
+        "footer_y": "int",
+        "footer_h": "int",
+        "right_edge_x": "float",
+        "col1_x": "float",
+        "col2_w": "float",
+        "nursery_name": "str",
+        "nursery_details": "str",
+        "nursery_website": "str",
+        "nursery_email": "str",
+        "unified_font_size": "float | None"
+      },
+      "return_type": "None",
+      "type_dependencies": [],
+      "call_dependencies": [],
+      "callers": [],
+      "parent_class": null,
+      "cyclomatic_complexity": 22,
+      "idioms_needed": [
+        "format_string",
+        "none_check",
+        "optional_type",
+        "svgwrite_buffer"
+      ]
+    }
+  }
+}

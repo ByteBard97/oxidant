@@ -1,18 +1,18 @@
 # oxidant
 
-An agentic harness for automated TypeScript-to-Rust translation, powered by [LangGraph](https://github.com/langchain-ai/langgraph).
+An agentic harness for automated source-to-Rust translation (TypeScript and Python), powered by [LangGraph](https://github.com/langchain-ai/langgraph).
 
 **[Documentation & Architecture →](https://bytebard97.github.io/oxidant/)**
 
 ## What It Does
 
-Oxidant drives a four-phase pipeline that reads a TypeScript codebase, analyzes its structure, and produces idiomatic Rust — one function at a time, in dependency order, verified at every step.
+Oxidant drives a four-phase pipeline that reads a TypeScript or Python codebase, analyzes its structure, and produces idiomatic Rust — one function at a time, in dependency order, verified at every step.
 
 ## Pipeline
 
 | Phase | What it does |
 |-------|-------------|
-| **A — Analysis** | ts-morph AST extraction, idiom detection, topological sort, tier classification, Rust skeleton generation |
+| **A — Analysis** | AST extraction (ts-morph for TypeScript, AST module for Python), idiom detection, topological sort, tier classification, Rust skeleton generation |
 | **B — Translation** | LangGraph loop: pick → prompt → `claude --print` → verify → retry/escalate → commit |
 | **C — Refinement** | `cargo clippy` auto-fix for mechanical warnings; structural warnings surfaced for review |
 | **D — Integration** | `cargo build --release`, error parsing, manifest intersection, retranslation hints |
@@ -22,8 +22,8 @@ flowchart LR
 
     subgraph phaseA ["Phase A — Analysis"]
         direction TB
-        tsFiles[".ts source files"]
-        astExtract["ts-morph AST<br>extraction"]
+        tsFiles[".ts / .py source files"]
+        astExtract["AST extraction<br>(ts-morph or Python ast)"]
         idiomDetect["idiom detection<br>& classification"]
         topoSort["topological sort<br>by dependency"]
         skeleton["Rust skeleton<br>generation"]
@@ -35,7 +35,7 @@ flowchart LR
     subgraph phaseB ["Phase B — Translation"]
         direction TB
         pickNode["pick next node<br>(topo order)"]
-        buildCtx["build context<br>TS src + deps + idioms"]
+        buildCtx["build context<br>src + deps + idioms"]
         claudeCall["claude --print<br>(haiku → sonnet → opus)"]
         verifySnip["verify snippet<br>stub · branch · cargo check"]
         pickNode --> buildCtx --> claudeCall --> verifySnip
@@ -109,7 +109,7 @@ oxidant/
 │   ├── refinement/      # Phase C — Clippy auto-fix
 │   ├── verification/    # Three-layer snippet verification
 │   └── cli.py           # Typer CLI entry point
-├── phase_a_scripts/     # ts-morph TypeScript scripts (A1 AST, A2 idioms)
+├── phase_a_scripts/     # ts-morph TypeScript scripts (A1 AST, A2 idioms); Python analysis uses the built-in ast module
 ├── snippets/            # Per-node .rs snippets output by Phase B
 ├── docs/                # GitHub Pages site
 ├── idiom_dictionary.md  # TS→Rust idiom guidance injected into prompts
@@ -118,10 +118,10 @@ oxidant/
 
 ## How Translation Works
 
-Every translatable unit in the TypeScript codebase — class, method, function, interface, enum — becomes a node in `conversion_manifest.json`. Nodes are processed in topological order: by the time a node is translated, all its dependencies are already in Rust.
+Every translatable unit in the source codebase — class, method, function, interface/dataclass, enum — becomes a node in the manifest. Nodes are processed in topological order: by the time a node is translated, all its dependencies are already in Rust.
 
 For each node, Phase B:
-1. Assembles a prompt with the TS source, Rust skeleton signature, dependency snippets, and relevant idiom guidance
+1. Assembles a prompt with the source (TS or Python), Rust skeleton signature, dependency snippets, and relevant idiom guidance
 2. Calls `claude --print` as a subprocess (subscription auth — no API key needed)
 3. Verifies the snippet: stub check → branch parity → `cargo check`
 4. Retries with error context, escalating haiku → sonnet → opus if needed

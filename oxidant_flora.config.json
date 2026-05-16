@@ -1,0 +1,35 @@
+{
+  "manifest_path": "flora_manifest.json",
+  "source_repo": "/Users/ceres/Desktop/flora/flora-backend/src/gis/pipeline/svg",
+  "target_repo": "/Users/ceres/Desktop/flora/flora-studio/src-tauri/src/gis/svg_oxidant",
+  "source_language": "python",
+  "target_language": "rust",
+  "crate_name": "svg-oxidant",
+  "architectural_decisions": {
+    "svg_output_strategy": "String buffer pattern. Every render function takes `buf: &mut String` as first parameter and calls `buf.push_str(...)`. Returns `()`. NO svgwrite objects, NO DOM API — just push formatted SVG strings.",
+    "svgwrite_mapping": "Python `dwg.g(id='x')` + `parent.add(child)` → Rust `buf.push_str(r#\"<g id=\"x\">\"#)` ... `buf.push_str(\"</g>\")`. Python `dwg.rect(insert=(x,y), size=(w,h))` → `buf.push_str(&format!(r#\"<rect x=\"{:.2}\" y=\"{:.2}\" width=\"{:.2}\" height=\"{:.2}\"/>\"#, x, y, w, h))`.",
+    "type_substitutions": "Python GeoDataFrame/shapely → pre-parsed Rust structs. `zones: pd.DataFrame` → `zones: &[SoilZone]`. `buildings: list` → `buildings: &[Building]`. `parcel_rings: shapely.Polygon` → `rings: &Rings`. `transform_fn: Callable` → `lc: &LayoutCalc` (use `lc.to_svg(lon, lat)` for coordinate conversion).",
+    "known_rust_types": "Available types from crate::types: SoilZone, Building, Rings, TitleBlockParams. Available from crate::layout: LayoutCalc (has `to_svg(lon: f64, lat: f64) -> (f64, f64)` method). Use `crate::layout::LayoutCalc` and `crate::types::SoilZone` etc in function signatures.",
+    "return_types": "`fit_text_to_cell` returns `(Vec<String>, f64)` not serde_json::Value. `compute_unified_font_size` returns `f64`. `hsv_to_rgb` returns `(u8, u8, u8)`. `apply_terrain_colormap` returns `(u8, u8, u8)`. `_get_terrain_color` returns `(u8, u8, u8)`.",
+    "reference_footer_px": "Add `const REFERENCE_FOOTER_PX: f64 = 108.0;` to title_block.rs. The Python pattern `footer_scale = footer_h / REFERENCE_FOOTER_PX` must be replicated exactly — all proportional offsets in the title block use this scale factor.",
+    "styles_strategy": "`generate_svg_styles` must APPEND new CSS classes to the existing STYLES const — it must NOT replace the existing parcel/building/soil CSS rules. New classes to add: .label, .footer-text, .footer-title, .footer-name, .footer-tagline, .footer-label, .footer-value, .footer-status. Also add @font-face for Balmat and @import for Typekit.",
+    "private_helpers": "Title block helper functions (_render_project_info_column, _render_technical_details_column, _render_branding_column) are private (`fn`, not `pub fn`) in title_block.rs. compute_unified_font_size is also private.",
+    "svg_id_constraints": "These SVG group IDs must match exactly (frontend JS depends on them): aerial-photo, parcel-boundary, building-footprint, dem-topo, sun-shade, flood-zones, soils-ssurgo, base-layer, geo-clip-wrapper, geo-content, _Site, _Sheet_Info.",
+    "error_handling": "No Result types needed for render functions — they take data that is already validated. If a value is missing, emit an empty string or skip the element.",
+    "crates_allowed": "Use only: serde, serde_json, base64, image. Do NOT use: usvg, svg2pdf, reqwest, tokio — those belong in the fetch layer."
+  },
+  "crate_inventory": [
+    "serde", "serde_json", "base64", "image"
+  ],
+  "model_tiers": {
+    "haiku": "claude-haiku-4-5-20251001",
+    "sonnet": "claude-sonnet-4-6",
+    "opus": "claude-opus-4-6"
+  },
+  "start_tier": "sonnet",
+  "max_attempts": {"haiku": 1, "sonnet": 2, "opus": 1},
+  "no_escalate": false,
+  "parallelism": 1,
+  "subscription_auth": true,
+  "review_mode": "auto"
+}
