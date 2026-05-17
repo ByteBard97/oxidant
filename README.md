@@ -2,7 +2,7 @@
   <img src="oxidant-logo.svg" alt="oxidant" width="600" />
 </p>
 
-An agentic harness for automated source-to-Rust translation (TypeScript and Python), powered by [LangGraph](https://github.com/langchain-ai/langgraph).
+A plugin-based agentic →Rust translation pipeline. Ships with TypeScript and Python frontends, with more languages coming. Powered by [LangGraph](https://github.com/langchain-ai/langgraph).
 
 **[Documentation & Architecture →](https://bytebard97.github.io/oxidant/)**
 
