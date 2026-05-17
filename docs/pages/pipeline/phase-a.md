@@ -2,11 +2,24 @@
 
 Phase A is entirely deterministic — no AI involvement. It produces all the structured inputs Phase B requires.
 
+The first two steps (A1 and A2) are **language-specific** and implemented as a frontend plugin pair — one script for AST extraction and one for idiom detection. Both scripts emit the same manifest schema regardless of source language, so steps A3 onward are completely language-agnostic.
+
+Set `"source_language"` in your config to select the frontend:
+
+```json
+{ "source_language": "typescript" }   // uses phase_a_scripts/extract_ast.ts + detect_idioms.ts
+{ "source_language": "python" }        // uses phase_a_scripts/extract_ast_python.py + detect_idioms_python.py
+```
+
+See [Language Frontends](../frontends.md) for the full contract and how to add a new language.
+
 ---
 
-## A1 — AST Extraction (`phase_a_scripts/extract_ast.ts`)
+## A1 — AST Extraction
 
-A ts-morph TypeScript script parses the entire source codebase and populates `oxidant.db`. ts-morph was chosen specifically for its **cross-file type resolution** — when a method in `GeomGraph` accepts a `GeomNode` parameter from another module, ts-morph resolves that type fully and records it as a dependency edge.
+**TypeScript frontend** (`phase_a_scripts/extract_ast.ts`): a ts-morph script that parses the entire source codebase and populates `oxidant.db`. ts-morph was chosen specifically for its **cross-file type resolution** — when a method in `GeomGraph` accepts a `GeomNode` parameter from another module, ts-morph resolves that type fully and records it as a dependency edge.
+
+**Python frontend** (`phase_a_scripts/extract_ast_python.py`): uses the stdlib `ast` module to walk `.py` files and extract the same node kinds. Produces a manifest with the same schema.
 
 **Node kinds extracted:**
 
@@ -24,9 +37,14 @@ For each node, the extractor records: unique node ID, source file path, line ran
 
 ---
 
-## A2 — Idiom Detection (`phase_a_scripts/detect_idioms.ts`)
+## A2 — Idiom Detection
 
-A second ts-morph pass scans each node's AST for 14 patterns known to require non-trivial Rust translation. Each detected pattern is stored in `idioms_needed[]` on the node and used in Phase B to inject relevant guidance into the conversion prompt.
+Each frontend ships a companion idiom detector that scans each node's AST for patterns known to require non-trivial Rust translation.
+
+- **TypeScript** (`phase_a_scripts/detect_idioms.ts`): detects 14 patterns via a second ts-morph pass.
+- **Python** (`phase_a_scripts/detect_idioms_python.py`): detects Python-specific patterns (e.g. `svgwrite` buffer idioms, dataframe → struct conversions).
+
+Each detected pattern is stored in `idioms_needed[]` on the node and injected into the Phase B prompt as targeted guidance.
 
 See [Idiom Detection](../reference/idioms.md) for the full list and translation guidance.
 

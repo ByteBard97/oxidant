@@ -1,10 +1,12 @@
 # Oxidant
 
-**Agentic TypeScript → Rust translation harness**
+**Plugin-based agentic →Rust translation pipeline**
 
-Oxidant takes a TypeScript codebase and produces an idiomatic, compiling Rust codebase by orchestrating Claude Code subprocesses. It is not a transpiler — it controls agents. The agents do the actual conversion; Oxidant decides what to convert, in what order, with what context, and whether the output is acceptable.
+Oxidant takes a source codebase and produces an idiomatic, compiling Rust codebase by orchestrating Claude Code subprocesses. It is not a transpiler — it controls agents. The agents do the actual conversion; Oxidant decides what to convert, in what order, with what context, and whether the output is acceptable.
 
-The primary test corpus is **msagl-js** — Microsoft's TypeScript graph layout engine (~4,800 functions). One of the project authors previously spent 236 commits hand-translating it; Oxidant automates that process.
+The source language is a **plugin** — a pair of scripts that extract an AST and detect translation idioms from any language and emit a standard manifest. Oxidant ships with two frontends: **TypeScript** (via ts-morph) and **Python** (via the stdlib `ast` module). More languages can be added by writing a new frontend pair.
+
+The primary test corpora are **msagl-js** (TypeScript, ~4,800 functions) and the **flora-backend SVG pipeline** (Python, ~90 functions).
 
 ---
 
@@ -23,11 +25,12 @@ Naive file-by-file LLM prompting produces code that compiles in isolation but fa
 
 ```mermaid
 flowchart LR
-    ts[("TypeScript<br>Repo")]:::db
+    src[("Source Repo<br>(any language)")]:::db
+    frontend["Language Frontend<br>(TypeScript · Python · ...)"]:::plugin
 
     subgraph phaseA ["PHASE A — Analysis"]
         direction TB
-        ast["ts-morph<br>AST extract"]:::process --> idiom["Idiom<br>detection"]:::process
+        ast["AST extract"]:::process --> idiom["Idiom<br>detection"]:::process
         idiom --> topo["Topological<br>sort"]:::process
         topo --> tier["Tier<br>classify"]:::process
         tier --> skel["Skeleton<br>generate"]:::process
@@ -58,12 +61,14 @@ flowchart LR
 
     rs[("Rust<br>Crate")]:::success
 
-    ts --> phaseA
+    src --> frontend
+    frontend --> phaseA
     phaseA --> phaseB
     phaseB --> phaseC
     phaseC --> phaseD
     phaseD --> rs
 
+    classDef plugin  fill:#1e3a5f,stroke:#a78bfa,color:#ddd6fe
     classDef db      fill:#7c2d12,stroke:#f97316,color:#fed7aa
     classDef process fill:#1e3a5f,stroke:#60a5fa,color:#bfdbfe
     classDef ai      fill:#4c1d95,stroke:#c084fc,color:#ddd6fe
@@ -75,7 +80,7 @@ Phases are sequential at the top level. Phase B's internal loop is highly iterat
 
 | Phase | What | How |
 |-------|------|-----|
-| **A — Analysis** | AST extraction → idiom detection → topological sort → tier classification → Rust skeleton | Deterministic (no AI) |
+| **A — Analysis** | Frontend plugin extracts AST + detects idioms → topological sort → tier classification → Rust skeleton | Deterministic (no AI) |
 | **B — Translation** | Convert each node, verify, retry | LangGraph loop + Claude Code subprocess |
 | **C — Refinement** | Make the output idiomatic | `cargo clippy` + targeted agents |
 | **D — Integration** | Full build, equivalence tests | `cargo build --release` + delta debugging |

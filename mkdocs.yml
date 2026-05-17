@@ -1,5 +1,5 @@
 site_name: Oxidant
-site_description: Agentic TypeScript-to-Rust translation harness
+site_description: Plugin-based agentic →Rust translation pipeline. Ships with TypeScript and Python frontends, with more languages coming.
 repo_url: https://github.com/ByteBard97/oxidant
 repo_name: ByteBard97/oxidant
 
@@ -45,6 +45,7 @@ markdown_extensions:
 
 nav:
   - Overview: index.md
+  - Language Frontends: frontends.md
   - Pipeline:
     - Phase A — Analysis: pipeline/phase-a.md
     - Class Hierarchies: pipeline/hierarchies.md
