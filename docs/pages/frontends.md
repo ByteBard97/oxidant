@@ -50,7 +50,7 @@ Oxidant dispatches Phase A1 and A2 to the appropriate scripts automatically.
 
 **Best for:** Python packages with clear function boundaries and typed signatures.
 
-**Tested on:** flora-backend SVG pipeline (~90 functions, GIS map rendering)
+**Tested on:** a private GIS map rendering pipeline (~90 functions)
 
 ---
 

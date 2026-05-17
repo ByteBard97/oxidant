@@ -6,7 +6,7 @@ Oxidant takes a source codebase and produces an idiomatic, compiling Rust codeba
 
 The source language is a **plugin** — a pair of scripts that extract an AST and detect translation idioms from any language and emit a standard manifest. Oxidant ships with two frontends: **TypeScript** (via ts-morph) and **Python** (via the stdlib `ast` module). More languages can be added by writing a new frontend pair.
 
-The primary test corpora are **msagl-js** (TypeScript, ~4,800 functions) and the **flora-backend SVG pipeline** (Python, ~90 functions).
+The primary TypeScript corpus is **msagl-js** — Microsoft's graph layout engine (~4,800 functions). The Python frontend has been validated on a private GIS rendering pipeline (~90 functions).
 
 ---
 
