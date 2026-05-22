@@ -352,8 +352,19 @@ class Manifest:
                 con.rollback()
                 return None
 
-            # Primary: topological order. Secondary: source length (short = easy first)
-            best = min(candidates, key=lambda r: (r["topological_order"] or 0, r["src_len"] or 0))
+            # Primary: topological order, then bfs_level. Secondary: source length (short = easy first)
+            all_rows_bfs = {r["node_id"]: r for r in all_rows}
+            bfs_map = {}
+            try:
+                bfs_rows = con.execute("SELECT node_id, bfs_level FROM nodes").fetchall()
+                bfs_map = {r["node_id"]: (r["bfs_level"] or 0) for r in bfs_rows}
+            except Exception:
+                pass
+            best = min(candidates, key=lambda r: (
+                r["topological_order"] or 0,
+                bfs_map.get(r["node_id"], 0),
+                r["src_len"] or 0,
+            ))
             con.execute(
                 "UPDATE nodes SET status = ? WHERE node_id = ?",
                 (NodeStatus.IN_PROGRESS.value, best["node_id"]),
