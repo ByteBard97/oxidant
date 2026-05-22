@@ -40,6 +40,30 @@ def _detect_idioms(
                 if isinstance(op, (ast.Is, ast.IsNot)) and isinstance(comp, ast.Constant) and comp.value is None:
                     idioms.add("none_check")
 
+    # shapely geometry — any function that imports or calls shapely types/methods
+    _SHAPELY_MODULES = {"shapely", "shapely.geometry", "shapely.affinity", "shapely.ops"}
+    _SHAPELY_TYPES_SET = {"Polygon", "LineString", "MultiLineString", "Point",
+                          "MultiPoint", "MultiPolygon", "GeometryCollection"}
+    _SHAPELY_ATTRS = {"intersection", "bounds", "exterior", "interiors", "coords",
+                      "geoms", "intersects", "area", "centroid", "minimum_rotated_rectangle",
+                      "buffer", "rotate", "unary_union"}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            if any(alias.name in _SHAPELY_MODULES or alias.name.startswith("shapely.")
+                   for alias in node.names):
+                idioms.add("shapely_geometry")
+        elif isinstance(node, ast.ImportFrom):
+            if node.module and (node.module in _SHAPELY_MODULES
+                                or node.module.startswith("shapely.")):
+                idioms.add("shapely_geometry")
+            if node.module and node.module.startswith("shapely"):
+                for alias in node.names:
+                    if alias.name in _SHAPELY_TYPES_SET:
+                        idioms.add("shapely_geometry")
+        elif isinstance(node, ast.Attribute):
+            if node.attr in _SHAPELY_ATTRS:
+                idioms.add("shapely_geometry")
+
     # svgwrite DOM-style API — any function that builds SVG via svgwrite objects
     # needs to be rewritten as a string-buffer function in Rust.
     # Detect via: import of svgwrite, or attribute calls like dwg.add/dwg.g/dwg.rect.
@@ -69,24 +93,84 @@ def _detect_idioms(
     return sorted(idioms)
 
 
+_FILE_LEVEL_IDIOMS: dict[str, str] = {
+    # library → idiom tag propagated to every node in any file that imports it
+    "shapely": "shapely_geometry",
+    "svgwrite": "svgwrite_buffer",
+}
+
+
+def _file_level_idioms(source_file: str) -> set[str]:
+    """Return idioms that apply to every node in source_file based on its imports.
+
+    Reads the actual file (not just a single node's source_text) so that
+    module-level imports are visible even when processing individual methods.
+    """
+    p = Path(source_file)
+    if not p.exists():
+        return set()
+    try:
+        tree = ast.parse(p.read_text(encoding="utf-8"))
+    except SyntaxError:
+        return set()
+
+    idioms: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.Import, ast.ImportFrom)):
+            names = (
+                [alias.name for alias in node.names]
+                if isinstance(node, ast.Import)
+                else ([node.module] if node.module else [])
+            )
+            for name in names:
+                if name is None:
+                    continue
+                for lib, tag in _FILE_LEVEL_IDIOMS.items():
+                    if name == lib or name.startswith(f"{lib}."):
+                        idioms.add(tag)
+    return idioms
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--manifest", required=True)
+    parser.add_argument(
+        "--source-root", default=None,
+        help="Root directory of the source repo, used to resolve relative source_file paths.",
+    )
     args = parser.parse_args()
 
     manifest_path = Path(args.manifest)
     manifest = json.loads(manifest_path.read_text())
     nodes = manifest.get("nodes", {})
 
+    # Resolve the source root: prefer --source-root, then manifest metadata, then cwd.
+    source_root = Path(args.source_root) if args.source_root else None
+    if source_root is None:
+        source_root = Path(manifest.get("source_repo", "."))
+
+    # Pre-compute file-level idioms so we read each file at most once.
+    file_idiom_cache: dict[str, set[str]] = {}
+
     tagged = 0
     for node in nodes.values():
         existing = set(node.get("idioms_needed", []))
-        detected = _detect_idioms(
+
+        # Per-function idioms from the node's own source text
+        detected = set(_detect_idioms(
             node.get("source_text", ""),
             node.get("parameter_types", {}),
             return_type=node.get("return_type"),
-        )
-        node["idioms_needed"] = sorted(existing | set(detected))
+        ))
+
+        # File-level idioms propagated from module imports
+        rel_path = node.get("source_file", "")
+        if rel_path not in file_idiom_cache:
+            abs_path = (source_root / rel_path) if not Path(rel_path).is_absolute() else Path(rel_path)
+            file_idiom_cache[rel_path] = _file_level_idioms(str(abs_path))
+        detected |= file_idiom_cache[rel_path]
+
+        node["idioms_needed"] = sorted(existing | detected)
         if detected:
             tagged += 1
 

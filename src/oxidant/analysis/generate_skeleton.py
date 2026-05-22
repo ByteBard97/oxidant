@@ -193,6 +193,19 @@ def map_python_type(py_type: str, known_classes: set[str] | None = None) -> str:
         elems = [recurse(e.strip()) for e in m.group(1).split(",")]
         return f"({', '.join(elems)})"
 
+    # Shapely geometry types → geo crate equivalents
+    _SHAPELY_TYPES: dict[str, str] = {
+        "Polygon": "geo::Polygon<f64>",
+        "LineString": "geo::LineString<f64>",
+        "MultiLineString": "geo::MultiLineString<f64>",
+        "Point": "geo::Point<f64>",
+        "MultiPoint": "geo::MultiPoint<f64>",
+        "MultiPolygon": "geo::MultiPolygon<f64>",
+        "GeometryCollection": "geo::GeometryCollection<f64>",
+    }
+    if t in _SHAPELY_TYPES:
+        return _SHAPELY_TYPES[t]
+
     if t in known:
         return f"Rc<RefCell<{t}>>"
 
@@ -1021,26 +1034,65 @@ def generate_skeleton(manifest_path: Path, target_path: Path, config: dict | Non
                 const_ident = _to_snake(cname).upper()
                 lines += [f"    pub const {const_ident}: {rust_ct} = {lit};", ""]
 
-            # Constructor (only emit one)
+            # Constructor — TypeScript uses __constructor suffix; Python uses ____init__
             ctor_id = f"{node.node_id}__constructor"
-            if ctor_id in manifest.nodes:
-                ctor = manifest.nodes[ctor_id]
+            python_ctor_id = f"{node.node_id}____init__"
+            resolved_ctor_id = (
+                ctor_id if ctor_id in manifest.nodes
+                else python_ctor_id if python_ctor_id in manifest.nodes
+                else None
+            )
+            if resolved_ctor_id:
+                ctor = manifest.nodes[resolved_ctor_id]
                 params = ", ".join(
                     f"{_sanitize_param_name(k)}: {tg(v)}"
                     for k, v in ctor.parameter_types.items()
                 )
                 lines += [
                     f"    pub fn new({params}) -> Self {{",
-                    f'        todo!("OXIDANT: not yet translated — {ctor_id}")',
+                    f'        todo!("OXIDANT: not yet translated — {resolved_ctor_id}")',
                     "    }",
+                    "",
+                ]
+
+            # __repr__ / __str__ → Display trait impl (outside the struct's impl block)
+            repr_id = f"{node.node_id}____repr__"
+            str_id  = f"{node.node_id}____str__"
+            display_node = (
+                manifest.nodes.get(repr_id) or manifest.nodes.get(str_id)
+            )
+            if display_node:
+                display_nid = display_node.node_id
+                lines += [
+                    "}",
+                    "",
+                    f"impl std::fmt::Display for {sname} {{",
+                    "    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {",
+                    f'        todo!("OXIDANT: not yet translated — {display_nid}")',
+                    "    }",
+                    "}",
+                    "",
+                    f"impl{tp_bounds} {sname}{tp_suffix} {{",
                     "",
                 ]
 
             # Methods — deduplicate overloads with numeric suffix
             seen_methods: dict[str, int] = {}
             for m in methods_by_class.get(node.node_id, []):
-                raw_name = m.node_id.split("__")[-1]
-                if not raw_name:  # trailing __ in node_id → skip
+                # Extract the bare method name from the node_id.
+                # For regular methods: "field__Field__haversine_distance" → "haversine_distance"
+                # For dunder methods:  "field__Field____repr__" → "__repr__"
+                # node.node_id is the parent class id, so strip it plus the "__" separator.
+                parent_prefix = node.node_id + "__"
+                raw_name = (
+                    m.node_id[len(parent_prefix):]
+                    if m.node_id.startswith(parent_prefix)
+                    else m.node_id.split("__")[-1]
+                )
+                # __repr__ and __str__ are emitted as Display impls above
+                if raw_name in ("__repr__", "__str__"):
+                    continue
+                if not raw_name:
                     continue
                 base = _escape_keyword(_to_snake(raw_name))
                 count = seen_methods.get(base, 0)

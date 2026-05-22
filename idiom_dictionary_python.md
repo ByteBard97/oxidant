@@ -142,6 +142,154 @@ buf.push_str(r#"<text x="10" y="20">Hello</text>"#);
 buf
 ```
 
+## shapely_geometry
+
+Shapely geometry types and operations translate to the `geo` crate.
+
+**Type mapping:**
+
+| Shapely | Rust (`geo` crate) |
+|---------|-------------------|
+| `Polygon` | `geo::Polygon<f64>` |
+| `LineString` | `geo::LineString<f64>` |
+| `MultiLineString` | `geo::MultiLineString<f64>` |
+| `Point` | `geo::Point<f64>` |
+
+**Construction:**
+
+```python
+poly = Polygon([(x0,y0), (x1,y1), (x2,y2)])
+line = LineString([(x0,y0), (x1,y1)])
+pt   = Point(x, y)
+```
+
+```rust
+use geo::{Polygon, LineString, Point, coord};
+let poly = Polygon::new(
+    LineString::from(vec![(x0, y0), (x1, y1), (x2, y2)]),
+    vec![],
+);
+let line = LineString::from(vec![(x0, y0), (x1, y1)]);
+let pt   = Point::new(x, y);
+```
+
+**Bounds (replaces `.bounds` → `(min_x, min_y, max_x, max_y)`):**
+
+```python
+(min_x, min_y, max_x, max_y) = poly.bounds
+```
+
+```rust
+use geo::BoundingRect;
+let bbox = poly.bounding_rect().unwrap();
+let (min_x, min_y) = (bbox.min().x, bbox.min().y);
+let (max_x, max_y) = (bbox.max().x, bbox.max().y);
+```
+
+**Rotation (replaces `affinity.rotate(geom, angle_deg, origin)`):**
+
+```python
+rotated = affinity.rotate(poly, angle_deg, origin=(cx, cy))
+```
+
+```rust
+use geo::{Rotate, Point};
+let origin = Point::new(cx, cy);
+let rotated = poly.rotate_around_point(-angle_deg, origin);
+```
+
+Note: shapely rotates counter-clockwise for positive angles; `geo::Rotate` also rotates counter-clockwise, so signs match directly.
+
+**Intersection (replaces `.intersection(other)`):**
+
+```python
+intersection = line.intersection(poly)
+if type(intersection) is MultiLineString:
+    for geom in intersection.geoms:
+        ...
+else:
+    ...  # LineString
+```
+
+```rust
+use geo::algorithm::line_intersection::LineIntersection;
+use geo::Intersects;
+// For polygon-clip of a line, use geo::algorithm::clip::Clip:
+use geo::Clip;
+let clipped: geo::MultiLineString<f64> = line.clip(&poly, false);
+for segment in clipped.0.iter() {
+    // segment is a geo::LineString<f64>
+}
+```
+
+**Checking intersection (replaces `.intersects(other)`):**
+
+```python
+if line.intersects(poly):
+```
+
+```rust
+use geo::Intersects;
+if line.intersects(&poly) {
+```
+
+**LineString coords iteration:**
+
+```python
+for coord in line.coords:
+    x, y = coord
+```
+
+```rust
+for coord in line.coords() {
+    let (x, y) = (coord.x, coord.y);
+}
+```
+
+**Minimum rotated rectangle (replaces `.minimum_rotated_rectangle`):**
+
+```python
+rect = poly.minimum_rotated_rectangle
+rectx = rect.exterior.xy[0]
+recty = rect.exterior.xy[1]
+```
+
+```rust
+use geo::MinimumRotatedRect;
+let rect: Option<geo::Polygon<f64>> = poly.minimum_rotated_rect();
+if let Some(rect) = rect {
+    let coords: Vec<_> = rect.exterior().coords().collect();
+    // coords[i].x, coords[i].y
+}
+```
+
+**Area:**
+
+```python
+area = poly.area
+```
+
+```rust
+use geo::Area;
+let area = poly.unsigned_area();
+```
+
+**Point buffer (replaces `Point(lon, lat).buffer(radius)`):**
+
+Shapely's `.buffer()` has no direct single-call equivalent in `geo`. For the common pattern of creating a fake circular boundary around a point, use a manual approximation:
+
+```rust
+// approximate circle as N-sided polygon
+fn point_buffer(lon: f64, lat: f64, radius: f64, n: usize) -> geo::Polygon<f64> {
+    use std::f64::consts::TAU;
+    let coords: Vec<_> = (0..=n).map(|i| {
+        let angle = TAU * (i as f64) / (n as f64);
+        geo::coord! { x: lon + radius * angle.cos(), y: lat + radius * angle.sin() }
+    }).collect();
+    geo::Polygon::new(geo::LineString::from(coords), vec![])
+}
+```
+
 ## typed_dict
 
 Python `TypedDict` becomes a Rust `struct` (not a `HashMap`).

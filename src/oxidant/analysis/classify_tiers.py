@@ -23,6 +23,7 @@ _SONNET_IDIOMS = frozenset({
     "generator_function",
     "class_inheritance",
     "closure_capture",
+    "shapely_geometry",
 })
 
 _OPUS_IDIOMS = frozenset({
