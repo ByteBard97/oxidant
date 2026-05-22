@@ -379,13 +379,27 @@ def phase_b(
 
     parallelism = cfg.get("parallelism", 1)
 
+    # Orphan recovery: reset any in_progress nodes from a previous crashed run.
+    # Must run before workers start so no live worker can race against the reset.
+    from oxidant.models.manifest import NodeStatus as _NodeStatus
+    orphans = [
+        nid for nid, n in manifest_obj.nodes.items()
+        if n.status == _NodeStatus.IN_PROGRESS
+    ]
+    if orphans:
+        typer.echo(f"Resetting {len(orphans)} orphaned in_progress node(s) from previous run.")
+        for nid in orphans:
+            manifest_obj.update_node(db, nid, status=_NodeStatus.NOT_STARTED)
+
+    # Create fresh per-worker clone directories (wipes any SIGKILL-corrupted state).
+    from oxidant.graph.nodes import setup_worker_clones
+    setup_worker_clones(target_path, parallelism)
+
     if parallelism > 1:
         import asyncio
         from oxidant.graph.graph import build_graph
-        from oxidant.graph.nodes import setup_worker_clones
 
         typer.echo(f"Parallel mode: {parallelism} workers")
-        setup_worker_clones(target_path, parallelism)
 
         async def run_parallel() -> list[dict]:
             graphs = [build_graph() for _ in range(parallelism)]

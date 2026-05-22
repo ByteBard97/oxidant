@@ -22,18 +22,19 @@ _MAX_ATTEMPTS: dict[str, int] = {"haiku": 3, "sonnet": 4, "opus": 5}
 
 
 def setup_worker_clones(target_path: Path, parallelism: int) -> None:
-    """Create skeleton clones for workers 1..parallelism-1.
+    """Create fresh skeleton clones for all workers 0..parallelism-1.
 
-    Worker 0 uses the main target_path directly. Each other worker gets its
-    own clone at ``target_path/.clone_N/`` so cargo check never races on the
-    same file. Only copies ``src/`` and ``Cargo.toml``; shares nothing else.
+    Every worker gets its own clone at ``target_path/.clone_N/`` so agents
+    never touch the master skeleton during Phase B. Clones are always wiped
+    and recreated — a SIGKILL-corrupted clone is cleaned up on the next run.
+    Only copies ``src/`` and ``Cargo.toml``; shares nothing else.
     """
     import shutil
 
-    for i in range(1, parallelism):
+    for i in range(0, parallelism):
         clone = target_path / f".clone_{i}"
         if clone.exists():
-            continue
+            shutil.rmtree(str(clone))
         clone.mkdir(parents=True, exist_ok=True)
         src = target_path / "src"
         if src.exists():
@@ -68,20 +69,6 @@ def pick_next_node(state: OxidantState) -> dict:
 
     complexity_max = state.get("config", {}).get("complexity_max")
     manifest = Manifest.load(_db(state))
-    parallelism = state.get("config", {}).get("parallelism", 1)
-
-    # Orphan recovery: only in single-worker mode. In parallel runs, IN_PROGRESS
-    # nodes belong to live workers — resetting them would cause duplicate work.
-    if parallelism <= 1:
-        stuck = [
-            nid for nid, n in manifest.nodes.items()
-            if n.status == NodeStatus.IN_PROGRESS
-            and nid != state.get("current_node_id")
-        ]
-        if stuck:
-            logger.warning("Resetting %d orphaned in_progress nodes: %s", len(stuck), stuck[:3])
-            for nid in stuck:
-                manifest.update_node(_db(state), nid, status=NodeStatus.NOT_STARTED)
 
     # Atomic SELECT + UPDATE in one transaction — safe for concurrent workers
     node = manifest.claim_next_eligible(complexity_max=complexity_max)
@@ -117,11 +104,16 @@ def build_context(state: OxidantState) -> dict:
     node = manifest.get_node(node_id) or manifest.nodes[node_id]
     workspace = _db(state).parent
 
+    worker_id = state.get("worker_id", 0)
+    target = Path(state["target_path"])
+    clone = target / f".clone_{worker_id}"
+    agent_target = clone if clone.exists() else target
+
     prompt = build_prompt(
         node=node,
         manifest=manifest,
         config=state["config"],
-        target_path=Path(state["target_path"]),
+        target_path=agent_target,
         snippets_dir=Path(state["snippets_dir"]),
         workspace=workspace,
         last_error=state.get("last_error"),
@@ -162,16 +154,18 @@ def invoke_agent(state: OxidantState) -> dict:
     safe_node = node_id.replace("/", "_").replace(":", "_")
     label = f"{safe_node}__{tier}_attempt{attempt}"
 
-    # Save the skeleton .rs file content before the agent runs.
-    # The agent edits the file directly (for cargo check), but the verify step
-    # needs the original file with the todo! marker so it can do its own injection.
-    # We restore the file after the agent call so verify always sees a clean slate.
+    # Save the clone's .rs file before the agent runs so verify can re-inject
+    # into a clean slate. The agent edits the clone for its cargo check; we
+    # restore the todo! marker after so verify does its own independent check.
     from oxidant.analysis.generate_skeleton import _module_name
     rs_backup: tuple[Path, str] | None = None
     if node:
         module = _module_name(node.source_file)
+        worker_id = state.get("worker_id", 0)
         target = Path(state["target_path"])
-        rs_file = target / "src" / f"{module}.rs"
+        clone = target / f".clone_{worker_id}"
+        rs_base = clone if clone.exists() else target
+        rs_file = rs_base / "src" / f"{module}.rs"
         if rs_file.exists():
             rs_backup = (rs_file, rs_file.read_text())
 
@@ -248,10 +242,9 @@ def verify(state: OxidantState) -> dict:
 
     worker_id = state.get("worker_id", 0)
     target = Path(state["target_path"])
-    if worker_id > 0:
-        clone = target / f".clone_{worker_id}"
-        if clone.exists():
-            target = clone
+    clone = target / f".clone_{worker_id}"
+    if clone.exists():
+        target = clone
 
     result = verify_snippet(
         node_id=node.node_id,
