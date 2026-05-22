@@ -234,7 +234,11 @@ def verify(state: OxidantState) -> dict:
 
     manifest = Manifest.load(_db(state))
     node = manifest.get_node(state["current_node_id"]) or manifest.nodes[state["current_node_id"]]
-    snippet = state.get("current_snippet")
+    raw_snippet = state.get("current_snippet")
+    # Strip the ---SUMMARY--- section before verification — the summary text is
+    # English prose and must not be injected into the Rust skeleton for cargo check.
+    # update_manifest re-splits on the delimiter to save the summary separately.
+    snippet = raw_snippet.split(_SUMMARY_DELIMITER, 1)[0].strip() if raw_snippet else None
 
     if snippet is None:
         return {
