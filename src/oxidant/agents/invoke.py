@@ -144,6 +144,102 @@ def invoke_claude(
     return _sanitize_snippet(raw_response)
 
 
+def invoke_kimi(
+    prompt: str,
+    cwd: str | Path,
+    tier: str = "haiku",
+    prompt_log_dir: Path | None = None,
+    label: str = "",
+) -> str:
+    """Call the Kimi Code CLI in print mode and return the response text.
+
+    Uses --print --output-format stream-json, which emits one JSON object per
+    line. The final assistant message is extracted from the last line that
+    contains a role=assistant entry with a text content block.
+
+    Args:
+        prompt: The full conversion prompt.
+        cwd: Working directory for the subprocess (workspace root).
+        tier: Translation tier -- controls the timeout.
+        prompt_log_dir: If set, write prompt and response to files here.
+        label: File name prefix for prompt logs.
+
+    Returns:
+        The assistant's final response text (sanitized).
+
+    Raises:
+        RuntimeError: kimi exits non-zero or returns no usable output.
+        subprocess.TimeoutExpired: Call exceeds the tier-specific timeout.
+    """
+    timeout = _TIMEOUT_BY_TIER.get(tier, _DEFAULT_TIMEOUT)
+
+    if prompt_log_dir and label:
+        log_dir = Path(prompt_log_dir)
+        log_dir.mkdir(parents=True, exist_ok=True)
+        safe_label = label.replace("/", "_").replace(":", "_")
+        (log_dir / f"{safe_label}_prompt.txt").write_text(prompt)
+
+    cmd = [
+        "kimi",
+        "--print",
+        "--output-format", "stream-json",
+        "--work-dir", str(cwd),
+        "--prompt", prompt,
+    ]
+
+    logger.debug("invoke_kimi tier=%s prompt[:200]=%r", tier, prompt[:_MAX_PROMPT_LOG_CHARS])
+
+    proc = subprocess.Popen(
+        cmd,
+        cwd=str(cwd),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        start_new_session=True,
+    )
+    try:
+        stdout, stderr = proc.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        try:
+            os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+        proc.wait()
+        raise
+
+    if proc.returncode != 0:
+        detail = stderr.strip() or stdout.strip()
+        raise RuntimeError(f"kimi exited {proc.returncode}: {detail[:600]}")
+
+    # stream-json: one JSON object per line; find last assistant text block
+    raw_response = ""
+    for line in reversed(stdout.strip().splitlines()):
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            obj = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if obj.get("role") == "assistant":
+            for block in obj.get("content", []):
+                if block.get("type") == "text" and block.get("text"):
+                    raw_response = block["text"]
+                    break
+            if raw_response:
+                break
+
+    if not raw_response:
+        raise RuntimeError(f"kimi returned no assistant text: {stdout[:400]}")
+
+    if prompt_log_dir and label:
+        log_dir = Path(prompt_log_dir)
+        safe_label = label.replace("/", "_").replace(":", "_")
+        (log_dir / f"{safe_label}_response.txt").write_text(raw_response)
+
+    return _sanitize_snippet(raw_response)
+
+
 def invoke_pi(
     prompt: str,
     cwd: str | Path,

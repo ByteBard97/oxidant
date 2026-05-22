@@ -11,7 +11,7 @@ import re
 from pathlib import Path
 
 from oxidant.agents.context import build_prompt
-from oxidant.agents.invoke import invoke_claude, invoke_pi
+from oxidant.agents.invoke import invoke_claude, invoke_kimi, invoke_pi
 from oxidant.graph.state import OxidantState
 from oxidant.models.manifest import Manifest, NodeStatus, TranslationTier
 from oxidant.verification.verify import VerifyStatus, verify_snippet
@@ -176,9 +176,22 @@ def invoke_agent(state: OxidantState) -> dict:
             rs_backup = (rs_file, rs_file.read_text())
 
     try:
-        backend = state.get("config", {}).get("backend", "claude")
-        if backend == "local":
-            local_model = state.get("config", {}).get("local_model", "qwen2.5-coder:32b")
+        cfg = state.get("config", {})
+        # Per-tier backend wins over the global backend key.
+        # Config example: "tier_backends": {"haiku": "kimi", "sonnet": "claude", "opus": "claude"}
+        tier_backends = cfg.get("tier_backends", {})
+        backend = tier_backends.get(tier) or cfg.get("backend", "claude")
+
+        if backend == "kimi":
+            response = invoke_kimi(
+                prompt=state["current_prompt"],
+                cwd=cwd,
+                tier=tier,
+                prompt_log_dir=prompt_log_dir,
+                label=label,
+            )
+        elif backend == "local":
+            local_model = cfg.get("local_model", "qwen2.5-coder:32b")
             response = invoke_pi(
                 prompt=state["current_prompt"],
                 cwd=cwd,
