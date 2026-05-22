@@ -324,6 +324,23 @@ _NUMERIC_NAME_FRAGMENTS: frozenset[str] = frozenset({
     "distance", "padding", "margin", "radius", "angle", "weight",
     "x", "y", "z", "dx", "dy", "scale", "ratio", "factor", "threshold",
     "min", "max", "slack", "cost", "priority", "depth", "level", "id",
+    # Geographic / geodetic
+    "lat", "lon", "lng", "alt", "altitude", "bearing", "heading",
+    "speed", "rate", "time", "duration",
+    # Mathematical / scientific (single/double letter names are almost always numeric)
+    "r", "a", "b", "c", "d", "t", "u", "v", "w", "h", "k", "n", "m",
+    "phi", "theta", "alpha", "beta", "gamma", "delta", "sigma", "lambda",
+    "area", "volume", "mass", "force", "velocity", "acceleration",
+    # Time / units
+    "hours", "minutes", "seconds", "meters", "miles", "feet", "mph", "mps",
+    "fpm", "knots",
+})
+
+# Field name fragments that strongly imply String
+_STRING_NAME_FRAGMENTS: frozenset[str] = frozenset({
+    "name", "description", "label", "title", "text", "message", "path",
+    "url", "uri", "key", "tag", "prefix", "suffix", "format", "pattern",
+    "color", "colour", "style", "class", "type", "kind", "mode", "state",
 })
 
 # Field name fragments that strongly imply bool
@@ -344,10 +361,16 @@ def _infer_rust_type_from_name(field_name: str) -> str:
     for frag in _BOOL_NAME_FRAGMENTS:
         if snake.startswith(frag) or snake.endswith(frag.rstrip("_")):
             return "bool"
+    # Numeric: name ends with a digit (phi0, theta0, lat1, lon2, p1, m2, ...)
+    if snake and snake[-1].isdigit():
+        return "f64"
     # Numeric: name contains a known numeric fragment as a whole word
     parts = set(re.split(r"_+", snake))
     if parts & _NUMERIC_NAME_FRAGMENTS:
         return "f64"
+    # String: name contains a known string fragment
+    if parts & _STRING_NAME_FRAGMENTS:
+        return "String"
     return "serde_json::Value"
 
 
@@ -569,11 +592,20 @@ def _parse_field_line(
 
 
 def _extract_this_references(source_text: str, skip: frozenset[str] = frozenset()) -> list[str]:
-    """Fallback: collect ``this.field`` names from source, excluding method calls."""
-    pattern = re.compile(r"\bthis\.([a-zA-Z_$][a-zA-Z0-9_$]*)(?!\s*\()")
-    return sorted(
-        {m.group(1) for m in pattern.finditer(source_text) if m.group(1) not in skip}
-    )
+    """Fallback: collect instance field names from source, excluding method calls.
+
+    Handles both TypeScript (this.field) and Python (self.field) conventions.
+    """
+    ts_pattern   = re.compile(r"\bthis\.([a-zA-Z_$][a-zA-Z0-9_$]*)(?!\s*\()")
+    py_pattern   = re.compile(r"\bself\.([a-zA-Z_][a-zA-Z0-9_]*)(?!\s*\()")
+    names: set[str] = set()
+    for m in ts_pattern.finditer(source_text):
+        if m.group(1) not in skip:
+            names.add(m.group(1))
+    for m in py_pattern.finditer(source_text):
+        if m.group(1) not in skip:
+            names.add(m.group(1))
+    return sorted(names)
 
 
 _CLASS_NAME_RE = re.compile(r'\bclass\s+(\w+)')
@@ -612,6 +644,21 @@ def _collect_class_fields(
             rust_t = f"Option<{rust_t}>"
         fields.append((fname, rust_t))
     return fields
+
+
+def _param_type(param_name: str, annotation: str | None, type_fn) -> str:
+    """Resolve a parameter's Rust type, falling back to name-based heuristics.
+
+    When a Python parameter has no type annotation (or maps to serde_json::Value),
+    use the parameter name to infer a more useful concrete type rather than
+    leaving everything as serde_json::Value.
+    """
+    if annotation and annotation not in ("Any", "object"):
+        resolved = type_fn(annotation)
+        if resolved != "serde_json::Value":
+            return resolved
+    # Fall back to name heuristic
+    return _infer_rust_type_from_name(param_name)
 
 
 def generate_skeleton(manifest_path: Path, target_path: Path, config: dict | None = None) -> None:
@@ -1045,7 +1092,7 @@ def generate_skeleton(manifest_path: Path, target_path: Path, config: dict | Non
             if resolved_ctor_id:
                 ctor = manifest.nodes[resolved_ctor_id]
                 params = ", ".join(
-                    f"{_sanitize_param_name(k)}: {tg(v)}"
+                    f"{_sanitize_param_name(k)}: {_param_type(k, v, tg)}"
                     for k, v in ctor.parameter_types.items()
                 )
                 lines += [
