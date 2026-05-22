@@ -171,10 +171,21 @@ def _extract_file(py_path: Path, source_root: Path) -> list[dict]:
     return nodes
 
 
-def _walk_python_files(source_root: Path):
+def _walk_python_files(source_root: Path, include_files: list[str] | None = None):
+    """Yield .py files under source_root, skipping _SKIP_DIRS.
+
+    If include_files is given, only files whose stem matches one of the listed
+    names (with or without .py extension) are yielded.
+    """
+    allowed: set[str] | None = None
+    if include_files:
+        allowed = {Path(f).stem for f in include_files}
+
     for py_file in sorted(source_root.rglob("*.py")):
         parts = py_file.relative_to(source_root).parts[:-1]  # exclude filename
         if any(part in _SKIP_DIRS or part.startswith(".") for part in parts):
+            continue
+        if allowed is not None and py_file.stem not in allowed:
             continue
         yield py_file
 
@@ -183,13 +194,24 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--source-root", required=True)
     parser.add_argument("--out", required=True)
+    parser.add_argument(
+        "--include-files",
+        default=None,
+        help="Comma-separated list of .py filenames (or stems) to include. "
+             "If omitted, all .py files under source-root are extracted.",
+    )
     args = parser.parse_args()
 
     source_root = Path(args.source_root).resolve()
     out_path = Path(args.out)
+    include_files = (
+        [f.strip() for f in args.include_files.split(",") if f.strip()]
+        if args.include_files
+        else None
+    )
 
     all_nodes: dict[str, dict] = {}
-    for py_file in _walk_python_files(source_root):
+    for py_file in _walk_python_files(source_root, include_files=include_files):
         for node in _extract_file(py_file, source_root):
             all_nodes[node["node_id"]] = node
 

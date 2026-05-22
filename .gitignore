@@ -57,8 +57,13 @@ gui/.myopex-current/
 *.jpg
 
 # Runtime / local-only artifacts
-oxidant.db
-oxidant.db.bak
+*.db
+*.db-shm
+*.db-wal
+*.db.bak
+*_manifest.json
+oxidant.*.config.json
+*-snippets/
 claude-sessions/
 _prompt_logs/
 review_queue.json

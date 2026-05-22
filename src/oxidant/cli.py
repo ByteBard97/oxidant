@@ -17,6 +17,53 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 _SCRIPTS_DIR = Path(__file__).parent.parent.parent / "phase_a_scripts"
 
 
+def _import_manifest_json(json_path: Path, db_path: Path) -> None:
+    """Import a JSON manifest into SQLite. Shared by phase-a and import-manifest."""
+    import json as _json
+    from oxidant.models.db import NodeRecord, ManifestMeta
+    from oxidant.models.manifest import ConversionNode, _get_engine
+    from sqlmodel import Session, SQLModel
+    import sqlite3 as _sqlite3
+
+    data = _json.loads(json_path.read_text())
+    nodes_raw = data.get("nodes", {})
+
+    engine = _get_engine(db_path)
+    SQLModel.metadata.create_all(engine)
+
+    with Session(engine) as session:
+        meta = session.get(ManifestMeta, 1)
+        if meta is None:
+            meta = ManifestMeta(
+                id=1,
+                version=data.get("version", "1.0"),
+                source_repo=data.get("source_repo", ""),
+                generated_at=data.get("generated_at", ""),
+            )
+        else:
+            meta.version = data.get("version", meta.version)
+            meta.source_repo = data.get("source_repo", meta.source_repo)
+        session.add(meta)
+
+        for node_id, raw in nodes_raw.items():
+            raw["node_id"] = raw.get("node_id") or node_id
+            node = ConversionNode.model_validate(raw)
+            row = session.get(NodeRecord, node_id)
+            if row is None:
+                session.add(NodeRecord.from_conversion_node(node))
+            else:
+                new_row = NodeRecord.from_conversion_node(node)
+                new_row.status = row.status
+                new_row.snippet_path = row.snippet_path
+                new_row.attempt_count = row.attempt_count
+                new_row.last_error = row.last_error
+                session.add(new_row)
+        session.commit()
+
+    with _sqlite3.connect(str(db_path.resolve())) as _con:
+        _con.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+
+
 @app.command("phase-a")
 def phase_a(
     config: Path = typer.Option("oxidant.config.json", "--config", "-c"),
@@ -61,12 +108,15 @@ def phase_a(
     elif source_language == "python":
         # A1: Python AST extraction
         typer.echo("A1: extracting AST (Python)...")
-        subprocess.run(
-            [sys.executable, str(_SCRIPTS_DIR / "extract_ast_python.py"),
-             "--source-root", source_root,
-             "--out", str(manifest_out)],
-            check=True,
-        )
+        a1_cmd = [
+            sys.executable, str(_SCRIPTS_DIR / "extract_ast_python.py"),
+            "--source-root", source_root,
+            "--out", str(manifest_out),
+        ]
+        include_files = cfg.get("source_include_files")
+        if include_files:
+            a1_cmd += ["--include-files", ",".join(include_files)]
+        subprocess.run(a1_cmd, check=True)
         # A2: Python idiom detection
         typer.echo("A2: detecting idioms (Python)...")
         subprocess.run(
@@ -82,15 +132,20 @@ def phase_a(
         )
         raise typer.Exit(1)
 
+    # A2.5: Import JSON manifest into SQLite so A3-A5 can use Manifest.load()
+    db_path = manifest_out.with_suffix(".db")
+    typer.echo(f"A2.5: importing manifest into SQLite ({db_path})...")
+    _import_manifest_json(manifest_out, db_path)
+
     # A3: Topological sort
     typer.echo("A3: computing topological order...")
     from oxidant.models.manifest import Manifest
-    manifest = Manifest.load(manifest_out)
+    manifest = Manifest.load(db_path)
     try:
         manifest.compute_topology()
     except ValueError as exc:
         typer.echo(f"Warning: {exc} — continuing without full topology", err=True)
-    manifest.save(manifest_out)
+    manifest.save(db_path)
 
     # A4: Tier classification
     if skip_tiers:
@@ -98,16 +153,16 @@ def phase_a(
     elif heuristic_tiers:
         typer.echo("A4: classifying tiers (heuristic, no API call)...")
         from oxidant.analysis.classify_tiers import classify_manifest_heuristic
-        classify_manifest_heuristic(manifest_out)
+        classify_manifest_heuristic(db_path)
     else:
         typer.echo("A4: classifying tiers...")
         from oxidant.analysis.classify_tiers import classify_manifest
-        classify_manifest(manifest_out, model=model)
+        classify_manifest(db_path, model=model)
 
     # A5: Skeleton generation
     typer.echo("A5: generating Rust skeleton...")
     from oxidant.analysis.generate_skeleton import generate_skeleton
-    generate_skeleton(manifest_out, target_repo, config=cfg)
+    generate_skeleton(db_path, target_repo, config=cfg)
 
     # Verify skeleton compiles
     typer.echo("Verifying skeleton compiles...")
