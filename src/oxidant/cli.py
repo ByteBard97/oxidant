@@ -172,6 +172,25 @@ def phase_a(
         raise typer.Exit(1)
     typer.echo("Phase A complete. Skeleton compiles.")
 
+    # Sanity check: warn about void signatures (functions with no return type).
+    # These indicate missing type annotations AND failed return-type inference.
+    # Agents given void skeletons will produce useless `let _ = ...` bodies.
+    import re as _re
+    void_sigs: list[str] = []
+    for rs_file in sorted((target_repo / "src").glob("*.rs")):
+        for line in rs_file.read_text().splitlines():
+            m = _re.match(r"\s+pub fn (\w+)\(.*\)\s*\{", line)
+            if m and m.group(1) not in ("new", "fmt", "clone"):
+                void_sigs.append(f"  {rs_file.name}: {m.group(1)}")
+    if void_sigs:
+        typer.echo(
+            f"\nWARNING: {len(void_sigs)} void-return function(s) in skeleton — "
+            f"agents will produce useless implementations. "
+            f"Add return type annotations or improve return-type inference:\n"
+            + "\n".join(void_sigs[:20])
+            + ("\n  ..." if len(void_sigs) > 20 else "")
+        )
+
     typer.echo("\nNext step (manual): review idiom_candidates.json and generate idiom_dictionary.md")
     typer.echo("  Run a single Opus call with the detected patterns as input.")
 

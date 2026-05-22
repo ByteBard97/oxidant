@@ -41,6 +41,131 @@ def _annotation_str(node: ast.expr | None) -> str | None:
         return None
 
 
+_FLOAT_FUNCS = frozenset({
+    "sqrt", "abs", "round", "ceil", "floor", "radians", "degrees",
+    "sin", "cos", "tan", "atan2", "asin", "acos", "log", "exp",
+    "haversine_distance", "haversine_distance2", "vincenty_distance",
+    "distance", "get_bearing",
+})
+_STR_NAME_FRAGMENTS = frozenset({"str", "text", "kml", "path", "html", "xml", "json", "name"})
+_FLOAT_NAME_FRAGMENTS = frozenset({
+    "distance", "length", "speed", "angle", "lat", "lon", "alt", "time",
+    "hours", "miles", "meters", "feet", "rate", "ratio", "area",
+    "width", "height", "bearing", "hue", "factor", "phi", "theta",
+    "rho", "lambda", "delta", "alpha", "beta", "gamma", "sigma",
+    "radius", "scale", "offset", "weight", "score", "value",
+})
+_LIST_NAME_FRAGMENTS = frozenset({"mtx", "matrix", "array", "coords", "points", "geoms", "nodes"})
+# Short single-letter variable names commonly used for coordinates/math
+_FLOAT_SINGLE_LETTERS = frozenset({"x", "y", "z", "s", "t", "r", "h", "a", "b", "c", "n"})
+
+
+def _classify_expr(node: ast.expr) -> str:
+    """Return a Python type name for an expression node."""
+    if isinstance(node, ast.Constant):
+        if isinstance(node.value, bool):
+            return "bool"
+        if isinstance(node.value, int):
+            return "int"
+        if isinstance(node.value, float):
+            return "float"
+        if isinstance(node.value, str):
+            return "str"
+        return "Any"
+    if isinstance(node, (ast.List, ast.ListComp)):
+        return "list"
+    if isinstance(node, (ast.Dict, ast.DictComp)):
+        return "dict"
+    if isinstance(node, ast.JoinedStr):
+        return "str"
+    if isinstance(node, (ast.Compare, ast.BoolOp)):
+        return "bool"
+    if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.Not):
+        return "bool"
+    if isinstance(node, ast.BinOp):
+        if isinstance(node.op, (ast.Add, ast.Sub, ast.Mult, ast.Div,
+                                  ast.Mod, ast.Pow, ast.FloorDiv)):
+            # If operands look numeric, the result is float
+            lo = _classify_expr(node.left)
+            ro = _classify_expr(node.right)
+            if lo in ("float", "int") or ro in ("float", "int"):
+                return "float"
+        return "Any"
+    if isinstance(node, ast.Call):
+        fname = None
+        if isinstance(node.func, ast.Name):
+            fname = node.func.id
+        elif isinstance(node.func, ast.Attribute):
+            fname = node.func.attr
+        if fname:
+            if fname in _FLOAT_FUNCS:
+                return "float"
+            if fname in ("format", "join", "replace", "strip", "lower", "upper"):
+                return "str"
+            if fname in ("int",):
+                return "int"
+            if fname in ("list",):
+                return "list"
+            if any(frag in fname.lower() for frag in _FLOAT_NAME_FRAGMENTS):
+                return "float"
+        return "Any"
+    if isinstance(node, ast.Name):
+        n = node.id.lower()
+        if any(frag in n for frag in _LIST_NAME_FRAGMENTS):
+            return "list"
+        if any(frag in n for frag in _STR_NAME_FRAGMENTS):
+            return "str"
+        if any(frag in n for frag in _FLOAT_NAME_FRAGMENTS):
+            return "float"
+        if node.id in _FLOAT_SINGLE_LETTERS:
+            return "float"
+        return "Any"
+    if isinstance(node, ast.BinOp):
+        if isinstance(node.op, (ast.Add, ast.Sub, ast.Mult, ast.Div,
+                                  ast.Mod, ast.Pow, ast.FloorDiv)):
+            lo = _classify_expr(node.left)
+            ro = _classify_expr(node.right)
+            if "float" in (lo, ro) or "int" in (lo, ro):
+                return "float"
+            # Both Any — could still be numeric (e.g. radius_earth * c)
+            if isinstance(node.op, (ast.Mult, ast.Div, ast.Sub)):
+                return "float"
+        return "Any"
+    return "Any"
+
+
+def _infer_return_type(func: ast.FunctionDef | ast.AsyncFunctionDef) -> str | None:
+    """Infer a Python type hint string from return statements when no annotation exists.
+
+    Scans return statements in the function body (not nested functions).
+    Returns a Python type string compatible with map_python_type(), or None.
+    """
+    return_values: list[ast.expr] = []
+    for node in ast.walk(func):
+        if node is not func and isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            continue
+        if isinstance(node, ast.Return) and node.value is not None:
+            return_values.append(node.value)
+
+    if not return_values:
+        return None
+
+    inferred: set[str] = set()
+    for rv in return_values:
+        if isinstance(rv, ast.Tuple):
+            elems = [_classify_expr(e) for e in rv.elts]
+            inferred.add(f"tuple[{', '.join(elems)}]" if elems else "tuple")
+        else:
+            inferred.add(_classify_expr(rv))
+
+    inferred.discard("Any")
+    if not inferred:
+        return "Any"
+    if len(inferred) == 1:
+        return inferred.pop()
+    return "Any"
+
+
 def _cyclomatic_complexity(func_node: ast.FunctionDef | ast.AsyncFunctionDef) -> int:
     count = 1
     for node in ast.walk(func_node):
@@ -132,7 +257,7 @@ def _extract_file(py_path: Path, source_root: Path) -> list[dict]:
             nodes.append(_make_node(
                 node_id=nid, node_kind="free_function", ast_node=top_node,
                 param_types=_params(top_node),
-                return_type=_annotation_str(top_node.returns),
+                return_type=_annotation_str(top_node.returns) or _infer_return_type(top_node),
                 parent_class=None,
                 complexity=_cyclomatic_complexity(top_node),
                 call_deps=_collect_calls(top_node),
@@ -162,7 +287,7 @@ def _extract_file(py_path: Path, source_root: Path) -> list[dict]:
                     node_id=f"{class_nid}__{method.name}",
                     node_kind=kind, ast_node=method,
                     param_types=_params(method),
-                    return_type=_annotation_str(method.returns),
+                    return_type=_annotation_str(method.returns) or _infer_return_type(method),
                     parent_class=class_nid,
                     complexity=_cyclomatic_complexity(method),
                     call_deps=_collect_calls(method),

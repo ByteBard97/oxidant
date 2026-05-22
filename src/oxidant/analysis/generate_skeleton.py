@@ -753,9 +753,13 @@ def generate_skeleton(manifest_path: Path, target_path: Path, config: dict | Non
                         f"crate::{_c_mod}::{_child_name}"
                     )
 
+    source_language = (config or {}).get("source_language", "typescript")
+
     def t(ts: str | None) -> str:
         if ts and ts.strip() in _enum_child_redirect:
             return _enum_child_redirect[ts.strip()]
+        if source_language == "python":
+            return map_python_type(ts or "Any", known_classes)
         return map_ts_type(
             ts or "void", known_classes, class_module,
             known_interfaces, interface_module, known_enums, enum_module,
