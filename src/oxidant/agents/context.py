@@ -66,13 +66,17 @@ no non-ASCII characters of any kind. They break compilation for every function i
 {retry_section}\
 {unfurl_section}\
 When cargo check passes, output two things separated by the literal line `---SUMMARY---`:
-1. The final Rust function body (no markdown fences, no explanation)
+1. ONLY the code that replaces the todo!() placeholder -- the implementation body, NOT the pub fn signature.
+   The skeleton already has the signature. Output only what goes inside the existing function braces.
 2. 1-2 sentences describing what this function does (used as context for callers)
 
-Example format:
-fn my_func() -> i32 {{
-    42
-}}
+Example -- if the skeleton has:
+    pub fn my_func(&mut self) -> i32 {{
+        todo!("OXIDANT: not yet translated -- my_func")
+    }}
+
+Your output should be:
+42
 ---SUMMARY---
 Computes the answer. Returns 42 always.\
 """
