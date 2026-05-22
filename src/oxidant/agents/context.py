@@ -32,8 +32,9 @@ You are converting one {source_language} function to Rust.
 1. Read the {source_language} source file to understand the function and its context
 2. Read the Rust skeleton file to understand available types and fields
 3. Write the Rust function body and insert it into the skeleton using Edit
-4. Run cargo check to verify it compiles: use Bash with `cd {rs_skeleton_dir} && cargo check`
-5. Fix any errors and repeat until cargo check passes
+4. Run cargo check to verify it compiles: use Bash with `cd {rs_skeleton_dir} && cargo check 2>&1 | grep "^error" | grep -v "todo" | head -5`
+   The skeleton has other todo!() stubs -- ignore any errors about those. Only fix errors in YOUR function.
+5. If the only errors are in other functions (todo!/unimplemented!), your implementation is correct -- stop.
 
 ## Files
 - {source_language} source: {ts_source_path} (lines {line_start}--{line_end})

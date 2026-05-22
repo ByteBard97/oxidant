@@ -17,7 +17,7 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 _TIMEOUT_BY_TIER: dict[str, int] = {
-    "haiku": 300,
+    "haiku": 480,
     "sonnet": 600,
     "opus": 900,
 }
