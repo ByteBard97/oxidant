@@ -1,0 +1,18 @@
+[Unit]
+Description=Oxidant overnight local model run
+After=network.target ollama.service
+Requires=ollama.service
+
+[Service]
+Type=simple
+User=geoff
+WorkingDirectory=/home/geoff/projects/oxidant
+ExecStart=/home/geoff/projects/oxidant/run_overnight.sh
+Environment="PATH=/home/geoff/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+Restart=on-failure
+RestartSec=60
+StandardOutput=append:/home/geoff/projects/oxidant/overnight_service.log
+StandardError=append:/home/geoff/projects/oxidant/overnight_service.log
+
+[Install]
+WantedBy=multi-user.target
