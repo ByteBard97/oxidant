@@ -794,16 +794,20 @@ def generate_skeleton(manifest_path: Path, target_path: Path, config: dict | Non
             serde_json   = "1"
         """))
 
-    # lib.rs
-    lib_lines = [
-        "#![allow(dead_code, unused_variables, unused_imports, non_snake_case)]",
-        "use std::rc::Rc;",
-        "use std::cell::RefCell;",
-        "",
-    ]
-    for mod_name in modules:
-        lib_lines.append(f"pub mod {mod_name};")
-    (src / "lib.rs").write_text("\n".join(lib_lines) + "\n")
+    # lib.rs — only write if the target is NOT a binary crate.
+    # Binary crates use main.rs as the root; writing lib.rs alongside it
+    # creates ambiguous module declarations.
+    is_binary_crate = (src / "main.rs").exists()
+    if not is_binary_crate:
+        lib_lines = [
+            "#![allow(dead_code, unused_variables, unused_imports, non_snake_case)]",
+            "use std::rc::Rc;",
+            "use std::cell::RefCell;",
+            "",
+        ]
+        for mod_name in modules:
+            lib_lines.append(f"pub mod {mod_name};")
+        (src / "lib.rs").write_text("\n".join(lib_lines) + "\n")
 
     # One .rs file per module
     for mod_name, nodes in by_module.items():
@@ -1205,4 +1209,11 @@ def generate_skeleton(manifest_path: Path, target_path: Path, config: dict | Non
                 "",
             ]
 
-        (src / f"{mod_name}.rs").write_text("\n".join(lines) + "\n")
+        # Skip writing this module file if the target already has a
+        # directory-based module (src/{mod}/mod.rs). Oxidant will inject
+        # snippets into the existing files instead of overwriting them.
+        dir_mod = src / mod_name / "mod.rs"
+        flat_mod = src / f"{mod_name}.rs"
+        if dir_mod.exists():
+            continue
+        flat_mod.write_text("\n".join(lines) + "\n")

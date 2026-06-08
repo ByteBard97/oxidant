@@ -17,6 +17,7 @@ from pathlib import Path
 _SKIP_DIRS: frozenset[str] = frozenset({
     "__pycache__", "tests", "test", "venv", ".venv", "node_modules",
     "dist", "build", ".git", ".mypy_cache", ".ruff_cache",
+    "migrations",  # Django migration files are not translatable
 })
 
 

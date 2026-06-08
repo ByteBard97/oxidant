@@ -90,6 +90,71 @@ def _detect_idioms(
     if return_type and ("tuple[" in return_type or "Tuple[" in return_type):
         idioms.add("multiple_return")
 
+    # DRF @action decorator on any function in this node
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef):
+            for dec in node.decorator_list:
+                dec_name = None
+                if isinstance(dec, ast.Name):
+                    dec_name = dec.id
+                elif isinstance(dec, ast.Call) and isinstance(dec.func, ast.Name):
+                    dec_name = dec.func.id
+                elif isinstance(dec, ast.Call) and isinstance(dec.func, ast.Attribute):
+                    dec_name = dec.func.attr
+                if dec_name == "action":
+                    idioms.add("drf_action")
+
+    # DRF lifecycle hook methods — detected by reserved method name
+    _DRF_HOOK_NAMES = {
+        "get_queryset", "perform_create", "perform_update", "perform_destroy",
+        "get_object", "get_serializer", "get_serializer_class", "get_permissions",
+    }
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef) and node.name in _DRF_HOOK_NAMES:
+            idioms.add("drf_hook")
+
+    # DRF SerializerMethodField assignment or validate_* methods
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef):
+            if node.name.startswith("validate_") or node.name == "validate":
+                idioms.add("drf_method_field")
+        if isinstance(node, ast.Assign):
+            val = node.value
+            if isinstance(val, ast.Call):
+                func = val.func
+                fname = func.id if isinstance(func, ast.Name) else (
+                    func.attr if isinstance(func, ast.Attribute) else None
+                )
+                if fname == "SerializerMethodField":
+                    idioms.add("drf_method_field")
+
+    # Django ORM queryset operations
+    _ORM_METHODS = {
+        "filter", "exclude", "get", "all", "create", "save", "delete", "update",
+        "select_related", "prefetch_related", "annotate", "values", "values_list",
+        "order_by", "first", "last", "exists", "count", "bulk_create",
+        "get_or_create", "update_or_create", "objects",
+    }
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Attribute) and node.attr in _ORM_METHODS:
+            idioms.add("django_orm_query")
+
+    # Django CHOICES constants — name ending in _CHOICES, or choices= kwarg
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Assign):
+            for target in node.targets:
+                if isinstance(target, ast.Name) and target.id.endswith("_CHOICES"):
+                    idioms.add("django_choices")
+        if isinstance(node, ast.keyword) and node.arg == "choices":
+            idioms.add("django_choices")
+
+    # @property decorator — model computed properties
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef):
+            for dec in node.decorator_list:
+                if isinstance(dec, ast.Name) and dec.id == "property":
+                    idioms.add("django_property")
+
     return sorted(idioms)
 
 
@@ -97,6 +162,7 @@ _FILE_LEVEL_IDIOMS: dict[str, str] = {
     # library → idiom tag propagated to every node in any file that imports it
     "shapely": "shapely_geometry",
     "svgwrite": "svgwrite_buffer",
+    "rest_framework": "drf_viewset",
 }
 
 

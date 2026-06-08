@@ -290,6 +290,284 @@ fn point_buffer(lon: f64, lat: f64, radius: f64, n: usize) -> geo::Polygon<f64> 
 }
 ```
 
+## drf_viewset
+
+DRF `ModelViewSet` / `ViewSet` methods become standalone `async fn` Axum handlers.
+The class itself disappears — each method becomes a free function registered on a router.
+
+**Python:**
+```python
+class PlantViewSet(ModelViewSet):
+    queryset = Plant.objects.all()
+    serializer_class = PlantSerializer
+
+    def list(self, request):
+        qs = self.get_queryset()
+        return Response(self.get_serializer(qs, many=True).data)
+```
+
+**Rust:**
+```rust
+pub async fn list_plants(
+    State(db): State<DatabaseConnection>,
+    Query(params): Query<ListParams>,
+) -> Result<Json<Vec<PlantDto>>, AppError> {
+    let plants = Plant::find().all(&db).await?;
+    Ok(Json(plants.into_iter().map(PlantDto::from).collect()))
+}
+```
+
+Router registration (one-time, outside this handler):
+```rust
+Router::new().route("/plants", get(list_plants).post(create_plant))
+```
+
+State is injected via `State(db): State<DatabaseConnection>` — never a global.
+`AppError` is a project-level error type that implements `IntoResponse`.
+
+## drf_action
+
+DRF `@action(detail=True/False, methods=[...])` becomes a separate Axum handler
+registered at an explicit path.
+
+**Python:**
+```python
+@action(detail=True, methods=["get"])
+def snapshot(self, request, pk=None):
+    plant = self.get_object()
+    return Response(SnapshotSerializer(plant).data)
+```
+
+**Rust:**
+```rust
+pub async fn plant_snapshot(
+    State(db): State<DatabaseConnection>,
+    Path(id): Path<i32>,
+) -> Result<Json<SnapshotDto>, AppError> {
+    let plant = Plant::find_by_id(id)
+        .one(&db).await?
+        .ok_or(AppError::NotFound)?;
+    Ok(Json(SnapshotDto::from(plant)))
+}
+```
+
+`detail=True` → `Path(id): Path<i32>` parameter.
+`detail=False` → no path parameter; acts on the collection.
+
+## drf_hook
+
+DRF lifecycle hooks (`get_queryset`, `perform_create`, etc.) contain the real business
+logic. Extract the body into a helper function; call it from the handler.
+
+**Python:**
+```python
+def get_queryset(self):
+    qs = Plant.objects.all()
+    search = self.request.query_params.get("search")
+    if search:
+        qs = qs.filter(scientific_name__icontains=search)
+    return qs
+
+def perform_create(self, serializer):
+    serializer.save(created_by=self.request.user)
+```
+
+**Rust:**
+```rust
+async fn build_plant_query(
+    db: &DatabaseConnection,
+    search: Option<&str>,
+) -> Result<Vec<plant::Model>, DbErr> {
+    let mut q = Plant::find();
+    if let Some(s) = search {
+        q = q.filter(plant::Column::ScientificName.contains(s));
+    }
+    q.all(db).await
+}
+
+// In the handler:
+pub async fn list_plants(
+    State(db): State<DatabaseConnection>,
+    Query(params): Query<ListParams>,
+) -> Result<Json<Vec<PlantDto>>, AppError> {
+    let plants = build_plant_query(&db, params.search.as_deref()).await?;
+    Ok(Json(plants.into_iter().map(PlantDto::from).collect()))
+}
+```
+
+`get_object_or_404(Model, pk=pk)` →
+```rust
+Model::find_by_id(id).one(&db).await?.ok_or(AppError::NotFound)?
+```
+
+## drf_method_field
+
+`SerializerMethodField` + `get_<field>` pairs and `validate_*` methods become
+helper methods on the DTO struct or standalone validation functions.
+
+**Python:**
+```python
+primary_image_url = serializers.SerializerMethodField()
+
+def get_primary_image_url(self, obj):
+    img = obj.images.filter(is_primary=True).first()
+    return img.url if img else None
+
+def validate_scientific_name(self, value):
+    if Plant.objects.filter(scientific_name=value).exists():
+        raise serializers.ValidationError("Name already taken.")
+    return value
+```
+
+**Rust (computed field as method on the DTO):**
+```rust
+impl PlantDto {
+    pub fn primary_image_url(plant: &plant::Model, images: &[image::Model]) -> Option<String> {
+        images.iter().find(|i| i.is_primary).map(|i| i.url.clone())
+    }
+}
+
+pub fn validate_scientific_name(name: &str) -> Result<(), AppError> {
+    // called before insert; uniqueness enforced by DB constraint in practice
+    Ok(())
+}
+```
+
+Prefer DB-level constraints (UNIQUE index) over application-level uniqueness checks.
+
+## django_orm_query
+
+Django ORM queryset operations translate to SeaORM async query builder calls.
+Every ORM call becomes `.await` — all handler functions must be `async fn`.
+
+**Field lookups:**
+```python
+Plant.objects.filter(scientific_name__icontains=search)
+Plant.objects.filter(growth_rate="slow", is_native=True)
+Plant.objects.exclude(workflow_status="archived")
+```
+```rust
+Plant::find()
+    .filter(plant::Column::ScientificName.contains(search))
+    .filter(plant::Column::GrowthRate.eq("slow"))
+    .filter(plant::Column::IsNative.eq(true))
+    .filter(plant::Column::WorkflowStatus.ne("archived"))
+    .all(&db).await?
+```
+
+**Single object:**
+```python
+Plant.objects.get(pk=pk)          # raises if missing
+Plant.objects.filter(...).first() # None if missing
+```
+```rust
+Plant::find_by_id(id).one(&db).await?.ok_or(AppError::NotFound)?
+Plant::find().filter(...).one(&db).await?   // returns Option<Model>
+```
+
+**Create / update / delete:**
+```python
+plant = Plant.objects.create(**data)
+plant.scientific_name = "New name"; plant.save()
+plant.delete()
+```
+```rust
+let plant = plant::ActiveModel { ..data.into_active_model() }.insert(&db).await?;
+let mut active: plant::ActiveModel = plant.into();
+active.scientific_name = Set("New name".to_string());
+active.update(&db).await?;
+plant.delete(&db).await?;
+```
+
+**Relations:**
+```python
+Plant.objects.select_related("images")
+Plant.objects.prefetch_related("distributions")
+```
+```rust
+// Load related in a second query (SeaORM pattern):
+let images = PlantImage::find()
+    .filter(plant_image::Column::PlantId.eq(plant.id))
+    .all(&db).await?;
+```
+
+**Counts / existence:**
+```python
+Plant.objects.filter(...).count()
+Plant.objects.filter(...).exists()
+```
+```rust
+Plant::find().filter(...).count(&db).await?
+Plant::find().filter(...).one(&db).await?.is_some()
+```
+
+## django_choices
+
+Django `CHOICES` constants become Rust enums with `serde` and `strum` derives.
+The `(value, display)` tuple becomes the variant name (snake_case → PascalCase).
+
+**Python:**
+```python
+GROWTH_RATE_CHOICES = [
+    ("slow", "Slow"),
+    ("moderate", "Moderate"),
+    ("fast", "Fast"),
+]
+growth_rate = models.CharField(max_length=20, choices=GROWTH_RATE_CHOICES, blank=True)
+```
+
+**Rust:**
+```rust
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize,
+         strum::Display, strum::EnumString, strum::AsRefStr)]
+#[serde(rename_all = "snake_case")]
+#[strum(serialize_all = "snake_case")]
+pub enum GrowthRate {
+    Slow,
+    Moderate,
+    Fast,
+}
+```
+
+Stored as `String` in the DB (SeaORM maps `VARCHAR` → `String`). Convert at the DTO boundary:
+```rust
+let rate: GrowthRate = model.growth_rate.parse().unwrap_or_default();
+```
+
+For `blank=True` / optional fields: wrap in `Option<GrowthRate>`.
+
+## django_property
+
+Django model `@property` methods become inherent methods on the SeaORM `Model` struct
+via an `impl` block. They take `&self` and are synchronous (no DB access).
+
+**Python:**
+```python
+@property
+def display_name(self) -> str:
+    return f"{self.common_name} ({self.scientific_name})"
+
+@property
+def is_published(self) -> bool:
+    return self.workflow_status == "approved"
+```
+
+**Rust:**
+```rust
+impl plant::Model {
+    pub fn display_name(&self) -> String {
+        format!("{} ({})", self.common_name, self.scientific_name)
+    }
+
+    pub fn is_published(&self) -> bool {
+        self.workflow_status.as_deref() == Some("approved")
+    }
+}
+```
+
+Place these in a separate `impl plant::Model` block in `src/entities/plant_ext.rs`
+rather than inside the SeaORM-generated entity file (which should not be edited).
+
 ## typed_dict
 
 Python `TypedDict` becomes a Rust `struct` (not a `HashMap`).

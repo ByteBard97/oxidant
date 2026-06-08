@@ -48,15 +48,16 @@ def _import_manifest_json(json_path: Path, db_path: Path) -> None:
         for node_id, raw in nodes_raw.items():
             raw["node_id"] = raw.get("node_id") or node_id
             node = ConversionNode.model_validate(raw)
-            row = session.get(NodeRecord, node_id)
-            if row is None:
-                session.add(NodeRecord.from_conversion_node(node))
+            new_row = NodeRecord.from_conversion_node(node)
+            existing = session.get(NodeRecord, node_id)
+            if existing is not None:
+                # Preserve translation progress fields on re-import
+                new_row.status = existing.status
+                new_row.snippet_path = existing.snippet_path
+                new_row.attempt_count = existing.attempt_count
+                new_row.last_error = existing.last_error
+                session.merge(new_row)
             else:
-                new_row = NodeRecord.from_conversion_node(node)
-                new_row.status = row.status
-                new_row.snippet_path = row.snippet_path
-                new_row.attempt_count = row.attempt_count
-                new_row.last_error = row.last_error
                 session.add(new_row)
         session.commit()
 
@@ -527,6 +528,8 @@ def serve(
     port: int = typer.Option(8000, "--port"),
     db_path: str = typer.Option("oxidant_checkpoints.db", "--db",
                                  help="Path to SqliteSaver checkpoint DB"),
+    manifest_db: str = typer.Option(None, "--manifest-db",
+                                     help="Path to manifest SQLite DB for dashboard stats (overrides config default)"),
     gui_dist: str = typer.Option(None, "--gui-dist",
                                   help="Path to built Vue GUI dist/ directory"),
     reload: bool = typer.Option(False, "--reload", help="Auto-reload on code changes (dev only)"),
@@ -546,7 +549,7 @@ def serve(
     else:
         typer.echo("No GUI dist provided. API-only mode. Pass --gui-dist to serve the dashboard.")
 
-    application = create_app(db_path=db_path, gui_dist=gui_dist, config_path=str(config.resolve()))
+    application = create_app(db_path=db_path, gui_dist=gui_dist, config_path=str(config.resolve()), manifest_db_path=manifest_db)
     uvicorn.run(application, host=host, port=port, reload=reload)
 
 

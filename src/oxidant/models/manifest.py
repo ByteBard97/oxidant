@@ -337,12 +337,28 @@ class Manifest:
             all_rows = con.execute("SELECT node_id, status, type_dependencies, call_dependencies, topological_order, cyclomatic_complexity, length(source_text) as src_len FROM nodes").fetchall()
             manifest_ids = {r["node_id"] for r in all_rows}
             converted = {r["node_id"] for r in all_rows if r["status"] == NodeStatus.CONVERTED.value}
+            blocked = {r["node_id"] for r in all_rows if r["status"] in (NodeStatus.HUMAN_REVIEW.value, NodeStatus.FAILED.value)}
 
             def _dep_count(row: sqlite3.Row) -> int:
                 deps = _json.loads(row["type_dependencies"]) + _json.loads(row["call_dependencies"])
                 return sum(1 for d in deps if d in manifest_ids and d not in converted)
 
+            def _has_blocked_dep(row: sqlite3.Row) -> bool:
+                deps = _json.loads(row["type_dependencies"]) + _json.loads(row["call_dependencies"])
+                return any(d in blocked for d in deps if d in manifest_ids)
+
             not_started = [r for r in all_rows if r["status"] == NodeStatus.NOT_STARTED.value]
+
+            # Cascade: any not_started node whose dependency failed goes straight to human_review.
+            cascade_ids = [r["node_id"] for r in not_started if _has_blocked_dep(r)]
+            if cascade_ids:
+                placeholders = ",".join("?" * len(cascade_ids))
+                con.execute(
+                    f"UPDATE nodes SET status = ?, last_error = 'blocked: dependency failed or needs human review' WHERE node_id IN ({placeholders})",
+                    [NodeStatus.HUMAN_REVIEW.value] + cascade_ids,
+                )
+                not_started = [r for r in not_started if r["node_id"] not in set(cascade_ids)]
+
             if complexity_max is not None:
                 not_started = [r for r in not_started if (r["cyclomatic_complexity"] or 1) <= complexity_max]
             strict = [r for r in not_started if _dep_count(r) == 0]

@@ -63,8 +63,14 @@ gui/.myopex-current/
 *.db.bak
 *_manifest.json
 oxidant.*.config.json
+oxidant_*.config.json
 *-snippets/
 claude-sessions/
 _prompt_logs/
 review_queue.json
 site/
+
+# Compiled test binaries
+test_diverge
+test_type2
+test_type3

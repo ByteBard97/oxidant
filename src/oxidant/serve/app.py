@@ -44,7 +44,7 @@ class ResumeRequest(BaseModel):
     skip: bool = False
 
 
-def create_app(db_path: str, gui_dist: str | None = None, config_path: str | None = None) -> FastAPI:
+def create_app(db_path: str, gui_dist: str | None = None, config_path: str | None = None, manifest_db_path: str | None = None) -> FastAPI:
     """Factory that creates a configured FastAPI app.
 
     Args:
@@ -177,7 +177,9 @@ def create_app(db_path: str, gui_dist: str | None = None, config_path: str | Non
         return JSONResponse(_review_queue)
 
     def _get_manifest_db() -> Path | None:
-        """Resolve the manifest DB path from the config file."""
+        """Resolve the manifest DB path — explicit arg wins over config default."""
+        if manifest_db_path:
+            return Path(manifest_db_path).resolve()
         cfg_path = Path(config_path) if config_path else Path("oxidant.config.json")
         if not cfg_path.exists():
             return None
