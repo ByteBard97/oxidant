@@ -412,11 +412,15 @@ def supervisor_node(state: OxidantState) -> dict:
     manifest = Manifest.load(_db(state))
     node = manifest.get_node(node_id) or manifest.nodes[node_id]
 
+    source_language = state.get("config", {}).get("source_language", "typescript")
+    lang_label = "Python" if source_language == "python" else "TypeScript"
+    fence = "python" if source_language == "python" else "typescript"
+
     hint_prompt = (
-        f"You are reviewing a failed TypeScript-to-Rust translation.\n\n"
+        f"You are reviewing a failed {lang_label}-to-Rust translation.\n\n"
         f"Node: {node_id}\n"
         f"Last error:\n{(state.get('last_error') or 'unknown')[:500]}\n\n"
-        f"TypeScript source:\n```typescript\n{node.source_text[:600]}\n```\n\n"
+        f"{lang_label} source:\n```{fence}\n{node.source_text[:600]}\n```\n\n"
         f"Generate a 2-3 sentence concrete hint for the translator's next attempt. "
         f"Focus on the specific error and what to do differently. Be concrete, not generic."
     )

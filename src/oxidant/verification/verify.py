@@ -171,9 +171,9 @@ def verify_snippet(
     Args:
         node_id: The manifest node ID (used to find the todo! marker).
         snippet: The raw Rust function body text returned by the agent.
-        ts_source: The original TypeScript source text (for branch parity).
+        ts_source: The original source text (for branch parity).
         target_path: Root of the skeleton Rust project.
-        source_file: The node's TypeScript source file path.
+        source_file: The node's source file path.
         source_branch_re: Regex for counting branches in source_text. Defaults
             to _BRANCH_RE_TS. Pass _BRANCH_RE_PY for Python source files.
     """
